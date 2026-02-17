@@ -1,4 +1,4 @@
-name: cyberrangecz_scenario_aayush
+name: cyberrangecz-scenario-aayush
 
 hosts:
   - name: server
