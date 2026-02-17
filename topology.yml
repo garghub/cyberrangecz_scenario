@@ -1,4 +1,4 @@
-name: library-demo-training
+name: cyberrangecz_scenario_aayush
 
 hosts:
   - name: server
