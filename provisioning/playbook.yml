@@ -25,8 +25,8 @@
   become: yes
   roles:
     - name: user-access
-      user_access_username: user
-      user_access_password: Password123
+      user_access_username: msfadmin
+      user_access_password: msfadmin
       user_access_sudo: True
     - name: client
 
