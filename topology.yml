@@ -3,14 +3,14 @@ name: cyberrangecz-scenario-aayush
 hosts:
   - name: server
     base_box:
-      image: ubuntu-noble-x86_64
-      man_user: ubuntu
+      image: Metasploitable
+      man_user: msfadmin
     flavor: standard.small
 
   - name: client
     base_box:
-      image: ubuntu-noble-x86_64
-      man_user: ubuntu
+      image: Metasploitable
+      man_user: msfadmin
     flavor: standard.small
 
 routers:
