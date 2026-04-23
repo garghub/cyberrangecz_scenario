@@ -1,0 +1,3 @@
+ansible_user: msfadmin
+ansible_password: msfadmin
+ansible_become_password: msfadmin
