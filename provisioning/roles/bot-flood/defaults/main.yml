@@ -1,0 +1,11 @@
+---
+# defaults file for bot-flood
+
+flood_target_host: "192.168.80.100"
+flood_target_port: 44382
+flood_schedule: "*:0/5"
+flood_count: 20
+flood_script_path: /usr/local/lib/.botcache/flood.sh
+flood_log: /var/lib/.botcache/flood.log
+flood_timer_unit: "bot-flood-Hilix.sh.timer"
+flood_service_unit: "bot-flood-Hilix.sh.service"

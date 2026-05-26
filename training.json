@@ -1,0 +1,164 @@
+{
+  "title": "Mirai Botnet Investigation",
+  "description": "You are an incident responder tasked with investigating a Mirai botnet infection targeting Realtek and Huawei routers. The malware variant, Linux/Mirai-Hilix, uses a new TABLE encoder and employs various DDoS attack methods. Your goal is to identify and mitigate the threat.",
+  "prerequisites": [
+    "Basic knowledge of Linux commands.",
+    "Familiarity with network security concepts.",
+    "Understanding of botnet behavior and mitigation techniques."
+  ],
+  "outcomes": [
+    "Identify and investigate suspicious beacon services.",
+    "Detect and analyze DDoS attack methods.",
+    "Mitigate the threat by containing C2 communication and blocking flooding."
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "You are an incident responder tasked with investigating a Mirai botnet infection targeting Realtek and Huawei routers. The malware variant, Linux/Mirai-Hilix, uses a new TABLE encoder and employs various DDoS attack methods. Your goal is to identify and mitigate the threat."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the sandbox via the provided cloud environment.",
+      "local_content": "Local sandbox access is not required for this scenario."
+    },
+    {
+      "title": "Identify and investigate the suspicious beacon service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 20,
+      "minimal_possible_solve_time": null,
+      "answer": "bot-beacon-Hilix.sh.service",
+      "answer_variable_name": null,
+      "content": "The Mirai botnet uses a beacon service to communicate with its command-and-control (C2) server. Your task is to identify and investigate this suspicious beacon service on the infected host.\n\n**Steps:**\n1. Log in to the entry host `bot1` using SSH.\n2. Investigate the running services using `systemctl list-units --type=service`.\n3. Identify the suspicious beacon service named `bot-beacon-Hilix.sh.service`.\n4. Examine the service details using `systemctl status bot-beacon-Hilix.sh.service`.\n5. Check the beacon log file located at `/var/lib/.botcache/beacon.log`.\n\n**Flag:** bot-beacon-Hilix.sh.service",
+      "solution": "To identify and investigate the suspicious beacon service, follow these steps:\n1. Log in to the entry host `bot1` using SSH.\n2. Run `systemctl list-units --type=service` to list all running services.\n3. Look for the suspicious beacon service named `bot-beacon-Hilix.sh.service`.\n4. Examine the service details using `systemctl status bot-beacon-Hilix.sh.service`.\n5. Check the beacon log file located at `/var/lib/.botcache/beacon.log`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Use `systemctl list-units --type=service` to list all running services and look for any suspicious services related to the beacon.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint",
+          "content": "The suspicious beacon service is named `bot-beacon-Hilix.sh.service`.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "beacon_service",
+          "prereq_state": [],
+          "cmd": "systemctl status bot-beacon-Hilix.sh.service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl status bot-beacon-Hilix.sh.service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify and investigate the suspicious flood service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 20,
+      "minimal_possible_solve_time": null,
+      "answer": "bot-flood-Hilix.sh.service",
+      "answer_variable_name": null,
+      "content": "The Mirai botnet is known to launch DDoS attacks using a flood service. Your task is to identify and investigate this suspicious flood service on the infected host.\n\n**Steps:**\n1. Continue working on the entry host `bot1`.\n2. Investigate the running services using `systemctl list-units --type=service`.\n3. Identify the suspicious flood service named `bot-flood-Hilix.sh.service`.\n4. Examine the service details using `systemctl status bot-flood-Hilix.sh.service`.\n5. Check the flood log file located at `/var/lib/.botcache/flood.log`.\n\n**Flag:** bot-flood-Hilix.sh.service",
+      "solution": "To identify and investigate the suspicious flood service, follow these steps:\n1. Continue working on the entry host `bot1`.\n2. Run `systemctl list-units --type=service` to list all running services.\n3. Look for the suspicious flood service named `bot-flood-Hilix.sh.service`.\n4. Examine the service details using `systemctl status bot-flood-Hilix.sh.service`.\n5. Check the flood log file located at `/var/lib/.botcache/flood.log`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Use `systemctl list-units --type=service` to list all running services and look for any suspicious services related to the flood.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint",
+          "content": "The suspicious flood service is named `bot-flood-Hilix.sh.service`.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "flood_service",
+          "prereq_state": [],
+          "cmd": "systemctl status bot-flood-Hilix.sh.service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl status bot-flood-Hilix.sh.service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Contain the C2 communication by blocking the suspicious outbound port",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 20,
+      "minimal_possible_solve_time": null,
+      "answer": "80",
+      "answer_variable_name": null,
+      "content": "To mitigate the threat, you need to contain the C2 communication by blocking the suspicious outbound port used by the beacon service.\n\n**Steps:**\n1. Continue working on the entry host `bot1`.\n2. Identify the suspicious outbound port used by the beacon service, which is `80`.\n3. Use `iptables` to block outgoing traffic on port `80`.\n4. Verify the blocking rule using `iptables -L -n`.\n\n**Flag:** 80",
+      "solution": "To contain the C2 communication by blocking the suspicious outbound port, follow these steps:\n1. Continue working on the entry host `bot1`.\n2. Identify the suspicious outbound port used by the beacon service, which is `80`.\n3. Use `iptables -A OUTPUT -p tcp --dport 80 -j DROP` to block outgoing traffic on port `80`.\n4. Verify the blocking rule using `iptables -L -n`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Use `iptables -A OUTPUT -p tcp --dport 80 -j DROP` to block outgoing traffic on port `80`.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint",
+          "content": "Verify the blocking rule using `iptables -L -n`.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "block_port",
+          "prereq_state": [],
+          "cmd": "iptables -A OUTPUT -p tcp --dport 80 -j DROP",
+          "cmd_type": "bash-command",
+          "cmd_regex": "iptables -A OUTPUT -p tcp --dport 80 -j DROP",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}

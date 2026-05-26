@@ -1,0 +1,6 @@
+---
+# defaults file for c2-command-listener
+
+listen_port: 80
+beacon_log: /var/log/botnet-c2/beacons.log
+c2_response: "CMD:status_report"
