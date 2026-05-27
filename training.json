@@ -1,0 +1,164 @@
+{
+  "title": "Mirai Botnet Investigation",
+  "description": "You are an incident responder tasked with investigating a Mirai botnet infection targeting Realtek and Huawei routers. The botnet is using a new TABLE encoder and has been observed communicating with a command-and-control (C2) server. Your goal is to identify and mitigate the threat.",
+  "prerequisites": [
+    "Basic knowledge of Linux commands.",
+    "Familiarity with network security concepts.",
+    "Understanding of botnet behavior and mitigation techniques."
+  ],
+  "outcomes": [
+    "Identify suspicious beacon and flood services.",
+    "Investigate persistence mechanisms.",
+    "Contain C2 communication and flooding activities."
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "You are an incident responder tasked with investigating a Mirai botnet infection targeting Realtek and Huawei routers. The botnet is using a new TABLE encoder and has been observed communicating with a command-and-control (C2) server. Your goal is to identify and mitigate the threat."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the sandbox environment via the provided cloud link. Use the following credentials to log in: Username: cyrano, Password: cyrano.",
+      "local_content": "Instructions for local sandbox usage."
+    },
+    {
+      "title": "Identify the suspicious beacon service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "bot-beacon-Hilix.x86.elf.service",
+      "answer_variable_name": null,
+      "content": "Investigate the services running on bot1 and identify the suspicious beacon service used by the Mirai botnet. Look for services related to system health or updates. The payload hash is 8293c25c4c759654ea72342750a91170.\n\n> **Critic revision**: flag at `/etc/systemd/system/bot-beacon-Hilix.x86.elf.service` on `bot1`. The flag should be placed on the correct host and path matching the attack chain stage and topology.",
+      "solution": "To identify the suspicious beacon service, run the command `systemctl list-units --type=service` on bot1. Look for the service named `bot-beacon-Hilix.x86.elf.service`. This service is responsible for the beaconing activity.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for services related to system health or updates.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Check the systemd services running on bot1.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "identify_beacon_service",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-units --type=service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Investigate the persistence mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "system-update-checker.timer",
+      "answer_variable_name": null,
+      "content": "Examine the systemd services on bot1 to identify and remove the persistence mechanism used by the Mirai botnet. Check for services disguised as system updaters.\n\n> **Critic revision**: flag at `/etc/systemd/system/system-update-checker.timer` on `bot1`. The flag should be placed on the correct host and path matching the attack chain stage and topology.",
+      "solution": "To investigate the persistence mechanism, run the command `systemctl list-timers` on bot1. Look for the timer named `system-update-checker.timer`. This timer is responsible for the persistence mechanism.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Check for services disguised as system updaters.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Use the command `systemctl list-timers` to list all timers.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "investigate_persistence_mechanism",
+          "prereq_state": [],
+          "cmd": "systemctl list-timers",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-timers",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Contain the C2 communication",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "194.180.224.124",
+      "answer_variable_name": null,
+      "content": "Identify the C2 server IP and port used by the beacon service and block the communication to prevent further commands from being received. The C2 server IP is 194.180.224.124.\n\n> **Critic revision**: flag at `` on `bot1`. The flag should be placed on the correct host matching the attack chain stage and topology.",
+      "solution": "To contain the C2 communication, run the command `iptables -A INPUT -s 194.180.224.124 -j DROP` on bot1. This command blocks all incoming traffic from the C2 server IP.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Check the beacon script for the C2 server details.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Use the command `iptables -A INPUT -s <C2_IP> -j DROP` to block the C2 server IP.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "contain_c2_communication",
+          "prereq_state": [],
+          "cmd": "iptables -A INPUT -s 194.180.224.124 -j DROP",
+          "cmd_type": "bash-command",
+          "cmd_regex": "iptables -A INPUT -s 194.180.224.124 -j DROP",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 30,
+  "variant_sandboxes": false
+}
