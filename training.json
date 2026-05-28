@@ -1,0 +1,155 @@
+{
+  "title": "Kobalos Linux Backdoor Investigation",
+  "description": "Investigate a Kobalos Linux backdoor on a high-performance computing infrastructure.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Familiarity with SSH and network scanning tools"
+  ],
+  "outcomes": [
+    "Identify suspicious services running on the target host",
+    "Detect persistence mechanisms used by the malware",
+    "Investigate data exfiltration on the target host"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 5,
+      "content": "Welcome to the Kobalos Linux Backdoor Investigation scenario. Your goal is to investigate a high-performance computing infrastructure compromised by the Kobalos backdoor malware. Use your knowledge of Unix/Linux and network scanning tools to identify suspicious services running on the target host, detect persistence mechanisms used by the malware, and investigate data exfiltration."
+    },
+    {
+      "title": "Access the Sandbox",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "passkey": "start",
+      "cloud_content": "Connect to the Cyber Range environment using SSH with the provided credentials for the 'cyrano' user on the target host.",
+      "local_content": "Access the local sandbox using the provided credentials for the 'cyrano' user on the target host."
+    },
+    {
+      "title": "Identify Suspicious Services",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "answer": "sshd",
+      "content": "Use command line tools such as 'netstat' or 'ss' to list open network connections and active services on the target host. Identify any suspicious services running.",
+      "solution": "Run `netstat -plnt` or `ss -tuln` to view all network connections and their associated processes. Look for unusual process names that could indicate malicious activity.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check the list of active services for any unexpected or unfamiliar service names.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for processes that are using non-standard ports or have unusual connection patterns.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "list_open_connections",
+          "prereq_state": [],
+          "cmd": "netstat -plnt",
+          "cmd_type": "bash-command",
+          "cmd_regex": "netstat -plnt",
+          "optional": false
+        }
+      ],
+      "expected_commands": [
+        "netstat -plnt"
+      ],
+      "commands_required": true
+    },
+    {
+      "title": "Detect Persistence Mechanisms",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "answer": "/var/run/sshd/sshd.pid",
+      "content": "Look for long-lived processes or services that start automatically at boot time to identify persistence mechanisms used by the malware.",
+      "solution": "Use tools like `ps`, `pgrep`, or `top` to view running processes and their associated PIDs. Look for any persistent processes related to the identified suspicious service from Level 2.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check the list of long-lived processes for any that are related to the suspicious service identified in Level 2.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for processes with unusual file paths or PIDs that could indicate malicious activity.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "list_long_lived_processes",
+          "prereq_state": [],
+          "cmd": "ps -ef | grep sshd",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ps -ef | grep sshd",
+          "optional": false
+        }
+      ],
+      "expected_commands": [
+        "ps -ef"
+      ],
+      "commands_required": true
+    },
+    {
+      "title": "Investigate Data Exfiltration",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "answer": "SSH credentials",
+      "content": "Look for unusual outbound traffic, network connections to suspicious IP addresses or domains, and files being transferred between hosts to identify data exfiltration.",
+      "solution": "Use tools like `tcpdump`, `wireshark`, or `netstat` to monitor network traffic. Look for any outgoing connections to known malicious IP addresses or unusual file transfers.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check the list of outbound connections for any that are suspicious or unusual.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for files being transferred between hosts or unusual network traffic patterns that could indicate data exfiltration.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "monitor_network_traffic",
+          "prereq_state": [],
+          "cmd": "tcpdump -i eth0 -n -X",
+          "cmd_type": "bash-command",
+          "cmd_regex": "tcpdump -i eth0 -n -X",
+          "optional": false
+        }
+      ],
+      "expected_commands": [
+        "tcpdump -i eth0"
+      ],
+      "commands_required": true
+    }
+  ],
+  "estimated_duration": 40,
+  "variant_sandboxes": false
+}

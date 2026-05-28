@@ -1,0 +1,129 @@
+---
+- name: Add host aliases
+  lineinfile:
+      path: '/etc/hosts'
+      line: "{{ item.ip }} {{ item.name }}"
+      state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Add user and set password
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash(''sha512'') }}'
+    shell: '/bin/bash'
+    groups: sudo
+    append: yes
+
+- name: Copy Payloads
+  copy:
+      src: "{{ item }}"
+      dest: "/home/{{ username }}/{{ item }}"
+      owner: "{{ username }}"
+      mode: "0644"
+  loop: "{{ files_to_copy }}"
+
+- name: Create Payloads
+  copy:
+      dest: "/home/{{ username }}/{{ item.name }}"
+      content: "{{ item.content }}"
+      owner: "{{ username }}"
+      mode: "0644"
+  loop: "{{ files_to_create }}"
+
+- name: Install packages
+  apt:
+      name: "{{ packages_to_install }}"
+      state: present
+      update_cache: yes
+
+- name: Place flags
+  copy:
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    content: "{{ item.content }}\n"
+    mode: '0600'
+  loop: "{{ flags }}"
+
+- name: Create inventory script
+  copy:
+    dest: /usr/local/bin/local-inventory.sh
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      set -eu
+      OUT_DIR="/var/log/local-inventory"
+      OUT_FILE="$OUT_DIR/inventory.log"
+      mkdir -p "$OUT_DIR"
+      {
+        echo "==== inventory run $(date -Is) ===="
+        echo "hostname: $(hostname)"
+        echo "kernel: $(uname -srmo)"
+        echo "uptime: $(uptime -p || true)"
+        echo "os:"
+        if [ -f /etc/os-release ]; then sed 's/^/  /' /etc/os-release; fi
+        echo "network addresses:"
+        ip -o addr show 2>/dev/null || true
+        echo "routes:"
+        ip route 2>/dev/null || true
+        echo "dns:"
+        cat /etc/resolv.conf 2>/dev/null || true
+        echo "mounted filesystems:"
+        mount | sed 's/^/  /' || true
+        echo "disk usage:"
+        df -h || true
+        echo "memory:"
+        free -h || true
+        echo "logged in users:"
+        who || true
+        echo
+      } >> "$OUT_FILE"
+
+- name: Create systemd unit for local inventory
+  copy:
+    dest: /etc/systemd/system/local-inventory.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Local boot inventory collection
+      After=network-online.target
+      Wants=network-online.target
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/local-inventory.sh
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Install systemd timer for periodic local inventory
+  copy:
+    dest: /etc/systemd/system/local-inventory.timer
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Run local inventory periodically
+      [Timer]
+      OnBootSec=2min
+      OnUnitActiveSec=1h
+      Unit=local-inventory.service
+      [Install]
+      WantedBy=timers.target
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: true
+
+- name: Enable local inventory service
+  systemd:
+    name: local-inventory.service
+    enabled: true
+
+- name: Enable and start local inventory timer
+  systemd:
+    name: local-inventory.timer
+    enabled: true
+    state: started
