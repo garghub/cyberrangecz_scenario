@@ -1,0 +1,163 @@
+{
+  "title": "BRICKSTORM Backdoor Sandbox Scenario",
+  "description": "Investigate a suspected BRICKSTORM backdoor infection in a multi-host sandbox environment.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Analyze Malware Artifacts (NICE TA3071)",
+    "Investigate Network Traffic (NICE TA0102)",
+    "Analyze System Logs (NICE TA0103)"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction to the BRICKSTORM Backdoor Scenario",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "Welcome to the BRICKSTORM Backdoor sandbox exercise. Your mission is to investigate a suspected infection of the BRICKSTORM backdoor on the target host. The malware is known for its sophisticated capabilities, including secure communication with a command and control (C2) server, installing other components, and exfiltrating data."
+    },
+    {
+      "title": "Accessing the Sandbox Environment",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Connect to the target host using your provided credentials and begin your investigation.",
+      "local_content": "The target host is accessible via SSH with the following credentials:\nUsername: cyrano\nPassword: cyrano"
+    },
+    {
+      "title": "Identify BRICKSTORM Backdoor Indicators of Compromise (IOCs)",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "Matched rule CISA_251165_02: BRICKSTORM backdoor installs_other_components communicates_with_c2 exfiltrates_data",
+      "content": "Use YARA rules to search for known IOCs related to the BRICKSTORM backdoor on the target host.\n\nIndicators of Compromise:\n- SHA256: 0a4fa52803a389311a9ddc49b7b19138\n- SHA256: 18f895e24fe1181bb559215ff9cf6ce3",
+      "solution": "Run the following command to search for known IOCs:\n`yara -r /path/to/brickstorm_ioc.yar /home/cyrano/*`\n\nExpected output:\n- Matched rule CISA_251165_02: BRICKSTORM backdoor installs_other_components communicates_with_c2 exfiltrates_data",
+      "hints": [
+        {
+          "title": "Hint 3",
+          "content": "Check the /home/cyrano directory for files with known BRICKSTORM backdoor hashes.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "yara_search",
+          "prereq_state": [],
+          "cmd": "yara -r /path/to/brickstorm_ioc.yar /home/cyrano/*",
+          "cmd_type": "bash-command",
+          "cmd_regex": "Matched rule CISA_251165_02: BRICKSTORM backdoor installs_other_components communicates_with_c2 exfiltrates_data"
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Investigate Lateral Movement with BRICKSTORM Backdoor",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "next-target",
+      "content": "Examine the target host for evidence of lateral movement by the BRICKSTORM backdoor. Look for indicators such as SSH keys, transferred files, or network connections to other hosts.",
+      "solution": "Use tools like `ls`, `grep`, and `netstat` to investigate lateral movement.\n\nExample commands:\n- `ls -lah /home/cyrano/.ssh`\n- `grep -R 'next-target' /var/log/*`\n- `netstat -an | grep 22`",
+      "hints": [
+        {
+          "title": "Hint 4",
+          "content": "Look for SSH keys in the ~/.ssh directory on the target host that match those found on the next-target host.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "ls_ssh_keys",
+          "prereq_state": [],
+          "cmd": "ls -lah /home/cyrano/.ssh",
+          "cmd_type": "bash-command",
+          "cmd_regex": "^[^-]*-rsa.*next-target"
+        },
+        {
+          "state_name": "grep_ssh_keys",
+          "prereq_state": [
+            "ls_ssh_keys"
+          ],
+          "cmd": "grep -R 'next-target' /var/log/*",
+          "cmd_type": "bash-command",
+          "cmd_regex": "next-target"
+        },
+        {
+          "state_name": "netstat_ssh",
+          "prereq_state": [],
+          "cmd": "netstat -an | grep 22",
+          "cmd_type": "bash-command",
+          "cmd_regex": "next-target"
+        }
+      ],
+      "expected_commands": [
+        "ls -lah /home/cyrano/.ssh",
+        "grep -R 'next-target' /var/log/*",
+        "netstat -an | grep 22"
+      ],
+      "commands_required": true
+    },
+    {
+      "title": "Analyze Logs for BRICKSTORM Backdoor Activity",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "suspicious_activity",
+      "content": "Review system logs on the target host to find evidence of BRICKSTORM backdoor activity. Look for unusual network connections, process executions, or user account activity.",
+      "solution": "Use tools like `grep`, `tail`, and `less` to analyze logs.\n\nExample commands:\n- `grep 'suspicious_activity' /var/log/syslog`\n- `tail -f /var/log/auth.log`",
+      "hints": [
+        {
+          "title": "Hint 5",
+          "content": "Review system logs such as /var/log/auth.log, /var/log/syslog, and /var/log/messages for signs of BRICKSTORM backdoor activity.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "grep_logs",
+          "prereq_state": [],
+          "cmd": "grep 'suspicious_activity' /var/log/syslog",
+          "cmd_type": "bash-command",
+          "cmd_regex": "suspicious_activity"
+        },
+        {
+          "state_name": "tail_logs",
+          "prereq_state": [],
+          "cmd": "tail -f /var/log/auth.log",
+          "cmd_type": "bash-command",
+          "cmd_regex": ""
+        }
+      ],
+      "expected_commands": [
+        "grep 'suspicious_activity' /var/log/syslog",
+        "tail -f /var/log/auth.log"
+      ],
+      "commands_required": true
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}
