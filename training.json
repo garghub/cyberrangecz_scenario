@@ -1,0 +1,165 @@
+{
+  "title": "BRICKSTORM Backdoor Investigation",
+  "description": "You are an incident responder tasked with investigating a suspected BRICKSTORM backdoor infection on a Linux-based network. The BRICKSTORM backdoor is known for its sophisticated evasion techniques, including SOCKS proxying, multi-layered web service communication, and varied command execution. Your goal is to identify and mitigate the threat.",
+  "prerequisites": [
+    "Basic knowledge of Linux commands.",
+    "Familiarity with network security concepts.",
+    "Understanding of incident response procedures."
+  ],
+  "outcomes": [
+    "Investigate suspicious services and files.",
+    "Identify persistence mechanisms.",
+    "Detect and block C2 communication.",
+    "Contain and mitigate the threat."
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "You are an incident responder tasked with investigating a suspected BRICKSTORM backdoor infection on a Linux-based network. The BRICKSTORM backdoor is known for its sophisticated evasion techniques, including SOCKS proxying, multi-layered web service communication, and varied command execution. Your goal is to identify and mitigate the threat."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the target host (IP: 192.168.50.5) using SSH with the username 'cyrano' and password 'cyrano'.",
+      "local_content": "Access the target host (IP: 192.168.50.5) using SSH with the username 'cyrano' and password 'cyrano'."
+    },
+    {
+      "title": "Identify and investigate the suspicious service 'vami'",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "vami.service",
+      "answer_variable_name": null,
+      "content": "The BRICKSTORM backdoor is known to use a service named 'vami' for its malicious activities. Investigate the 'vami' service on the target host to gather information about its behavior and configuration.\n\nThe payload hash is: 013211c56caaa697914b5b5871e4998d0298902e336e373ebb27b7db30917eaf\n\nThe C2/Beaconing service name is: wss://[redacted].dev/update\n\n> **Critic revision**: flag at `/etc/systemd/system/vami.service` on `target`. The flag should be placed in the service file to reflect the investigation of the suspicious service.",
+      "solution": "1. Log in to the target host using SSH.\n2. Check the running services using the `systemctl` command.\n3. Investigate the 'vami' service by examining its configuration files and logs.\n4. Document the findings, including the service's behavior and any suspicious indicators.\n\nThe payload hash is: 013211c56caaa697914b5b5871e4998d0298902e336e373ebb27b7db30917eaf\n\nThe C2/Beaconing service name is: wss://[redacted].dev/update",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Use the `systemctl list-units --type=service` command to list all running services and look for the 'vami' service.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Examine the configuration files and logs of the 'vami' service to gather more information about its behavior.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "investigate_vami_service",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-units --type=service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify and investigate the persistence mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "$PATH",
+      "answer_variable_name": null,
+      "content": "The BRICKSTORM backdoor is known to use a persistence mechanism involving the PATH environment variable modification. Investigate the persistence mechanism on the target host to understand how the backdoor maintains its presence.\n\nThe persistence mechanism used by the BRICKSTORM backdoor is: PATH environment variable modification\n\n> **Critic revision**: flag at `/home/cyrano/.bashrc` on `target`. The flag should be placed in the .bashrc file to reflect the investigation of the PATH environment variable modification.",
+      "solution": "1. Log in to the target host using SSH.\n2. Examine the PATH environment variable using the `echo $PATH` command.\n3. Check for any suspicious entries in the PATH that might indicate the persistence mechanism.\n4. Document the findings, including the suspicious PATH entries and any related configuration files.\n\nThe persistence mechanism used by the BRICKSTORM backdoor is: PATH environment variable modification",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Use the `echo $PATH` command to examine the PATH environment variable and look for any suspicious entries.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Check for any related configuration files that might indicate the persistence mechanism.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "investigate_persistence_mechanism",
+          "prereq_state": [],
+          "cmd": "echo $PATH",
+          "cmd_type": "bash-command",
+          "cmd_regex": "echo $PATH",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Contain and block C2 communication",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "443",
+      "answer_variable_name": null,
+      "content": "The BRICKSTORM backdoor communicates with its C2 server using a specific IP address and port. Identify the C2 communication and block it to prevent further malicious activities.\n\nThe C2 port is: 443\n\nThe C2 IP is: 1.1.1.1\n\nThe C2 DNS is: [redacted].dev\n\n> **Critic revision**: flag at `/etc/iptables/rules.v4` on `target`. The flag should be placed in the iptables rules file to reflect the blocking of C2 communication.",
+      "solution": "1. Log in to the target host using SSH.\n2. Monitor network traffic using tools like `tcpdump` or `netstat` to identify the C2 communication.\n3. Block the C2 communication by adding firewall rules or disabling the relevant service.\n4. Document the steps taken to block the C2 communication and verify that it has been successfully contained.\n\nThe C2 port is: 443\n\nThe C2 IP is: 1.1.1.1\n\nThe C2 DNS is: [redacted].dev",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Use the `tcpdump -i any port 443` command to monitor network traffic on port 443 and identify the C2 communication.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Block the C2 communication by adding firewall rules or disabling the relevant service.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "block_c2_communication",
+          "prereq_state": [],
+          "cmd": "tcpdump -i any port 443",
+          "cmd_type": "bash-command",
+          "cmd_regex": "tcpdump -i any port 443",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 120,
+  "variant_sandboxes": false
+}
