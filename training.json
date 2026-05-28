@@ -1,0 +1,181 @@
+{
+  "title": "BRICKSTORM Backdoor Investigation Exercise",
+  "description": "Investigate a suspected BRICKSTORM backdoor incident in a simulated environment.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Identify BRICKSTORM Backdoor Indicators of Compromise (IOCs)",
+    "Analyze System Logs for BRICKSTORM Backdoor Activity",
+    "Gather Evidence and Document Findings"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction to the BRICKSTORM Backdoor Incident",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "Welcome to the BRICKSTORM Backdoor Investigation Exercise. Your mission is to investigate a suspected BRICKSTORM backdoor incident on a target system. The malware is known for its sophisticated Go-based backdoor, secure command and control (C2), and self-monitoring function that reinstalls or restarts if disrupted."
+    },
+    {
+      "title": "Accessing the Target System",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Connect to the target system using SSH and begin your investigation.",
+      "local_content": "The target system (IP address: 192.168.50.5) runs Ubuntu and has an SSH service available for login. The username is cyrano, and the password is provided in Ansible."
+    },
+    {
+      "title": "Identify BRICKSTORM Backdoor Indicators of Compromise (IOCs)",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/var/log/syslog",
+      "content": "Search for known indicators of compromise related to the BRICKSTORM backdoor, such as hashes, IP addresses, domains, or filenames. Use command-line tools like `grep` and `find` to search for IOCs in relevant system directories (e.g., /etc, /var/log, /home).",
+      "solution": "Use the following commands to search for BRICKSTORM backdoor indicators:\n\n1. Search for known hashes in system files:\n```bash\ngrep -r 'hash_value' /etc/* /var/log/* /home/*\n```\nReplace `hash_value` with the appropriate hash value from the MISP Event.\n\n2. Check system logs for unusual network connections or commands:\n```bash\ngrep -i 'unusual_keyword' /var/log/syslog /var/log/auth.log\n```\nReplace `unusual_keyword` with a keyword that might indicate BRICKSTORM backdoor activity.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Look for known BRICKSTORM backdoor hashes in system files.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Check system logs for unusual network connections or commands.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "Search for hashes",
+          "prereq_state": [],
+          "cmd": "grep -r 'hash_value' /etc/* /var/log/* /home/*",
+          "cmd_type": "bash-command",
+          "cmd_regex": "grep -r 'hash_value' /etc/* /var/log/* /home/*",
+          "optional": false
+        },
+        {
+          "state_name": "Check system logs",
+          "prereq_state": [],
+          "cmd": "grep -i 'unusual_keyword' /var/log/syslog /var/log/auth.log",
+          "cmd_type": "bash-command",
+          "cmd_regex": "grep -i 'unusual_keyword' /var/log/syslog /var/log/auth.log",
+          "optional": false
+        }
+      ],
+      "expected_commands": [
+      ],
+      "commands_required": true
+    },
+    {
+      "title": "Analyze System Logs for BRICKSTORM Backdoor Activity",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/var/log/syslog",
+      "content": "Examine system logs (e.g., /var/log/syslog, /var/log/auth.log) to identify any suspicious activity related to the BRICKSTORM backdoor.",
+      "solution": "Use command-line tools like `grep` and `less` to search for specific keywords or patterns in system logs.\n\n1. Search for unusual network connections:\n```bash\ngrep -i 'unusual_keyword' /var/log/syslog\n```\nReplace `unusual_keyword` with a keyword that might indicate BRICKSTORM backdoor activity.\n\n2. Check for suspicious commands:\n```bash\ngrep -i 'suspicious_command' /var/log/auth.log\n```\nReplace `suspicious_command` with a command that might be associated with the BRICKSTORM backdoor.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check system logs for unusual network connections or commands.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for suspicious activity in system logs.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "Search for unusual network connections",
+          "prereq_state": [],
+          "cmd": "grep -i 'unusual_keyword' /var/log/syslog",
+          "cmd_type": "bash-command",
+          "cmd_regex": "grep -i 'unusual_keyword' /var/log/syslog",
+          "optional": false
+        },
+        {
+          "state_name": "Check for suspicious commands",
+          "prereq_state": [],
+          "cmd": "grep -i 'suspicious_command' /var/log/auth.log",
+          "cmd_type": "bash-command",
+          "cmd_regex": "grep -i 'suspicious_command' /var/log/auth.log",
+          "optional": false
+        }
+      ],
+      "expected_commands": [
+      ],
+      "commands_required": true
+    },
+    {
+      "title": "Gather Evidence and Document Findings",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/report_directory/report.txt",
+      "content": "Collect evidence of the BRICKSTORM backdoor activity and document your findings in a report.",
+      "solution": "Use command-line tools like `cp`, `mv`, and text editors (e.g., nano, vim) to gather relevant files and create a report detailing your investigation.\n\n1. Gather evidence:\n```bash\nmv /path/to/evidence /report_directory/\n```\nReplace `/path/to/evidence` with the path to the evidence file(s) you found and `/report_directory/` with the directory where you want to store your report.\n\n2. Create a report:\n```bash\nnano /report_directory/report.txt\n```\nOpen the report file in nano or another text editor and document your findings.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Gather evidence of the BRICKSTORM backdoor activity.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Document your findings in a report.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "Gather evidence",
+          "prereq_state": [],
+          "cmd": "mv /path/to/evidence /report_directory/",
+          "cmd_type": "bash-command",
+          "cmd_regex": "mv /path/to/evidence /report_directory/",
+          "optional": false
+        },
+        {
+          "state_name": "Create a report",
+          "prereq_state": [],
+          "cmd": "nano /report_directory/report.txt",
+          "cmd_type": "bash-command",
+          "cmd_regex": "nano /report_directory/report.txt",
+          "optional": false
+        }
+      ],
+      "expected_commands": [
+      ],
+      "commands_required": true
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}

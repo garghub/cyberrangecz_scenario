@@ -1,0 +1,36 @@
+---
+username: cyrano
+password: cyrano
+flag: ""
+flag_2: ""
+hosts_entries:
+- {ip: "192.168.50.5", name: "target"}
+- {ip: "192.168.40.5", name: "c2-server"}
+- {ip: "192.168.50.6", name: "next-target"}
+files_to_copy: []
+files_to_create:
+- name: 0a4fa52803a389311a9ddc49b7b19138.hash
+  content: "0a4fa52803a389311a9ddc49b7b19138\n"
+- name: 18f895e24fe1181bb559215ff9cf6ce3.hash
+  content: "18f895e24fe1181bb559215ff9cf6ce3\n"
+- name: 39111508bfde89ce6e0fe6abe0365552.hash
+  content: "39111508bfde89ce6e0fe6abe0365552\n"
+- name: 82bf31e7d768e6d4d3bc7c8c8ef2b358.hash
+  content: "82bf31e7d768e6d4d3bc7c8c8ef2b358\n"
+- name: 8e4c88d00b6eb46229a1ed7001451320.hash
+  content: "8e4c88d00b6eb46229a1ed7001451320\n"
+- name: a02469742f7b0bc9a8ab5e26822b3fa8.hash
+  content: "a02469742f7b0bc9a8ab5e26822b3fa8\n"
+- name: a52e36a70b5e0307cbcaa5fd7c97882c.hash
+  content: "a52e36a70b5e0307cbcaa5fd7c97882c\n"
+- name: dbca28ad420408850a94d5c325183b28.hash
+  content: "dbca28ad420408850a94d5c325183b28\n"
+packages_to_install:
+- openssh-server
+flags:
+- dest: "/home/{{ username }}/flag1.txt"
+  owner: "{{ username }}"
+  content: "Flag1\n"
+- dest: "/home/{{ username }}/flag2.txt"
+  owner: "{{ username }}"
+  content: "Flag2\n"
