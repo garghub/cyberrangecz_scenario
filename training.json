@@ -1,0 +1,146 @@
+{
+  "title": "Mirai Botnet Investigation",
+  "description": "You are an incident responder tasked with investigating a Mirai botnet infection on your organization's network. The malware, specifically the Linux/Mirai-Hilix variant, targets Realtek and Huawei routers. Your goal is to identify and mitigate the threat.",
+  "prerequisites": [
+    "Basic knowledge of Linux commands.",
+    "Familiarity with network security concepts.",
+    "Understanding of incident response procedures."
+  ],
+  "outcomes": [
+    "Identify suspicious beacon and flood services.",
+    "Investigate persistence mechanisms.",
+    "Contain C2 communication and flooding activities."
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "You are an incident responder tasked with investigating a Mirai botnet infection on your organization's network. The malware, specifically the Linux/Mirai-Hilix variant, targets Realtek and Huawei routers. Your goal is to identify and mitigate the threat."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "SSH into bot1 using the provided credentials.",
+      "local_content": "SSH into bot1 using the provided credentials."
+    },
+    {
+      "title": "Identify Suspicious Beacon Service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "bot-beacon-Hilix.x86.service",
+      "answer_variable_name": null,
+      "content": "Investigate the suspicious beacon service running on bot1. This service is communicating with a known C2 server.\n\nSteps:\n1. SSH into bot1 using the provided credentials.\n2. List all running services using `systemctl list-units --type=service`.\n3. Identify the suspicious beacon service named `bot-beacon-Hilix.x86.service`.\n4. Examine the service details using `systemctl status bot-beacon-Hilix.x86.service`.",
+      "solution": "The suspicious beacon service is named `bot-beacon-Hilix.x86.service`. This service is responsible for communicating with the C2 server.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for services with unusual names or those that are not part of the standard system services.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-units --type=service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify Suspicious Flood Service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "bot-flood-Hilix.x86.service",
+      "answer_variable_name": null,
+      "content": "Investigate the suspicious flood service running on bot1. This service is responsible for performing DDoS attacks.\n\nSteps:\n1. SSH into bot1 using the provided credentials.\n2. List all running services using `systemctl list-units --type=service`.\n3. Identify the suspicious flood service named `bot-flood-Hilix.x86.service`.\n4. Examine the service details using `systemctl status bot-flood-Hilix.x86.service`.",
+      "solution": "The suspicious flood service is named `bot-flood-Hilix.x86.service`. This service is responsible for performing DDoS attacks.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for services that are not part of the standard system services and have unusual names.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-units --type=service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Contain C2 Communication",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "44382",
+      "answer_variable_name": null,
+      "content": "Contain the C2 communication by blocking the suspicious port used by the beacon service.\n\nSteps:\n1. SSH into bot1 using the provided credentials.\n2. Identify the port used by the beacon service (44382).\n3. Use `iptables` to block outgoing traffic on port 44382.\n4. Verify the block using `iptables -L`.",
+      "solution": "The port used by the beacon service is 44382. Use `iptables` to block outgoing traffic on this port.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Use `netstat` or `ss` to identify the port used by the beacon service.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "iptables -A OUTPUT -p tcp --dport 44382 -j DROP",
+          "cmd_type": "bash-command",
+          "cmd_regex": "iptables -A OUTPUT -p tcp --dport 44382 -j DROP",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}
