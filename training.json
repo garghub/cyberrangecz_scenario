@@ -1,0 +1,165 @@
+{
+  "title": "BRICKSTORM Backdoor Investigation",
+  "description": "You are an incident responder tasked with investigating a compromised Linux system infected with the BRICKSTORM backdoor. Your goal is to identify and mitigate the threat, including its command and control (C2) communications, persistence mechanisms, and lateral movement activities.",
+  "prerequisites": [
+    "Basic knowledge of Linux command line.",
+    "Familiarity with network analysis tools.",
+    "Understanding of incident response procedures."
+  ],
+  "outcomes": [
+    "Identify indicators of compromise (IOCs) related to the BRICKSTORM backdoor.",
+    "Analyze network traffic for suspicious C2 communications.",
+    "Investigate persistence mechanisms and lateral movement activities.",
+    "Develop mitigation strategies to contain and remove the threat."
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "You are an incident responder tasked with investigating a compromised Linux system infected with the BRICKSTORM backdoor. Your goal is to identify and mitigate the threat, including its command and control (C2) communications, persistence mechanisms, and lateral movement activities."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the target system using SSH with the following credentials: Username: cyrano, Password: cyrano.",
+      "local_content": "Access the target system using SSH with the following credentials: Username: cyrano, Password: cyrano."
+    },
+    {
+      "title": "Identify Suspicious Service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "vami.service",
+      "answer_variable_name": null,
+      "content": "Investigate the running services on the target system and identify any suspicious services that may be related to the BRICKSTORM backdoor.\n\nSteps:\n1. Log in to the target system using SSH.\n2. List all running services using the appropriate command.\n3. Identify any suspicious services, particularly those named \"vami\".\n4. Document the service name and its associated details.\n\nThe file or payload name associated with the BRICKSTORM backdoor is `vami`.",
+      "solution": "To identify the suspicious service, log in to the target system using SSH and list all running services using the command `systemctl list-units --type=service` or `ps aux`. Look for any suspicious services, particularly those named \"vami\". The service name associated with the BRICKSTORM backdoor is `vami`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Use commands like `systemctl list-units --type=service` or `ps aux` to list running services.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Look for any suspicious services, particularly those named \"vami\".",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "identify_suspicious_service",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-units --type=service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Investigate Persistence Mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "vami.timer",
+      "answer_variable_name": null,
+      "content": "Examine the system for persistence mechanisms used by the BRICKSTORM backdoor. Focus on environment variables and service configurations.\n\nSteps:\n1. Check the PATH environment variable for any suspicious modifications.\n2. Inspect service configurations for any unusual entries.\n3. Identify any persistence mechanisms related to the \"vami\" service.\n4. Document the persistence mechanism and its details.\n\nThe persistence mechanism used by the BRICKSTORM backdoor is the modification of the PATH environment variable.",
+      "solution": "To investigate the persistence mechanism, check the PATH environment variable using the command `echo $PATH` and inspect service configurations using the command `systemctl list-unit-files`. Look for any unusual entries related to the \"vami\" service. The persistence mechanism used by the BRICKSTORM backdoor is the modification of the PATH environment variable.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Use commands like `echo $PATH` and `systemctl list-unit-files` to investigate persistence mechanisms.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Look for any unusual entries related to the \"vami\" service.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "investigate_persistence_mechanism",
+          "prereq_state": [],
+          "cmd": "echo $PATH",
+          "cmd_type": "bash-command",
+          "cmd_regex": "echo $PATH",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Analyze Network Traffic for C2 Communications",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "443",
+      "answer_variable_name": null,
+      "content": "Analyze network traffic on the target system to identify any suspicious outbound connections to known C2 IP addresses and ports.\n\nSteps:\n1. Use network analysis tools to monitor outbound connections.\n2. Identify any connections to the IP address 1.1.1.1 on port 443.\n3. Document the details of the suspicious connections, including timestamps and data transferred.\n4. Develop a plan to block these connections.\n\nThe C2 IP address associated with the BRICKSTORM backdoor is `1.1.1.1` and the C2 port is `443`.",
+      "solution": "To analyze network traffic, use tools like `tcpdump`, `netstat`, or `ss` to monitor outbound connections. Look for any connections to the IP address 1.1.1.1 on port 443. Document the details of the suspicious connections, including timestamps and data transferred. Develop a plan to block these connections.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Use tools like `tcpdump`, `netstat`, or `ss` to analyze network traffic.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Look for any connections to the IP address 1.1.1.1 on port 443.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "analyze_network_traffic",
+          "prereq_state": [],
+          "cmd": "tcpdump",
+          "cmd_type": "bash-command",
+          "cmd_regex": "tcpdump",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 120,
+  "variant_sandboxes": false
+}
