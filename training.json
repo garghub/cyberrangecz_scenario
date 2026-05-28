@@ -1,0 +1,153 @@
+{
+  "title": "Kobalos Linux Backdoor Investigation",
+  "description": "Investigate a Kobalos Linux backdoor in a preconfigured sandbox environment.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Familiarity with network traffic analysis"
+  ],
+  "outcomes": [
+    "Identify the malicious process running on the target host",
+    "Detect communication between the target and C2 servers",
+    "Investigate data exfiltration from the target to next-target hosts"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 5,
+      "content": "Welcome to the Kobalos Linux Backdoor Investigation scenario. Your goal is to identify and investigate a Kobalos backdoor in our preconfigured sandbox environment."
+    },
+    {
+      "title": "Access Target Host",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "passkey": "start",
+      "cloud_content": "Connect to the target host using SSH with username 'cyrano' and password 'cyrano'.",
+      "local_content": "Access the local sandbox environment and connect to the target host using SSH with username 'cyrano' and password 'cyrano'."
+    },
+    {
+      "title": "Identify Malicious Process",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "answer": "sshd",
+      "content": "List running processes on the target host and identify the malicious process.",
+      "solution": "Use the `ps` command to list running processes. Look for the sshd process that has been compromised by Kobalos.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check the output of the `ps` command for any unusual or unexpected processes.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for a process named 'sshd' that may have been compromised by Kobalos.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "list_processes",
+          "prereq_state": [],
+          "cmd": "ps aux | grep sshd",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ps aux | grep sshd"
+        }
+      ],
+      "expected_commands": [
+        "ps aux | grep sshd"
+      ]
+    },
+    {
+      "title": "Detect Communication with C2 Server",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 15,
+      "answer": "151.80.57.191, 7070",
+      "content": "Analyze network traffic to detect communication between the target host and the C2 server.",
+      "solution": "Use tools like `tcpdump` or `wireshark` to capture network traffic and look for connections between the target host and the IP address 151.80.57.191 on port 7070.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Capture network traffic using tools like `tcpdump` or `wireshark` and look for connections to the C2 server.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for connections between the target host and IP address 151.80.57.191 on port 7070.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "capture_network_traffic",
+          "prereq_state": [
+            "list_processes"
+          ],
+          "cmd": "tcpdump -i eth0 -n -vvv port 7070 and host 151.80.57.191",
+          "cmd_type": "bash-command",
+          "cmd_regex": "tcpdump -i eth0 -n -vvv port 7070 and host 151.80.57.191"
+        }
+      ],
+      "expected_commands": [
+        "tcpdump -i eth0 -n -vvv port 7070 and host 151.80.57.191"
+      ]
+    },
+    {
+      "title": "Investigate Data Exfiltration",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 20,
+      "answer": "/home/cyrano/.ssh/id_ed25519.pub",
+      "content": "Investigate data exfiltration from the target host to the next-target host.",
+      "solution": "Examine file transfer logs, SSH logs, or other relevant artifacts to identify potential data exfiltration between hosts. Look for the public key (id_ed25519.pub) that has been transferred from the target host to the next-target host.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Examine file transfer logs, SSH logs, or other relevant artifacts for signs of data exfiltration between hosts.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for the public key (id_ed25519.pub) that has been transferred from the target host to the next-target host.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "examine_file_transfer_logs",
+          "prereq_state": [
+            "list_processes"
+          ],
+          "cmd": "ls -l /home/cyrano/.ssh | grep id_ed25519.pub",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ls -l /home/cyrano/.ssh | grep id_ed25519.pub"
+        }
+      ],
+      "expected_commands": [
+        "ls -l /home/cyrano/.ssh | grep id_ed25519.pub"
+      ]
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}
