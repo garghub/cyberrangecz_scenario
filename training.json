@@ -1,0 +1,147 @@
+{
+  "title": "Kobalos Malware Investigation",
+  "description": "You are an incident responder tasked with investigating a suspected Kobalos malware infection on a high-performance computing (HPC) cluster. Kobalos is a complex malware that targets HPC clusters and other high-profile systems, providing remote access, terminal sessions, and proxying capabilities. Your goal is to identify and mitigate the malware's presence on the affected systems.",
+  "prerequisites": [
+    "Basic knowledge of Linux command line.",
+    "Familiarity with network security concepts.",
+    "Understanding of malware analysis and incident response procedures."
+  ],
+  "outcomes": [
+    "Identify indicators of compromise (IOCs) related to Kobalos malware.",
+    "Investigate suspicious services and files.",
+    "Analyze network traffic for signs of command and control (C2) communication.",
+    "Mitigate the malware's persistence mechanisms and C2 communication."
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "You are an incident responder tasked with investigating a suspected Kobalos malware infection on a high-performance computing (HPC) cluster. Kobalos is a complex malware that targets HPC clusters and other high-profile systems, providing remote access, terminal sessions, and proxying capabilities. Your goal is to identify and mitigate the malware's presence on the affected systems."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the target system using SSH with the following credentials: Username: cyrano, Password: cyrano.",
+      "local_content": "Access the target system using SSH with the following credentials: Username: cyrano, Password: cyrano."
+    },
+    {
+      "title": "Identify Suspicious Service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "sshd",
+      "answer_variable_name": null,
+      "content": "Investigate the target system for suspicious services. Kobalos malware is known to embed itself in the OpenSSH server executable. Identify the suspicious service running on the target system.\n\nSteps:\n1. Log in to the target system using SSH.\n2. List all running services using the `systemctl list-units --type=service` command.\n3. Identify any suspicious services, particularly those related to SSH.\n\nThe flag should be the name of the suspicious service identified.\n\n> **Critic revision**: flag at `/var/log/sshd_flag.txt` on `target`. The flag 'sshd' should be placed in a specific file path to make it clear where the flag should be found.",
+      "solution": "The suspicious service is the SSH service (sshd). This service is known to be modified by Kobalos malware.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for services that are not typically expected on a standard system or those that have unusual configurations.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-units --type=service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Investigate Suspicious File",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "75edf6662811d001da179b96bd06d675aa2439fd88a981cc84f24b4a5b4f8f45",
+      "answer_variable_name": null,
+      "content": "Kobalos malware is known to modify the OpenSSH server executable. Investigate the target system for suspicious files related to the SSH service.\n\nSteps:\n1. Navigate to the directory containing the SSH service executable, typically `/usr/sbin/`.\n2. Check the file attributes and hash of the `sshd` executable using the `ls -l /usr/sbin/sshd` and `sha256sum /usr/sbin/sshd` commands.\n3. Compare the hash with the known good hash of the SSH service executable.\n\nThe flag should be the hash of the suspicious file identified.\n\n> **Critic revision**: flag at `/var/log/file_hash_flag.txt` on `target`. The flag '75edf6662811d001da179b96bd06d675aa2439fd88a981cc84f24b4a5b4f8f45' should be placed in a specific file path to make it clear where the flag should be found.",
+      "solution": "The hash of the suspicious file is `75edf6662811d001da179b96bd06d675aa2439fd88a981cc84f24b4a5b4f8f45`. This hash indicates that the file has been modified by Kobalos malware.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Use the `sha256sum` command to generate the hash of the file and compare it with the known good hash.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "sha256sum /usr/sbin/sshd",
+          "cmd_type": "bash-command",
+          "cmd_regex": "sha256sum /usr/sbin/sshd",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Analyze Network Traffic for C2 Communication",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "7070",
+      "answer_variable_name": null,
+      "content": "Kobalos malware communicates with a command and control (C2) server. Analyze the network traffic on the target system to identify any suspicious outbound connections.\n\nSteps:\n1. Use the `netstat -tuln` command to list all network connections.\n2. Look for any suspicious outbound connections, particularly those to the IP address `151.80.57.191` on port `7070`.\n3. Investigate the process responsible for the suspicious connection using the `ps aux | grep <PID>` command.\n\nThe flag should be the port number used for the suspicious outbound connection.\n\n> **Critic revision**: flag at `/var/log/port_flag.txt` on `target`. The flag '7070' should be placed in a specific file path to make it clear where the flag should be found.",
+      "solution": "The port number used for the suspicious outbound connection is `7070`. This port is known to be used by Kobalos malware for C2 communication.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Use the `netstat` command to identify suspicious network connections and investigate the responsible process.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "netstat -tuln",
+          "cmd_type": "bash-command",
+          "cmd_regex": "netstat -tuln",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 120,
+  "variant_sandboxes": false
+}
