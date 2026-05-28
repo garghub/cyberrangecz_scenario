@@ -1,0 +1,145 @@
+{
+  "title": "BRICKSTORM Backdoor Investigation",
+  "description": "Investigate and mitigate the BRICKSTORM backdoor on the target system.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Usage of nmap",
+    "Usage of metasploit",
+    "Password cracking techniques"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "The BRICKSTORM backdoor is a sophisticated 64-bit ELF executable written in Go, designed to operate on Linux systems. It employs advanced techniques such as SOCKS proxying, multi-layered web service communication, and varied command execution to obscure its activities. The backdoor uses XOR cipher encryption to hide key strings within its code and employs environment variables for connection parameters, logging, WebSocket connectors, and request handlers."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the target system via SSH using the following credentials: IP: 192.168.50.5, Username: cyrano, Password: cyrano.",
+      "local_content": "Access the target system via SSH using the following credentials: IP: 192.168.50.5, Username: cyrano, Password: cyrano."
+    },
+    {
+      "title": "Identify the Suspicious Service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "vami.service",
+      "answer_variable_name": null,
+      "content": "The BRICKSTORM backdoor is known to create a service named \"vami\". Investigate the running services on the target system to identify this suspicious service.\n\n> **Critic revision**: flag at `/etc/systemd/system/vami.service` on `target`. The flag should be placed in the correct service file path.",
+      "solution": "Use the `systemctl list-units --type=service` command to list all running services and identify the \"vami\" service.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First Hint",
+          "content": "Use the `systemctl list-units --type=service` command to list all running services.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "service_identification",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-units --type=service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Investigate the Persistence Mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "PATH",
+      "answer_variable_name": null,
+      "content": "The BRICKSTORM backdoor modifies the PATH environment variable to maintain persistence. Check the environment variables to identify this persistence mechanism.\n\n> **Critic revision**: flag at `/home/cyrano/.bashrc` on `target`. The flag should be placed in the correct environment variable file path.",
+      "solution": "Use the `printenv` command to list all environment variables and identify the PATH environment variable modification.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First Hint",
+          "content": "Use the `printenv` command to list all environment variables.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "persistence_mechanism",
+          "prereq_state": [],
+          "cmd": "printenv",
+          "cmd_type": "bash-command",
+          "cmd_regex": "printenv",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the Suspicious Outbound IP Address",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "1.1.1.1",
+      "answer_variable_name": null,
+      "content": "The BRICKSTORM backdoor communicates with a C2 server at IP address 1.1.1.1. Investigate the network connections to identify this suspicious outbound IP address.\n\n> **Critic revision**: flag at `/var/log/syslog` on `target`. The flag should be placed in the correct log file path.",
+      "solution": "Use the `ss -tulnp` command to list all network connections and identify the IP address 1.1.1.1.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First Hint",
+          "content": "Use the `ss -tulnp` command to list all network connections.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "network_connections",
+          "prereq_state": [],
+          "cmd": "ss -tulnp",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ss -tulnp",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}
