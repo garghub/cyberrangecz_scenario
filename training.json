@@ -1,0 +1,147 @@
+{
+  "title": "Kobalos Malware Investigation",
+  "description": "You are an incident responder tasked with investigating a suspected Kobalos malware infection on a high-performance computing (HPC) cluster. Kobalos is a complex malware that targets HPC clusters and other high-profile systems, providing remote access, file system manipulation, and proxying capabilities. Your goal is to identify and mitigate the malware's presence on the affected systems.",
+  "prerequisites": [
+    "Basic knowledge of Linux command line.",
+    "Familiarity with network security concepts.",
+    "Understanding of malware analysis and incident response procedures."
+  ],
+  "outcomes": [
+    "Identify indicators of compromise (IOCs) related to the Kobalos malware.",
+    "Investigate suspicious services and files on the affected systems.",
+    "Analyze network traffic for signs of command and control (C2) communication.",
+    "Mitigate the malware's persistence mechanisms and C2 communication."
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "You are an incident responder tasked with investigating a suspected Kobalos malware infection on a high-performance computing (HPC) cluster. Kobalos is a complex malware that targets HPC clusters and other high-profile systems, providing remote access, file system manipulation, and proxying capabilities. Your goal is to identify and mitigate the malware's presence on the affected systems."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the target system using SSH with the following credentials: Username: cyrano, Password: cyrano.",
+      "local_content": "Access the target system using SSH with the following credentials: Username: cyrano, Password: cyrano."
+    },
+    {
+      "title": "Identify Suspicious Service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "kobalos_sshd",
+      "answer_variable_name": null,
+      "content": "Investigate the target system for suspicious services. Kobalos malware is known to embed itself in the OpenSSH server executable. Identify the suspicious service running on the target system.\n\n> **Critic revision**: flag at `/var/log/kobalos_sshd.log` on `target`. This flag better reflects a specific indicator of compromise related to the Kobalos malware.",
+      "solution": "1. Log in to the target system using SSH.\n2. List all running services on the system.\n3. Identify the suspicious service related to the Kobalos malware.\nThe suspicious service is `sshd`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Check the running services and look for any unusual or unexpected services, particularly those related to SSH.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-units --type=service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Investigate Persistence Mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "kobalos_persistence",
+      "answer_variable_name": null,
+      "content": "Kobalos malware is known to use persistence mechanisms to maintain its presence on the system. Investigate the persistence mechanism used by the malware on the target system.\n\n> **Critic revision**: flag at `/etc/cron.d/kobalos_persistence` on `target`. This flag reflects a specific persistence mechanism used by the Kobalos malware.",
+      "solution": "1. Examine the SSH service configuration files for any unusual entries.\n2. Check for any cron jobs or scheduled tasks that might be related to the malware.\n3. Identify the persistence mechanism used by the Kobalos malware.\nThe persistence mechanism is embedded in the OpenSSH server executable.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for any unusual entries in the SSH service configuration files or scheduled tasks that might indicate persistence.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "cat /etc/ssh/sshd_config",
+          "cmd_type": "bash-command",
+          "cmd_regex": "cat /etc/ssh/sshd_config",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Analyze Network Traffic for C2 Communication",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "151.80.57.191:7070",
+      "answer_variable_name": null,
+      "content": "Kobalos malware communicates with a command and control (C2) server. Analyze the network traffic on the target system to identify the C2 communication.\n\n> **Critic revision**: flag at `/var/log/network_traffic.log` on `target`. This flag provides the explicit file path where the C2 IP address and port can be found.",
+      "solution": "1. Use network monitoring tools to capture and analyze network traffic on the target system.\n2. Identify any suspicious outbound connections to external IP addresses or ports.\n3. Determine the C2 IP address and port used by the Kobalos malware.\nThe C2 IP address and port is `151.80.57.191:7070`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Use tools like `tcpdump` or `Wireshark` to capture and analyze network traffic for suspicious connections.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "tcpdump -i any port 7070",
+          "cmd_type": "bash-command",
+          "cmd_regex": "tcpdump -i any port 7070",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 120,
+  "variant_sandboxes": false
+}
