@@ -1,0 +1,170 @@
+{
+  "title": "Kobalos Linux Backdoor Investigation",
+  "description": "Investigate a Kobalos Linux backdoor malware infection on a target host.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Familiarity with SSH and network traffic analysis"
+  ],
+  "outcomes": [
+    "Identify the running service associated with Kobalos",
+    "Locate the persistence mechanism used by Kobalos",
+    "Detect data exfiltration by Kobalos"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 5,
+      "content": "Welcome to the Kobalos Linux Backdoor Investigation scenario. Your goal is to investigate a Kobalos infection on a target host and identify its behavior.\n\nThis scenario will guide you through tasks that help you understand how Kobalos operates and how to detect it in your environment."
+    },
+    {
+      "title": "Access the Target Host",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Connect to the target host using SSH with the provided credentials.",
+      "local_content": "Access the local sandbox environment and navigate to the target host."
+    },
+    {
+      "title": "Identify Running Service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "sshd",
+      "content": "List running services on the target host and identify the service associated with Kobalos.",
+      "solution": "Use `ss -al` or `netstat -tuln` to list active connections and find the service associated with Kobalos (e.g., sshd).",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check for unusual processes related to SSH.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for connections on the expected C2 port (7070).",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "list_services",
+          "prereq_state": [],
+          "cmd": "ss -al",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ss -al | grep sshd"
+        }
+      ],
+      "expected_commands": [
+        "ss -al"
+      ]
+    },
+    {
+      "title": "Locate Persistence Mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "/etc/ssh/sshd_config",
+      "content": "Investigate the target host for signs of Kobalos persistence.",
+      "solution": "Examine system files, configurations, and running processes to find indicators of Kobalos' persistence (e.g., modified sshd configuration or standalone executables).",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check the sshd configuration file for unusual settings.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for standalone executables related to Kobalos.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "check_sshd_config",
+          "prereq_state": [],
+          "cmd": "cat /etc/ssh/sshd_config",
+          "cmd_type": "bash-command",
+          "cmd_regex": "grep -i kobalos /etc/ssh/sshd_config"
+        },
+        {
+          "state_name": "search_for_executables",
+          "prereq_states": [
+            "check_sshd_config"
+          ],
+          "cmd": "find / -type f -iname kobalos",
+          "cmd_type": "bash-command",
+          "cmd_regex": "find / -type f -iname kobalos"
+        }
+      ],
+      "expected_commands": [
+        "cat /etc/ssh/sshd_config",
+        "find / -type f -iname kobalos"
+      ]
+    },
+    {
+      "title": "Detect Data Exfiltration",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "/var/log/auth.log",
+      "content": "Analyze logs, network traffic, and system files to find indicators of stolen SSH credentials being sent over the network.",
+      "solution": "Inspect system logs for unusual SSH activity, analyze network traffic for non-SSH traffic on the port attributed to an SSH server, and search for known indicators of compromise in logs and system files.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check the SSH log file for unusual activity.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Investigate network traffic for non-SSH traffic on the port attributed to an SSH server.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "check_ssh_log",
+          "prereq_states": [],
+          "cmd": "tail /var/log/auth.log",
+          "cmd_type": "bash-command",
+          "cmd_regex": "grep -i ssh /var/log/auth.log"
+        },
+        {
+          "state_name": "analyze_network_traffic",
+          "prereq_states": [
+            "check_ssh_log"
+          ],
+          "cmd": "tcpdump -i eth0 port 22",
+          "cmd_type": "bash-command",
+          "cmd_regex": "tcpdump -i eth0 port 22"
+        }
+      ],
+      "expected_commands": [
+        "tail /var/log/auth.log",
+        "tcpdump -i eth0 port 22"
+      ]
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}

@@ -1,0 +1,33 @@
+---
+- name: Install ncat
+  apt:
+    name: ncat
+    state: present
+    update_cache: yes
+
+- name: Create listener service
+  copy:
+    dest: /etc/systemd/system/lab-checkin-listener.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Lab benign check-in listener
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/bin/sh -c '/usr/bin/ncat -lk {{ listen_port }} -c "cat {{ file_to_send }}" >> {{ listen_log }} 2>&1'
+      Restart=always
+      RestartSec=2
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable and start listener
+  systemd:
+    name: lab-checkin-listener.service
+    enabled: yes
+    state: started
+    daemon_reload: yes
