@@ -1,0 +1,137 @@
+{
+  "title": "BRICKSTORM Backdoor Investigation",
+  "description": "Investigate a BRICKSTORM backdoor on a compromised target host.",
+  "prerequisites": [
+    "Basic Linux command line skills",
+    "Understanding of network protocols"
+  ],
+  "outcomes": [
+    "Identify malicious service running on the target host",
+    "Investigate persistence mechanism used by the malware",
+    "Detect malicious communication between the target and c2-server hosts"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Sandbox Overview",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 2,
+      "content": "Sandbox consists of three hosts: c2-server, target, and next-target. The c2-server is running a malicious backdoor named BRICKSTORM, which communicates with its C2 server over WebSocket using the DoH protocol."
+    },
+    {
+      "title": "Access Level",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "passkey": "start",
+      "cloud_content": "Connect to the cloud sandbox using provided credentials.",
+      "local_content": "Access the local sandbox via SSH as user cyrano."
+    },
+    {
+      "title": "Identify Malicious Service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 5,
+      "answer": "lab-checkin",
+      "content": "Use netstat or ss command to list open network connections and active services on the target host.",
+      "solution": "Check for a service listening on port 4444 (e.g., `netstat -tuln | grep 4444`).",
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Look for a service with an unusual name or listening on an unexpected port.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint",
+          "content": "Check the process list for any processes related to the malware (e.g., `ps aux | grep brickstorm`).",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 5,
+      "reference_solution": [
+        {
+          "state_name": "list_open_connections",
+          "prereq_state": [],
+          "cmd": "netstat -tuln | grep 4444",
+          "cmd_type": "bash-command",
+          "cmd_regex": "^tcp.*:4444"
+        }
+      ]
+    },
+    {
+      "title": "Investigate Persistence Mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 5,
+      "answer": "/usr/local/bin:.*brickstorm",
+      "content": "Look for modified system files, environment variables, or startup scripts that could indicate persistence.",
+      "solution": "Check the PATH environment variable on the target host (e.g., `echo $PATH`).",
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Investigate system files, such as /etc/profile or ~/.bashrc, for modifications related to the malware.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint",
+          "content": "Check the output of `env` for any unusual environment variables.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 5,
+      "reference_solution": [
+        {
+          "state_name": "check_path_variable",
+          "prereq_state": [],
+          "cmd": "echo $PATH",
+          "cmd_type": "bash-command",
+          "cmd_regex": "^/usr/local/bin:.*brickstorm"
+        }
+      ]
+    },
+    {
+      "title": "Detect Malicious Communication",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 7,
+      "answer": "8090",
+      "content": "Analyze network traffic, logs, or process listings to find indicators of compromise (IOCs) related to the BRICKSTORM backdoor.",
+      "solution": "Use tools like tcpdump or Wireshark to capture and analyze network traffic. Look for connections to IP addresses on port 8090.",
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Check the output of `netstat -an` for any connections to an unusual IP address or port.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint",
+          "content": "Investigate process listings for any processes related to the malware (e.g., `ps aux | grep brickstorm`).",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 7,
+      "reference_solution": [
+        {
+          "state_name": "capture_network_traffic",
+          "prereq_state": [],
+          "cmd": "tcpdump -i eth0 -w output.pcap",
+          "cmd_type": "bash-command",
+          "cmd_regex": "^(.*):8090"
+        }
+      ]
+    }
+  ],
+  "estimated_duration": 21,
+  "variant_sandboxes": false
+}
