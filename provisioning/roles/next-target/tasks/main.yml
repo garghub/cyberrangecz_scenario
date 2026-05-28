@@ -1,0 +1,27 @@
+---
+- name: Add host aliases
+  lineinfile:
+      path: '/etc/hosts'
+      line: "{{ item.ip }} {{ item.name }}"
+      state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Add user and set password
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash(''sha512'') }}'
+    shell: '/bin/bash'
+    update_password: always
+
+- name: Reset password using command line
+  command: chpasswd
+  args:
+        stdin: "{{ username }}:{{ password }}"
+
+- name: Place flags
+  copy:
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    content: "{{ item.content }}\n"
+    mode: '0600'
+  loop: "{{ flags }}"

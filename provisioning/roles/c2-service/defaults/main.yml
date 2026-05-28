@@ -1,0 +1,12 @@
+---
+# defaults file for c2-service
+
+client_user: cyrano
+connect_host: target
+connect_port: 7070
+connect_message: "lab-checkin"
+connect_timer_unit: "lab-checkin.timer"
+connect_service_unit: "lab-checkin.service"
+connect_script_path: "/usr/local/bin/lab-checkin.sh"
+connect_schedule: "*:0/2"
+random_delay_seconds: 10

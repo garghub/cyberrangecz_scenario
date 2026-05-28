@@ -1,0 +1,58 @@
+name: _backdoor
+
+hosts:
+  - name: c2-server
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: target
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: next-target
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+routers:
+  - name: router
+    base_box:
+      image: debian-12-x86_64
+      man_user: debian
+    flavor: standard.small
+
+networks:
+  - name: server-switch
+    cidr: 192.168.40.0/24
+    accessible_by_user: False
+
+  - name: target-switch
+    cidr: 192.168.50.0/24
+
+net_mappings:
+  - host: c2-server
+    network: server-switch
+    ip: 192.168.40.5
+
+  - host: target
+    network: target-switch
+    ip: 192.168.50.5
+
+  - host: next-target
+    network: target-switch
+    ip: 192.168.50.6
+
+router_mappings:
+  - router: router
+    network: server-switch
+    ip: 192.168.40.1
+  - router: router
+    network: target-switch
+    ip: 192.168.50.1
+
+groups: []

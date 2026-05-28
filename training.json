@@ -1,0 +1,149 @@
+{
+  "title": "Kobalos Backdoor Investigation Exercise",
+  "description": "Investigate a Kobalos backdoor infection in a multi-host sandbox environment.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Identify affected hosts",
+    "Gather evidence for further analysis"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Kobalos Backdoor Investigation Overview",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "You are a member of the incident response team at CyberRangeCZ. A recent MISP event has reported a Kobalos backdoor infection in one of our systems. Your task is to investigate this incident, identify the compromised hosts, and gather evidence to support your findings."
+    },
+    {
+      "title": "Accessing the Sandbox Environment",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Connect to the target host using SSH with the provided credentials: username: cyrano, password: cyrano.",
+      "local_content": "The target host's IP address is 192.168.50.5."
+    },
+    {
+      "title": "Identify Kobalos Backdoor Artifacts",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/tmp/2c693d26ba9df26edf77557c1a709528",
+      "content": [
+        "md5: 2c693d26ba9df26edf77557c1a709528",
+        "sha1: 1dd0edc5744d63a731db8c3b42efbd09d91fed78"
+      ],
+      "solution": "Use the `locate` command or manually search for files with known Kobalos hashes in the /tmp directory.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Look for files with known Kobalos hashes in the /tmp directory.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "locate",
+          "prereq_state": [],
+          "cmd": "locate /tmp/*{{ item.hash }}",
+          "cmd_type": "bash-command",
+          "cmd_regex": "locate /tmp/.*\\s+{{ item.hash }}",
+          "optional": false
+        }
+      ]
+    },
+    {
+      "title": "Investigate Network Connections",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "7070",
+      "content": [
+        "Listen port: 7070"
+      ],
+      "solution": "Use `netstat -an | grep LISTEN` or `ss -tuln` commands to inspect active connections and listen ports on the target host.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Use `netstat` or `ss` commands to inspect active connections and listen ports on the target host.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "netstat",
+          "prereq_state": [],
+          "cmd": "netstat -an | grep LISTEN",
+          "cmd_type": "bash-command",
+          "cmd_regex": "netstat -an \\s+LISTEN",
+          "optional": false
+        },
+        {
+          "state_name": "ss",
+          "prereq_state": [],
+          "cmd": "ss -tuln",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ss -tuln",
+          "optional": false
+        }
+      ]
+    },
+    {
+      "title": "Gather Evidence and Report Findings",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/tmp/.installer",
+      "content": [
+        "Evidence: /tmp/.installer"
+      ],
+      "solution": "Use `ls`, `cat`, or other commands to gather relevant files, logs, and indicators of compromise (IOCs). Write a brief report summarizing your investigation results.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Collect evidence of the Kobalos backdoor infection on the target host and prepare a report summarizing your findings.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "ls",
+          "prereq_state": [],
+          "cmd": "ls -l /tmp/.installer",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ls -l \\s+/tmp/.installer",
+          "optional": false
+        },
+        {
+          "state_name": "cat",
+          "prereq_state": [],
+          "cmd": "cat /tmp/.installer",
+          "cmd_type": "bash-command",
+          "cmd_regex": "cat \\s+/tmp/.installer",
+          "optional": false
+        }
+      ]
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}

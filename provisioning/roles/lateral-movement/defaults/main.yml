@@ -1,0 +1,10 @@
+---
+# defaults file for lateral-movement
+
+username: cyrano
+next_target_host: next-target
+next_target_user: cyrano
+next_target_path: /tmp/synthetic-transfer/
+synthetic_payload_kb: 64
+synthetic_transfer_interval: 2min
+transfer_poll_interval: 5

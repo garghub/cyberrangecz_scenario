@@ -1,0 +1,138 @@
+---
+- name: disable qxl
+  hosts:
+    - routers
+    - hosts
+  gather_facts: yes
+  become: yes
+  tasks:
+    - include_role:
+        name: disable-qxl
+      when: ansible_os_family == 'Debian'
+
+
+- name: set up target
+  hosts: target
+  become: yes
+  roles:
+    - name: target
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: True
+
+- name: set up next-target
+  hosts: next-target
+  become: yes
+  roles:
+    - name: next-target
+
+- name: Generate SSH key on target and trust next-target
+  hosts: target
+  become: yes
+  roles:
+    - role: ssh_access
+      vars:
+        ssh_user: cyrano
+        ssh_scan_hosts:
+          - next-target
+
+- name: Generate SSH key on next-target and trust target
+  hosts: next-target
+  become: yes
+  roles:
+    - role: ssh_access
+      vars:
+        ssh_user: cyrano
+        ssh_scan_hosts:
+          - target
+
+- name: Authorize target key on next-target
+  hosts: next-target
+  become: yes
+  tasks:
+    - name: Ensure cyrano user exists
+      user:
+        name: cyrano
+        shell: /bin/bash
+        state: present
+
+    - name: Ensure .ssh directory exists for cyrano
+      file:
+        path: /home/cyrano/.ssh
+        state: directory
+        owner: cyrano
+        group: cyrano
+        mode: "0700"
+
+    - name: Add target public key to next-target
+      authorized_key:
+        user: cyrano
+        key: "{{ hostvars['target'].ssh_public_key_decoded }}"
+        state: present
+
+- name: Authorize next-target key on target
+  hosts: target
+  become: yes
+  tasks:
+    - name: Ensure cyrano user exists
+      user:
+        name: cyrano
+        shell: /bin/bash
+        state: present
+
+    - name: Ensure .ssh directory exists for cyrano
+      file:
+        path: /home/cyrano/.ssh
+        state: directory
+        owner: cyrano
+        group: cyrano
+        mode: "0700"
+
+    - name: Add next-target public key to target
+      authorized_key:
+        user: cyrano
+        key: "{{ hostvars['next-target'].ssh_public_key_decoded }}"
+        state: present
+
+- name: Lateral mouvement Target -> Next Target
+  hosts: target
+  become: yes
+  roles:
+    - name: lateral-movement
+
+- name: set up c2-server
+  hosts: c2-server
+  become: yes
+  roles:
+    - name: c2-server
+      flag: "{{ alice_flag }}"
+      flag_2: "{{ root_flag }}"
+
+- name: Start benign listener on target
+  hosts: target
+  become: yes
+  roles:
+    - role: c2-listener
+      vars:
+        listen_port: 7070
+
+- name: Start intermittent benign connections from c2-server
+  hosts: c2-server
+  become: yes
+  roles:
+    - role: c2-service
+      vars:
+        client_user: cyrano
+        connect_host: target
+        connect_port: 7070
+        connect_message: "lab-checkin"
+        connect_schedule: "*:0/2"
+        random_delay_seconds: 10
+
+- name: set up command logging
+  hosts: hosts
+  become: yes
+  roles:
+    - role: sandbox-logging
+      slf_destination_port: '{% if hostvars["man"] is defined -%} 514 {%- else -%} 515 {%- endif %}'
