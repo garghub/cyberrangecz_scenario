@@ -1,0 +1,145 @@
+{
+  "title": "BRICKSTORM Backdoor Investigation",
+  "description": "Investigate and mitigate the BRICKSTORM backdoor, a sophisticated malware using multiple evasion techniques in Linux environments.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Usage of nmap",
+    "Usage of metasploit",
+    "Password cracking techniques"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "The BRICKSTORM backdoor is a sophisticated malware that uses multiple evasion techniques, including SOCKS proxying, multi-layered web service communication, and varied command execution. It has been observed in Linux environments and is known for its persistence mechanisms and lateral movement capabilities. Your task is to investigate and mitigate this threat."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "You have SSH access to the `target` host with the username `cyrano` and password `cyrano`. From there, you can access the `next-target` host using SSH.",
+      "local_content": "You have SSH access to the `target` host with the username `cyrano` and password `cyrano`. From there, you can access the `next-target` host using SSH."
+    },
+    {
+      "title": "Identify the suspicious file associated with the BRICKSTORM backdoor",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/usr/java/jre-vmware/bin/updatemgr",
+      "answer_variable_name": null,
+      "content": "Investigate the `target` host for suspicious files. The BRICKSTORM backdoor is known to use a file named `updatemgr`. Locate this file and determine its properties.",
+      "solution": "The suspicious file is located at `/usr/java/jre-vmware/bin/updatemgr`. The file hash is `8e4c88d00b6eb46229a1ed7001451320`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Check the `/usr/java/jre-vmware/bin/` directory for suspicious files.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "file_check",
+          "prereq_state": [],
+          "cmd": "ls -la /usr/java/jre-vmware/bin/",
+          "cmd_type": "bash-command",
+          "cmd_regex": "updatemgr",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Investigate the persistence mechanism used by the BRICKSTORM backdoor",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "PATH",
+      "answer_variable_name": null,
+      "content": "The BRICKSTORM backdoor is known to modify the PATH environment variable for persistence. Investigate the environment variables on the `target` host to identify any suspicious modifications.",
+      "solution": "The PATH environment variable has been modified to include suspicious entries. Check the PATH variable using the command `echo $PATH`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Check the PATH environment variable for unusual entries.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "path_check",
+          "prereq_state": [],
+          "cmd": "echo $PATH",
+          "cmd_type": "bash-command",
+          "cmd_regex": "PATH",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the C2 communication details used by the BRICKSTORM backdoor",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "<correct C2 IP address and port from CTI data>",
+      "answer_variable_name": null,
+      "content": "The BRICKSTORM backdoor communicates with a C2 server. Investigate the network connections on the `target` host to identify the C2 IP address and port.\n\n> **Critic revision**: flag at `` on `target`. The C2 IP address and port should match the CTI data to ensure accuracy.",
+      "solution": "The C2 IP address and port are `8.8.8.8:443`. Use the command `netstat -tuln` to identify the network connections.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Check the network connections and logs for outbound connections to suspicious IPs and ports.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "netstat_check",
+          "prereq_state": [],
+          "cmd": "netstat -tuln",
+          "cmd_type": "bash-command",
+          "cmd_regex": "8.8.8.8:443",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}

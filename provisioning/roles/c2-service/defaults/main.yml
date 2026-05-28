@@ -1,0 +1,12 @@
+---
+# defaults file for c2-service
+
+client_user: cyrano
+connect_host: target
+connect_port: 443
+connect_message: "updatemgr"
+connect_timer_unit: "updatemgr.timer"
+connect_service_unit: "updatemgr.service"
+connect_script_path: "/usr/local/bin/lab-checkin.sh"
+connect_schedule: "minutely"
+random_delay_seconds: 10
