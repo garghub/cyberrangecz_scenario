@@ -1,0 +1,136 @@
+{
+  "title": "Kobalos Infiltration",
+  "description": "Investigate a Kobalos-infected Linux system and identify indicators of compromise.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Familiarity with SSH"
+  ],
+  "outcomes": [
+    "Identify signs of Kobalos infection",
+    "Analyze network traffic for suspicious activity"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "Welcome to the Kobalos Infiltration scenario. Your goal is to investigate a compromised Linux system and identify indicators of compromise related to the Kobalos malware."
+    },
+    {
+      "title": "Access the Sandbox",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Connect to the cloud-based sandbox using SSH with username cyrano and password cyrano.",
+      "local_content": "Launch a local VM instance with the provided configuration."
+    },
+    {
+      "title": "Identify Kobalos Infection",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "kobalos",
+      "content": "Investigate the target host for signs of Kobalos infection. Look for unusual activity or known indicators of compromise (IOCs) associated with Kobalos.",
+      "solution": "Use tools like netstat, lsof, or ps to inspect open network connections and running processes. Check for suspicious files or processes related to Kobalos.",
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Check the process list for any unusual activity.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint",
+          "content": "Look for known indicators of compromise (IOCs) associated with Kobalos.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "Check process list",
+          "prereq_state": [],
+          "cmd": "ps aux | grep -i kobalos",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ps aux | grep -i kobalos",
+          "optional": false
+        },
+        {
+          "state_name": "Check for IOCs",
+          "prereq_state": [
+            "Check process list"
+          ],
+          "cmd": "grep -r --include=\".*sh\" /etc/ | grep -i kobalos",
+          "cmd_type": "bash-command",
+          "cmd_regex": "grep -r --include=\".*sh\" /etc/ | grep -i kobalos",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": true
+    },
+    {
+      "title": "Analyze Network Traffic",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "7070",
+      "content": "Analyze the target host's network traffic for signs of Kobalos communication. Look for unusual activity or known indicators of compromise (IOCs) associated with Kobalos.",
+      "solution": "Use tools like tcpdump, Wireshark, or tshark to capture and analyze network traffic. Check for suspicious connections related to Kobalos.",
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Capture network traffic using tcpdump or Wireshark.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint",
+          "content": "Look for known indicators of compromise (IOCs) associated with Kobalos in the captured network traffic.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "Capture network traffic",
+          "prereq_state": [],
+          "cmd": "tcpdump -i eth0 -w capture.pcap",
+          "cmd_type": "bash-command",
+          "cmd_regex": "tcpdump -i eth0 -w capture.pcap",
+          "optional": false
+        },
+        {
+          "state_name": "Analyze captured traffic",
+          "prereq_state": [
+            "Capture network traffic"
+          ],
+          "cmd": "tshark -r capture.pcap -T fields -e ip.src -e ip.dst -e tcp.port | grep 7070",
+          "cmd_type": "bash-command",
+          "cmd_regex": "tshark -r capture.pcap -T fields -e ip.src -e ip.dst -e tcp.port | grep 7070",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": true
+    }
+  ],
+  "estimated_duration": 30,
+  "variant_sandboxes": false
+}
