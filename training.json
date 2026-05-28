@@ -1,0 +1,145 @@
+{
+  "title": "Akira Ransomware Incident Response",
+  "description": "Investigate the Akira ransomware incident, identify indicators of compromise (IOCs), and contain the threat.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Usage of nmap",
+    "Usage of metasploit",
+    "Password cracking techniques"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "The Akira ransomware has been detected in your network. This ransomware is known for its double-extortion techniques, involving both data exfiltration and enterprise-wide encryption. Your task is to investigate the incident, identify the indicators of compromise (IOCs), and contain the threat."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "You have access to the victim machine with the following credentials:\n- **Hostname:** victim\n- **Username:** cyrano\n- **Password:** cyrano\n\nYou can use SSH to connect to the victim machine and perform your investigations.",
+      "local_content": "You have access to the victim machine with the following credentials:\n- **Hostname:** victim\n- **Username:** cyrano\n- **Password:** cyrano\n\nYou can use SSH to connect to the victim machine and perform your investigations."
+    },
+    {
+      "title": "Identify the suspicious payload file associated with the Akira ransomware",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "akira",
+      "answer_variable_name": null,
+      "content": "The Akira ransomware is known to drop specific payload files on infected systems. Your task is to identify the suspicious payload file on the victim machine.\n\n**Steps:**\n1. Connect to the victim machine using SSH.\n2. Search for files with suspicious names or extensions.\n3. Identify the file named \"akira\" which is associated with the Akira ransomware.\n\n**Flag:** The filename of the suspicious payload file.\n\n**Hint:** Look for files with unusual names or extensions in the home directory of the victim machine.\n\n> **Critic revision**: flag at `/home/cyrano/akira` on `victim`. Flag placement is correct and consistent with the scenario design",
+      "solution": "To identify the suspicious payload file associated with the Akira ransomware, follow these steps:\n1. Connect to the victim machine using SSH.\n2. Search for files with suspicious names or extensions.\n3. Identify the file named \"akira\" which is associated with the Akira ransomware.\n\nThe file named \"akira\" is the suspicious payload file.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for files with unusual names or extensions in the home directory of the victim machine.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "ls -la /home/cyrano",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ls -la /home/cyrano",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Investigate the ransom note left by the Akira ransomware",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "RANSOM_NOTE.txt",
+      "answer_variable_name": null,
+      "content": "The Akira ransomware leaves a ransom note on infected systems. Your task is to locate and investigate this ransom note to understand the ransomware's demands and instructions.\n\n**Steps:**\n1. Connect to the victim machine using SSH.\n2. Search for files named \"RANSOM_NOTE.txt\" or similar.\n3. Read the contents of the ransom note to understand the ransomware's demands.\n\n**Flag:** The filename of the ransom note.\n\n**Hint:** The ransom note is typically placed in the home directory of the victim machine.\n\n> **Critic revision**: flag at `/home/cyrano/RANSOM_NOTE.txt` on `victim`. Flag placement is correct and consistent with the scenario design",
+      "solution": "To investigate the ransom note left by the Akira ransomware, follow these steps:\n1. Connect to the victim machine using SSH.\n2. Search for files named \"RANSOM_NOTE.txt\" or similar.\n3. Read the contents of the ransom note to understand the ransomware's demands.\n\nThe file named \"RANSOM_NOTE.txt\" is the ransom note.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "The ransom note is typically placed in the home directory of the victim machine.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "cat /home/cyrano/RANSOM_NOTE.txt",
+          "cmd_type": "bash-command",
+          "cmd_regex": "cat /home/cyrano/RANSOM_NOTE.txt",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the exfiltrated data from the victim machine",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/var/exfil/victim/.flag",
+      "answer_variable_name": null,
+      "content": "The Akira ransomware is known to exfiltrate data from infected systems. Your task is to identify the exfiltrated data on the exfiltration server.\n\n**Steps:**\n1. Connect to the exfiltration server using SSH.\n2. Search for directories or files that contain exfiltrated data.\n3. Identify the exfiltrated data and note its location.\n\n**Flag:** The filename or path of the exfiltrated data.\n\n**Hint:** The exfiltrated data is typically stored in a specific directory on the exfiltration server.\n\n> **Critic revision**: flag at `/var/exfil/victim/.flag` on `exfil-server`. Flag placement is correct and consistent with the scenario design",
+      "solution": "To identify the exfiltrated data from the victim machine, follow these steps:\n1. Connect to the exfiltration server using SSH.\n2. Search for directories or files that contain exfiltrated data.\n3. Identify the exfiltrated data and note its location.\n\nThe exfiltrated data is stored in the directory /var/exfil/victim/.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "The exfiltrated data is typically stored in a specific directory on the exfiltration server.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "ls -la /var/exfil/victim/",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ls -la /var/exfil/victim/",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}

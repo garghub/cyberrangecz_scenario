@@ -1,0 +1,9 @@
+---
+username: cyrano
+password: cyrano
+hosts_entries:
+- {ip: "192.168.90.5", name: "c2-server"}
+- {ip: "192.168.90.10", name: "victim"}
+- {ip: "192.168.90.20", name: "exfil-server"}
+exfil_dir: /var/exfil/victim
+exfil_flag: ""

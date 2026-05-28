@@ -1,0 +1,5 @@
+---
+- name: restart keysrv
+  systemd:
+    name: ransom-keysrv.service
+    state: restarted

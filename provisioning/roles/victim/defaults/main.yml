@@ -1,0 +1,28 @@
+---
+username: cyrano
+password: cyrano
+hosts_entries:
+- {ip: "192.168.90.5", name: "c2-server"}
+- {ip: "192.168.90.10", name: "victim"}
+- {ip: "192.168.90.20", name: "exfil-server"}
+packages_to_install:
+- openssh-server
+- openssl
+- netcat-openbsd
+- rsync
+files_to_copy:
+- quarterly_report.txt
+- employee_data.csv
+- passwords.txt
+victim_flag: ""
+files_to_create:
+- name: akira
+  content: "akira\n"
+- name: c9c94ac5e1991a7db42c7973e328fceeb6f163d9f644031bdfd4123c7b3898b0
+  content: "c9c94ac5e1991a7db42c7973e328fceeb6f163d9f644031bdfd4123c7b3898b0\n"
+- name: akira_readme.txt
+  content: "akira_readme.txt\n"
+flags:
+- dest: "/home/{{ username }}/flag1.txt"
+  owner: "{{ username }}"
+  content: "Flag1\n"

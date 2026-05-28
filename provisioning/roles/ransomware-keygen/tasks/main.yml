@@ -1,0 +1,36 @@
+---
+- name: Ensure openssl is installed
+  apt:
+    name: openssl
+    state: present
+    update_cache: yes
+
+- name: Generate AES-256 encryption key
+  command: openssl rand -hex 32
+  register: aes_key_result
+  changed_when: true
+
+- name: Expose key as host fact for use by subsequent plays
+  set_fact:
+    ransom_aes_key: "{{ aes_key_result.stdout }}"
+
+- name: Store root-only key backup on victim
+  copy:
+    dest: /root/.ransom_key_backup
+    content: "{{ ransom_aes_key }}\n"
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Write key transmission log (simulates C2 beacon)
+  copy:
+    dest: "{{ key_transmission_log }}"
+    owner: root
+    group: root
+    mode: '0600'
+    content: |
+      {{ ansible_date_time.iso8601 }} [RANSOM] INITIALISED host={{ ansible_hostname }}
+      {{ ansible_date_time.iso8601 }} [RANSOM] KEY_GENERATED length=64
+      {{ ansible_date_time.iso8601 }} [RANSOM] CONNECTING c2=c2-server port=4443
+      {{ ansible_date_time.iso8601 }} [RANSOM] KEY_TRANSMITTED status=OK
+      {{ ansible_date_time.iso8601 }} [RANSOM] C2_ACK received

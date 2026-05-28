@@ -1,0 +1,120 @@
+---
+- name: disable qxl
+  hosts:
+    - routers
+    - hosts
+  gather_facts: yes
+  become: yes
+  tasks:
+    - include_role:
+        name: disable-qxl
+      when: ansible_os_family == 'Debian'
+
+
+- name: set up victim
+  hosts: victim
+  become: yes
+  roles:
+    - name: victim
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: False
+
+- name: set up c2-server
+  hosts: c2-server
+  become: yes
+  roles:
+    - name: c2-server
+
+- name: set up exfil-server
+  hosts: exfil-server
+  become: yes
+  roles:
+    - name: exfil-server
+
+
+- name: Generate SSH key on victim and trust exfil-server
+  hosts: victim
+  become: yes
+  roles:
+    - role: ssh_access
+      vars:
+        ssh_user: cyrano
+        ssh_scan_hosts:
+          - exfil-server
+
+- name: Fetch cyrano public key to controller
+  hosts: victim
+  become: yes
+  tasks:
+    - name: Fetch public key from victim
+      fetch:
+        src: /home/cyrano/.ssh/id_ed25519.pub
+        dest: /tmp/ransomware_victim_pubkey
+        flat: yes
+
+- name: Authorize victim key on exfil-server
+  hosts: exfil-server
+  become: yes
+  tasks:
+    - name: Ensure cyrano exists
+      user:
+        name: cyrano
+        shell: /bin/bash
+        state: present
+
+    - name: Ensure .ssh directory exists
+      file:
+        path: /home/cyrano/.ssh
+        state: directory
+        owner: cyrano
+        group: cyrano
+        mode: "0700"
+
+    - name: Add victim public key to exfil-server
+      authorized_key:
+        user: cyrano
+        key: "{{ lookup('file', '/tmp/ransomware_victim_pubkey') }}"
+        state: present
+
+
+- name: Generate ransomware AES key on victim
+  hosts: victim
+  become: yes
+  roles:
+    - name: ransomware-keygen
+
+- name: Register decryption key on c2-server
+  hosts: c2-server
+  become: yes
+  roles:
+    - role: ransomware-keysrv
+      vars:
+        ransom_key: "{{ hostvars['victim'].ransom_aes_key }}"
+        listen_port: 4443
+
+
+- name: Exfiltrate victim data to exfil-server
+  hosts: victim
+  become: yes
+  roles:
+    - name: ransomware-exfil
+
+- name: Encrypt victim files and drop ransom note
+  hosts: victim
+  become: yes
+  roles:
+    - role: ransomware-encrypt
+      vars:
+        ransom_key: "{{ hostvars['victim'].ransom_aes_key }}"
+        c2_address: c2-server
+        c2_port: 4443
+
+
+- name: set up command logging
+  hosts: hosts
+  become: yes
+  roles:
+    - role: sandbox-logging
+      slf_destination_port: '{% if hostvars["man"] is defined -%} 514 {%- else -%} 515 {%- endif %}'
