@@ -1,0 +1,35 @@
+---
+- name: Add exfil user
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash("sha512") }}'
+    shell: '/bin/bash'
+    state: present
+
+- name: Add host aliases
+  lineinfile:
+    path: '/etc/hosts'
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Ensure victimuser exists for directory ownership
+  user:
+    name: victimuser
+    shell: /bin/bash
+    state: present
+
+- name: Create exfiltration data directory
+  file:
+    path: "{{ exfil_dir }}"
+    state: directory
+    owner: victimuser
+    group: victimuser
+    mode: "0755"
+
+- name: Place exfil flag (hidden alongside stolen data)
+  copy:
+    dest: "{{ exfil_dir }}/.flag"
+    owner: root
+    content: "{{ exfil_flag }}\n"
+    mode: '0600'

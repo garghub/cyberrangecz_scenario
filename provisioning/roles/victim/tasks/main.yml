@@ -1,0 +1,51 @@
+---
+- name: Add host aliases
+  lineinfile:
+    path: '/etc/hosts'
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Add victim user
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash("sha512") }}'
+    shell: '/bin/bash'
+    state: present
+
+- name: Install packages
+  apt:
+    name: "{{ packages_to_install }}"
+    state: present
+    update_cache: yes
+
+- name: Copy decoy documents
+  copy:
+    src: "{{ item }}"
+    dest: "/home/{{ username }}/{{ item }}"
+    owner: "{{ username }}"
+    mode: "0644"
+  loop: "{{ files_to_copy }}"
+
+- name: Create Payloads
+  copy:
+      dest: "/home/{{ username }}/{{ item.name }}"
+      content: "{{ item.content }}"
+      owner: "{{ username }}"
+      mode: "0644"
+  loop: "{{ files_to_create }}"
+
+- name: Place flags
+  copy:
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    content: "{{ item.content }}\n"
+    mode: '0600'
+  loop: "{{ flags }}"
+
+- name: Place flag file (encrypted by ransomware-encrypt role later)
+  copy:
+    dest: "/home/{{ username }}/flag.txt"
+    owner: "{{ username }}"
+    content: "{{ victim_flag }}\n"
+    mode: '0644'

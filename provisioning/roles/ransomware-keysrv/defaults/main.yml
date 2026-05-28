@@ -1,0 +1,5 @@
+---
+ransom_key: ""
+listen_port: 4443
+key_file: /root/.ransom-keys/victim_key.txt
+keysrv_log: /var/log/ransom-c2/keysrv.log

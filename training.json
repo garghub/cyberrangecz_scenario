@@ -1,0 +1,163 @@
+{
+  "title": "Akira Ransomware Investigation",
+  "description": "This exercise simulates an investigation of the Akira ransomware attack on a Linux network. The goal is to identify indicators of compromise, detect lateral movement, and recover exfiltrated data.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Identify C2 IP address",
+    "Identify Exfiltration IP address",
+    "Recover Exfiltrated Data"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "content": "Welcome to the Akira Ransomware Investigation scenario. Your mission is to investigate a ransomware attack on a Linux network and recover exfiltrated data."
+    },
+    {
+      "title": "Access Network",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Connect to the cloud sandbox using your preferred SSH client. The IP address of the victim host is provided in the topology.",
+      "local_content": "Access the local sandbox and log into the victim host using the provided credentials."
+    },
+    {
+      "title": "Identify C2 IP address",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "192.168.90.5",
+      "content": "Identify the IP address of the command and control (C2) server by analyzing network traffic logs or using tools like tcpdump. The C2 server's IP address is one of the MISP indicators.",
+      "solution": "Analyze pcap files with Wireshark, filter for outbound connections to port 4443 and look for the source IP matching the C2 server's IP from the MISP event.",
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Look for unusual outbound connections, especially those using SSH (sshd.exe) or other known C2 protocols.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint",
+          "content": "Check the network traffic logs for connections to port 4443 and look for the source IP matching the C2 server's IP from the MISP event.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "tcpdump_filter",
+          "prereq_state": [],
+          "cmd": "tcpdump -i eth0 port 4443 -w traffic.pcap",
+          "cmd_type": "bash-command",
+          "cmd_regex": "tcpdump.*port 4443.*-w.*traffic\\.pcap"
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify Exfiltration IP address",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "192.168.90.20",
+      "content": "Determine the IP address of the server used for data exfiltration during the ransomware attack. The exfiltration IP address is one of the MISP indicators.",
+      "solution": "Analyze pcap files with Wireshark, filter for outbound connections to port 4443 and look for the destination IP matching the exfil server's IP from the MISP event.",
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Look for unusual outbound connections, especially those using Rclone (Rclone.exe) or other known data exfiltration tools.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint",
+          "content": "Check the network traffic logs for connections to port 4443 and look for the destination IP matching the exfil server's IP from the MISP event.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "tcpdump_filter",
+          "prereq_state": [],
+          "cmd": "tcpdump -i eth0 port 4443 -w traffic.pcap",
+          "cmd_type": "bash-command",
+          "cmd_regex": "tcpdump.*port 4443.*-w.*traffic\\.pcap"
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Recover Exfiltrated Data",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "[MISP indicators]",
+      "content": "Recover the exfiltrated data from the sandbox environment and compare it with the original files to verify their integrity. The exfiltrated data includes quarterly_report.txt and employee_data.csv.",
+      "solution": "Use rsync or similar tool to retrieve the exfiltrated data from the exfil server, then compare the recovered data with the original files provided in the MISP event examples.",
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Look for hidden files or directories where the exfiltrated data might be stored (e.g., /home/cyrano/.flag).",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint",
+          "content": "Use rsync or similar tool to retrieve the exfiltrated data from the exfil server and compare it with the original files provided in the MISP event examples.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 15,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "rsync",
+          "prereq_state": [],
+          "cmd": "rsync -az exfil-server:/var/exfil/victim/ /local/path/to/recover",
+          "cmd_type": "bash-command",
+          "cmd_regex": "rsync.*exfil-server.*\\/var\\/exfil\\/victim\\/.*./local\\/path\\/to\\/recover"
+        },
+        {
+          "state_name": "compare_files",
+          "prereq_state": [
+            "quarterly_report.txt",
+            "employee_data.csv"
+          ],
+          "cmd": "diff quarterly_report.txt original_quarterly_report.txt && diff employee_data.csv original_employee_data.csv",
+          "cmd_type": "bash-command",
+          "cmd_regex": "diff.*quarterly_report\\.txt.*original_quarterly_report\\.txt.*&&.*diff.*employee_data\\.csv.*original_employee_data\\.csv"
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}
