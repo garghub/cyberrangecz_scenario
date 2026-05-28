@@ -1,0 +1,149 @@
+{
+  "title": "Kobalos Linux Trojan Investigation Exercise",
+  "description": "Defence-oriented Scenario, Intermediate, Incident Response Profile\nInvestigate a Kobalos Linux trojan infection in a high-performance computing infrastructure.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Usage of nmap",
+    "Usage of metasploit",
+    "Password cracking techniques"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "You are an incident responder tasked with investigating a Kobalos Linux trojan infection in a high-performance computing infrastructure. The initial access was gained via SSH bruteforce, and the payload was dropped to /tmp/.installer. The malware communicates with the command and control server at 151.80.57.191:7070 every 120 seconds."
+    },
+    {
+      "title": "Accessing the Sandbox",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "The sandbox consists of three hosts: c2-server, target, and next-target. Each host runs Ubuntu 20.04 LS and is connected via a network switch.\nYou will access the target host using SSH with the provided credentials.",
+      "local_content": "Use the provided credentials to log into the target host via SSH.\nUsername: cyrano\nPassword: cyrano"
+    },
+    {
+      "title": "Identify Compromised Host",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 5,
+      "minimal_possible_solve_time": null,
+      "answer": "/tmp/.installer",
+      "content": "Check for the presence of the Kobalos payload (/tmp/.installer).\nMISP Indicator: /tmp/.installer",
+      "solution": "Navigate to the target host and check if the file /tmp/.installer exists.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check for unusual network connections or processes running on the compromised host.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for suspicious files in common malware drop locations, such as /tmp, /var/spool, and /root.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 5,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "file_check",
+          "prereq_state": [],
+          "cmd": "ls -la /tmp/",
+          "cmd_type": "bash-command",
+          "cmd_regex": "/^.*\\.installer$/"
+        }
+      ]
+    },
+    {
+      "title": "Gather Evidence of Infection",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/var/log/auth.log or /var/log/syslog",
+      "content": "Collect logs and configuration files that may contain indicators of compromise.\nMISP Indicators: /var/log/auth.log, /var/log/syslog",
+      "solution": "Search for relevant log files, such as /var/log/auth.log or /var/log/syslog, and check for suspicious activity related to the Kobalos trojan.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check for unusual network connections or processes running on the compromised host.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for suspicious files in common malware drop locations, such as /tmp, /var/spool, and /root.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 5,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "log_search",
+          "prereq_state": [],
+          "cmd": "grep -i 'kobalos' /var/log/auth.log",
+          "cmd_type": "bash-command"
+        },
+        {
+          "state_name": "log_search",
+          "prereq_state": [],
+          "cmd": "grep -i 'kobalos' /var/log/syslog",
+          "cmd_type": "bash-command"
+        }
+      ]
+    },
+    {
+      "title": "Determine the Scope of the Attack",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "N/A (MISP Event does not provide specific lateral movement details)",
+      "content": "Investigate reachable hosts from the compromised host and check for signs of lateral movement or additional infections.\nMISP Indicator: N/A",
+      "solution": "Use tools like nmap, netstat, or dig to discover reachable hosts and examine their configurations for indicators of compromise.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check for unusual network connections or processes running on the compromised host.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for suspicious files in common malware drop locations, such as /tmp, /var/spool, and /root.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 5,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "nmap_scan",
+          "prereq_state": [],
+          "cmd": "nmap -sP 192.168.40.0/24",
+          "cmd_type": "bash-command"
+        }
+      ]
+    }
+  ],
+  "estimated_duration": 35,
+  "variant_sandboxes": false
+}
