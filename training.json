@@ -1,0 +1,172 @@
+{
+  "title": "Kobalos Linux Backdoor Investigation",
+  "description": "Investigate a Kobalos Linux backdoor on a target host, identify C2 server IP and port, and check for lateral movement.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Identify indicators of compromise (IOCs)",
+    "Analyze system logs and configuration files",
+    "Determine C2 server IP and port"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 5,
+      "content": "The provided MISP event describes a high confidence Linux/Kobalos backdoor that targets high performance computing infrastructure. The malware is portable to multiple operating systems, including Linux, BSD, Solaris, and possibly AIX and Windows."
+    },
+    {
+      "title": "Access Target Host",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 5,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Use the provided Ansible playbook to set up the target host with SSH access.",
+      "local_content": "Connect to the target host using SSH."
+    },
+    {
+      "title": "Analyze Target Host for IOCs",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "/var/log/auth.log",
+      "content": "Analyze the target host's logs, configuration files, and system state to identify any signs of malicious activity related to Kobalos.",
+      "solution": "Examine sshd logs for unusual connections, failed login attempts, or other suspicious activities. Check system files and configuration settings for any signs of malware presence or persistence mechanisms.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Start by examining the sshd logs for unusual connections, failed login attempts, or other suspicious activities.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Check system files and configuration settings for any signs of malware presence or persistence mechanisms.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "Check sshd logs",
+          "prereq_state": [],
+          "cmd": "cat /var/log/auth.log",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ssh.*failed.*|ssh.*unusual.*",
+          "optional": false
+        },
+        {
+          "state_name": "Check system files and configuration settings",
+          "prereq_state": [],
+          "cmd": "ls -la /etc/ssh",
+          "cmd_type": "bash-command",
+          "cmd_regex": ".*/passwd|.*/moduli|.*/sshd_config",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": true
+    },
+    {
+      "title": "Identify C2 Server IP and Port",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "151.80.57.191",
+      "content": "Verify that the obtained C2 IP address and port match those provided in the MISP event (151.80.57.191, 7070).",
+      "solution": "Analyze network traffic or system logs to find connections to the C2 server.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Examine network traffic for connections to the C2 server.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Check system logs for any malware-related artifacts that could provide clues about the C2 communication.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "Analyze network traffic",
+          "prereq_state": [],
+          "cmd": "tcpdump -i eth0 -n -vvv port 7070",
+          "cmd_type": "bash-command",
+          "cmd_regex": "151.80.57.191.*:7070",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": true
+    },
+    {
+      "title": "Check for Lateral Movement",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/var/log/auth.log",
+      "content": "Determine if there is lateral movement within the network by checking for signs of Kobalos activity on the next-target host.",
+      "solution": "Examine system files, configuration settings, and network traffic to find any signs of malicious activity related to Kobalos. Additionally, check for any unusual SSH connections between the target and next-target hosts.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Examine system files, configuration settings, and network traffic to find any signs of malicious activity related to Kobalos.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Check for any unusual SSH connections between the target and next-target hosts.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "Check system files and configuration settings",
+          "prereq_state": [],
+          "cmd": "ls -la /home/cyrano/next-target",
+          "cmd_type": "bash-command",
+          "cmd_regex": ".*/kobalos.*|.*/sshd_config",
+          "optional": false
+        },
+        {
+          "state_name": "Check for SSH connections",
+          "prereq_state": [],
+          "cmd": "grep cyrano /var/log/auth.log",
+          "cmd_type": "bash-command",
+          "cmd_regex": "cyrano.*next-target",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": true
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}

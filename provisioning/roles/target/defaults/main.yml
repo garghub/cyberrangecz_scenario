@@ -1,0 +1,21 @@
+---
+username: cyrano
+password: cyrano
+flag: ""
+flag_2: ""
+hosts_entries:
+- {ip: "192.168.50.5", name: "target"}
+- {ip: "192.168.40.5", name: "c2-server"}
+- {ip: "192.168.50.6", name: "next-target"}
+files_to_copy: []
+files_to_create:
+- name: bc49dd3da0b2cb1425a466a3d2f0ed41
+  content: "bc49dd3da0b2cb1425a466a3d2f0ed41\n"
+- name: bc49dd3da0b2cb1425a466a3d2f0ed41
+  content: "bc49dd3da0b2cb1425a466a3d2f0ed41\n"
+packages_to_install:
+- openssh-server
+flags:
+- dest: "/home/{{ username }}/flag1.txt"
+  owner: "{{ username }}"
+  content: "Flag1\n"
