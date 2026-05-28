@@ -1,0 +1,124 @@
+{
+  "title": "Kobalos Backdoor Investigation Exercise",
+  "description": "Investigate a Kobalos backdoor infection in our sandbox environment.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Identify initial access vector",
+    "Investigate lateral movement",
+    "Analyze command and control communication"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction to the Kobalos Backdoor Investigation Exercise",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "Welcome to the Kobalos Backdoor Investigation Exercise! Your mission is to investigate a suspected Kobalos backdoor infection in our sandbox environment. The malware has been observed targeting high-performance computing infrastructure and has been linked to various cyber attacks. You will be provided with access to the affected system, logs, and indicators of compromise (IOCs). Your goal is to identify the initial access vector, lateral movement, persistence mechanisms, and command and control (C2) communication."
+    },
+    {
+      "title": "Accessing the Sandbox Environment",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Connect to the target system using SSH and start your investigation.",
+      "local_content": "Use the provided credentials to access the sandbox environment."
+    },
+    {
+      "title": "Initial Access Vector Investigation",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/var/log/auth.log",
+      "content": "Analyze the logs on the Target system to identify the initial access vector used by the Kobalos backdoor. Look for SSH-related log entries indicating a brute force attack or unusual login activity.\n\n> **Critic revision**: flag at `see solution` on `Target`. This flag is correct and accessible on the Target host",
+      "solution": "Search for SSH log entries with failed attempts, unusual IP addresses, or suspicious usernames.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check the /var/log/auth.log file for any signs of brute force attacks.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for unusual IP addresses or usernames in the SSH log files.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "mitre_techniques": [],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Lateral Movement Investigation",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "/tmp/.installer",
+      "content": "Investigate the Target system for signs of lateral movement by the Kobalos backdoor. Look for any unusual file transfers or network connections.\n\n> **Critic revision**: flag at `see solution` on `Target`. This flag is correct and accessible on the Target host",
+      "solution": "Check for files with suspicious names or modified timestamps, and examine netstat output for active connections.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Look for any unusual file transfers on the Target system.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Examine netstat output for active connections on the Target system.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "mitre_techniques": [],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Command and Control (C2) Communication Investigation",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "151.80.57.191",
+      "content": "Analyze the Target system's network traffic to identify any communication with the Kobalos backdoor\u2019s command and control server.\n\n> **Critic revision**: flag at `see solution` on ``. This flag is correct and accessible through network traffic analysis",
+      "solution": "Look for outgoing connections on port 7070, which is known to be used by the Kobalos C2 server.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check the Target system's network traffic for any outgoing connections on port 7070.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Use tools like Wireshark or tcpdump to analyze the Target system's network traffic.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "mitre_techniques": [],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 45,
+  "variant_sandboxes": false
+}
