@@ -1,0 +1,174 @@
+{
+  "title": "BRICKSTORM Backdoor Investigation Exercise",
+  "description": "Investigate a suspected BRICKSTORM backdoor incident in a simulated lab environment.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Identify BRICKSTORM Backdoor Indicators of Compromise",
+    "Analyze BRICKSTORM Backdoor Behavior",
+    "Gather Evidence for Further Investigation"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction to the BRICKSTORM Backdoor Incident",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "Welcome to the BRICKSTORM Backdoor Investigation Exercise. Your mission is to investigate a suspected BRICKSTORM backdoor incident in a simulated lab environment. The BRICKSTORM backdoor is a Go-based malware that uses multiple techniques to maintain persistence on compromised systems, communicate with its command and control (C2) server using HTTPS and WebSocket protocols, and can download files from the C2 server or specific sections of a file from the compromised host."
+    },
+    {
+      "title": "Accessing the Lab Environment",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Connect to the lab environment using SSH with the provided credentials.",
+      "local_content": "The target system's IP address is 192.168.50.5. Use the username 'cyrano' and password 'cyrano' for authentication."
+    },
+    {
+      "title": "Identify BRICKSTORM Backdoor Indicators of Compromise",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "FLAG_REDACTED",
+      "content": "Search for indicators of compromise (IOCs) related to the BRICKSTORM backdoor on the target system. Use the `grep` command to search for known hashes in relevant log files and directories.\n\nHashes:\n- 0a4fa52803a389311a9ddc49b7b19138\n- 18f895e24fe1181bb559215ff9cf6ce3\n- 39111508bfde89ce6e0fe6abe0365552\n- 82bf31e7d768e6d4d3bc7c8c8ef2b358\n- 8e4c88d00b6eb46229a1ed7001451320\n- a02469742f7b0bc9a8ab5e26822b3fa8\n- a52e36a70b5e0307cbcaa5fd7c97882c\n- dbca28ad420408850a94d5c325183b28",
+      "solution": "Use the following command to search for the hashes in the /var/log/syslog file:\n\n`grep -E '(0a4fa52803a389311a9ddc49b7b19138|18f895e24fe1181bb559215ff9cf6ce3|39111508bfde89ce6e0fe6abe0365552|82bf31e7d768e6d4d3bc7c8c8ef2b358|8e4c88d00b6eb46229a1ed7001451320|a02469742f7b0bc9a8ab5e26822b3fa8|a52e36a70b5e0307cbcaa5fd7c97882c|dbca28ad420408850a94d5c325183b28)' /var/log/syslog`",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Look for the hashes in log files such as syslog or auth.log.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Use the `grep` command to search for the hashes in the log files.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "search_hashes",
+          "prereq_state": [],
+          "cmd": "grep -E '(0a4fa52803a389311a9ddc49b7b19138|18f895e24fe1181bb559215ff9cf6ce3|39111508bfde89ce6e0fe6abe0365552|82bf31e7d768e6d4d3bc7c8c8ef2b358|8e4c88d00b6eb46229a1ed7001451320|a02469742f7b0bc9a8ab5e26822b3fa8|a52e36a70b5e0307cbcaa5fd7c97882c|dbca28ad420408850a94d5c325183b28)' /var/log/syslog",
+          "cmd_type": "bash-command",
+          "cmd_regex": null,
+          "optional": false
+        }
+      ],
+      "expected_commands": [
+        "grep -E '(0a4fa52803a389311a9ddc49b7b19138|18f895e24fe1181bb559215ff9cf6ce3|39111508bfde89ce6e0fe6abe0365552|82bf31e7d768e6d4d3bc7c8c8ef2b358|8e4c88d00b6eb46229a1ed7001451320|a02469742f7b0bc9a8ab5e26822b3fa8|a52e36a70b5e0307cbcaa5fd7c97882c|dbca28ad420408850a94d5c325183b28)' /var/log/syslog"
+      ],
+      "commands_required": true
+    },
+    {
+      "title": "Analyze BRICKSTORM Backdoor Behavior",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "FLAG_REDACTED",
+      "content": "Investigate the behavior of the BRICKSTORM backdoor on the target system by analyzing its network traffic and processes. Use tools such as `tcpdump` or `netstat` to analyze network traffic, and `ps` or `pgrep` to list running processes. Look for signs of communication with the C2 server or lateral movement within the lab environment.\n\nNetwork traffic:\n- 172.16.13.10\n- 10.10.10.1\n- 8.8.8.8\ndomains:\n- brickstorm[.]com\n- evil-c2[.]com",
+      "solution": "Use the following commands to analyze network traffic and processes:\n\n`tcpdump -i eth0 -w /tmp/network_traffic.pcap &`\n`netstat -an | grep LISTEN`\n`ps aux | grep brickstorm`\n`pgrep -f evil-c2`",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Analyze network traffic using `tcpdump` or similar tools.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "List running processes related to the BRICKSTORM backdoor.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "analyze_network_traffic",
+          "prereq_states": [
+            "search_hashes"
+          ],
+          "cmd": "tcpdump -i eth0 -w /tmp/network_traffic.pcap & netstat -an | grep LISTEN ps aux | grep brickstorm pgrep -f evil-c2",
+          "cmd_type": "bash-command",
+          "cmd_regex": null,
+          "optional": false
+        }
+      ],
+      "expected_commands": [
+        "tcpdump -i eth0 -w /tmp/network_traffic.pcap",
+        "netstat -an",
+        "grep LISTEN",
+        "ps aux",
+        "grep brickstorm",
+        "pgrep -f evil-c2"
+      ],
+      "commands_required": true
+    },
+    {
+      "title": "Gather Evidence for Further Investigation",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "FLAG_REDACTED",
+      "content": "Collect evidence related to the BRICKSTORM backdoor incident for further analysis and reporting. This may include relevant log files, network captures, or malware samples.\n\nLog files:\n- /var/log/syslog\n- /var/log/auth.log\nNetwork captures:\n- /tmp/network_traffic.pcap",
+      "solution": "Use the following commands to copy relevant files from the target system to a secure location for further analysis:\n\n`scp user@target:/var/log/syslog .`\n`scp user@target:/var/log/auth.log .`\n`scp user@target:/tmp/network_traffic.pcap .`",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Copy relevant log files to a secure location.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Transfer the network capture file to your local machine.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "copy_log_files",
+          "prereq_states": [
+            "analyze_network_traffic"
+          ],
+          "cmd": "scp user@target:/var/log/syslog . scp user@target:/var/log/auth.log . scp user@target:/tmp/network_traffic.pcap .",
+          "cmd_type": "bash-command",
+          "cmd_regex": null,
+          "optional": false
+        }
+      ],
+      "expected_commands": [
+        "scp user@target:/var/log/syslog .",
+        "scp user@target:/var/log/auth.log .",
+        "scp user@target:/tmp/network_traffic.pcap ."
+      ],
+      "commands_required": true
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}
