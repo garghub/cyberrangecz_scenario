@@ -1,0 +1,71 @@
+---
+- name: Ensure SSH client is installed
+  apt:
+    name: openssh-client
+    state: present
+    update_cache: yes
+
+- name: Ensure SSH server is installed
+  apt:
+    name: openssh-server
+    state: present
+
+- name: Ensure SSH service is running
+  service:
+    name: ssh
+    state: started
+    enabled: yes
+
+- name: Ensure user exists
+  user:
+    name: "{{ ssh_user }}"
+    shell: /bin/bash
+    state: present
+
+- name: Ensure .ssh directory exists
+  file:
+    path: "{{ ssh_user_home }}/.ssh"
+    state: directory
+    owner: "{{ ssh_user }}"
+    group: "{{ ssh_user }}"
+    mode: "0700"
+
+- name: Generate SSH keypair
+  community.crypto.openssh_keypair:
+    path: "{{ ssh_user_home }}/.ssh/{{ ssh_key_filename }}"
+    type: "{{ ssh_key_type }}"
+    owner: "{{ ssh_user }}"
+    group: "{{ ssh_user }}"
+    mode: "0600"
+  when: ssh_generate_keypair | default(true)
+
+- name: Read generated public key
+  slurp:
+    src: "{{ ssh_user_home }}/.ssh/{{ ssh_key_filename }}.pub"
+  register: ssh_generated_pubkey
+
+- name: Expose decoded public key as fact
+  set_fact:
+    ssh_public_key_decoded: "{{ ssh_generated_pubkey.content | b64decode }}"
+
+- name: Scan SSH host keys
+  command: "ssh-keyscan -H -t {{ ssh_key_type }} {{ item }}"
+  register: ssh_keyscan_results
+  changed_when: false
+  loop: "{{ ssh_scan_hosts | default([]) }}"
+
+- name: Add scanned hosts to known_hosts
+  known_hosts:
+    path: "{{ ssh_user_home }}/.ssh/known_hosts"
+    name: "{{ item.item }}"
+    key: "{{ item.stdout }}"
+    state: present
+  loop: "{{ ssh_keyscan_results.results | default([]) }}"
+  when: item.stdout is defined and item.stdout != ''
+
+- name: Ensure .ssh directory ownership is correct
+  file:
+    path: "{{ ssh_user_home }}/.ssh"
+    owner: "{{ ssh_user }}"
+    group: "{{ ssh_user }}"
+    recurse: yes

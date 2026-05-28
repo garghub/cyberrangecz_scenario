@@ -1,0 +1,160 @@
+{
+  "title": "Kobalos Linux Backdoor Investigation",
+  "description": "Investigate a Kobalos Linux backdoor on a high-performance computing infrastructure.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Familiarity with SSH and OpenSSH server"
+  ],
+  "outcomes": [
+    "Identify suspicious services running on the target host",
+    "Investigate persistence mechanisms used by Kobalos",
+    "Detect data exfiltration by Kobalos"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 5,
+      "content": "Welcome to the Kobalos Linux Backdoor Investigation scenario. Your mission is to investigate a Kobalos backdoor on a high-performance computing infrastructure. You will be provided with access to the target host and some indicators of compromise (IOCs). Good luck!"
+    },
+    {
+      "title": "Access the Target Host",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "passkey": "start",
+      "cloud_content": "Connect to the cloud-based sandbox using SSH with the provided credentials.",
+      "local_content": "Access the local sandbox using SSH with the provided credentials."
+    },
+    {
+      "title": "Identify Suspicious Services Running on the Target Host",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "ss -al | grep sshd",
+      "content": "List the running services on the target host using `ss -al` and identify any unusual or malicious services. Look for well-known service names and their associated ports.",
+      "solution": "Use the command `ss -al` to list the running services. Look for the service named 'sshd' which is a common indicator of Kobalos.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Look for well-known service names and their associated ports.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Consider using the `grep` command to filter the output of `ss -al` for 'sshd'.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "list_running_services",
+          "prereq_state": [],
+          "cmd": "ss -al",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ss -al",
+          "optional": false
+        }
+      ],
+      "expected_commands": [
+        "ss -al"
+      ],
+      "commands_required": true
+    },
+    {
+      "title": "Investigate Persistence Mechanisms Used by Kobalos",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "/usr/sbin/sshd",
+      "content": "Investigate the target host to find out how Kobalos establishes persistence on the system. Look for unusual file paths, modified configuration files, or unexpected processes related to sshd.",
+      "solution": "Check the OpenSSH server executable (sshd) for any embedded malware or modifications that could indicate persistence. Use commands like `strings` and `file` to examine the binary.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Look for unusual file paths, modified configuration files, or unexpected processes related to sshd.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Use commands like `strings` and `file` to examine the binary for any embedded malware or modifications.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "examine_sshd",
+          "prereq_states": [
+            "list_running_services"
+          ],
+          "cmd": "strings /usr/sbin/sshd | grep -i 'Kobalos'",
+          "cmd_type": "bash-command",
+          "cmd_regex": "strings .*sshd.*|grep -i 'Kobalos'",
+          "optional": false
+        }
+      ],
+      "expected_commands": [
+        "strings /usr/sbin/sshd",
+        "grep -i 'Kobalos'"
+      ]
+    },
+    {
+      "title": "Detect Data Exfiltration by Kobalos",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "grep -i 'Failed' /var/log/auth.log | grep sshd",
+      "content": "Investigate the target host for any signs of data exfiltration by Kobalos, specifically focusing on SSH credentials. Look for unusual connections, failed login attempts, or unexpected user activity patterns.",
+      "solution": "Check log files related to SSH for unusual activity or unauthorized access attempts. Use commands like `grep` and `tail` to examine the logs.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Look for unexpected connections, failed login attempts, or unusual user activity patterns.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Use commands like `grep` and `tail` to examine the logs for signs of data exfiltration.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "examine_ssh_logs",
+          "prereq_states": [],
+          "cmd": "grep -i 'Failed' /var/log/auth.log | grep sshd",
+          "cmd_type": "bash-command",
+          "cmd_regex": "grep -i 'Failed.*sshd'",
+          "optional": false
+        }
+      ],
+      "expected_commands": [
+        "grep -i 'Failed' /var/log/auth.log",
+        "grep sshd"
+      ]
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}
