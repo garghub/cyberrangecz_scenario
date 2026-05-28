@@ -1,0 +1,5 @@
+---
+- name: restart c2 listener
+  systemd:
+    name: botnet-c2-listener.service
+    state: restarted

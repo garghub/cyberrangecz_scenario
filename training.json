@@ -1,0 +1,155 @@
+{
+  "title": "Mirai Botnet Investigation",
+  "description": "Investigate a Mirai botnet targeting Realtek and Huawei routers.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Identify suspicious beacon service",
+    "Identify suspicious flood service",
+    "Block C2 communication"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "content": "Welcome to the Mirai Botnet Investigation scenario. Your mission is to investigate a Mirai botnet targeting Realtek and Huawei routers."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the cloud sandbox using your provided credentials.",
+      "local_content": "Launch Vagrant to start the local sandbox."
+    },
+    {
+      "title": "Identify suspicious beacon service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "Hilix[0-9]+.sh",
+      "content": "Analyze network traffic on the `c2-server` host to identify a potential beaconing service used by the Mirai botnet.\n\nIndicators:\n- Process name: Hilix[0-9]+.sh\n- File or payload name: Hilix[0-9]+.sh",
+      "solution": "Use `netstat -an` to view active connections, then filter for the process name 'Hilix[0-9]+.sh'.",
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for unusual outbound connections or processes related to the malware indicators of compromise (IOCs).",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Check the `/var/log/syslog` or `/var/log/messages` for any suspicious activity related to the malware IOCs.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "active_connections",
+          "prereq_state": [],
+          "cmd": "netstat -an",
+          "cmd_type": "bash-command",
+          "cmd_regex": "netstat -an"
+        }
+      ],
+      "expected_commands": [
+        "netstat -an"
+      ]
+    },
+    {
+      "title": "Identify suspicious flood service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "flood.sh",
+      "content": "Investigate network traffic on the `bot1` and `bot2` hosts to identify a potential flood service used by the Mirai botnet for DDoS attacks.\n\nIndicators:\n- Process name: flood.sh",
+      "solution": "Use `netstat -an` to view active connections, then filter for the process name 'flood.sh'.",
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for unusual outbound connections or processes related to the malware indicators of compromise (IOCs).",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Check the `/var/log/syslog` or `/var/log/messages` for any suspicious activity related to the malware IOCs.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "active_connections",
+          "prereq_state": [],
+          "cmd": "netstat -an",
+          "cmd_type": "bash-command",
+          "cmd_regex": "netstat -an"
+        }
+      ],
+      "expected_commands": [
+        "netstat -an"
+      ]
+    },
+    {
+      "title": "Block C2 communication",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "80",
+      "content": "Configure a firewall rule on the `router` host to block communication between the botnet members (`bot1`, `bot2`) and the command-and-control server (`c2-server`).\n\nIndicators:\n- Port number associated with the blocked communication.",
+      "solution": "Use `iptables` to create a rule that blocks traffic from `bot1` and `bot2` to `c2-server` on port 80.",
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Use the C2 IP addresses provided in the MISP event as a starting point.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Consult the `iptables` documentation for more information on creating rules.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "firewall_rules",
+          "prereq_states": [
+            "active_connections"
+          ],
+          "cmd": "iptables -A INPUT -p tcp --dport 80 -s 192.168.70.10,192.168.70.11 -j DROP",
+          "cmd_type": "bash-command",
+          "cmd_regex": "iptables -A INPUT -p tcp --dport 80 -s 192\".*\\.70\\.1[01] -j DROP"
+        }
+      ],
+      "expected_commands": [
+        "iptables -A INPUT -p tcp --dport 80 -s 192.168.70.10,192.168.70.11 -j DROP"
+      ]
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}
