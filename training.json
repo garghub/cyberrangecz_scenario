@@ -1,0 +1,136 @@
+{
+  "title": "Kobalos Linux Trojan Investigation Exercise",
+  "description": "Investigate a complex Linux threat targeting high performance computing infrastructure named Kobalos.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Analyze the provided sandbox environment, MISP event, and security profile to identify and investigate the Kobalos Linux Trojan.",
+    "Identify the location where the Kobalos payload has been dropped on the target host.",
+    "Investigate the target host for signs of this persistence mechanism.",
+    "Identify the IP address of the Command & Control server used by the Kobalos Linux Trojan."
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction to the Kobalos Linux Trojan Investigation",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "Welcome to the Kobalos Linux Trojan Investigation exercise. Your mission is to investigate a complex Linux threat targeting high performance computing infrastructure named Kobalos. We have provided you with a sandbox environment and MISP event containing indicators of compromise (IOCs) related to this malware."
+    },
+    {
+      "title": "Accessing the Sandbox Environment",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Use the provided credentials to connect to the target host via SSH.",
+      "local_content": "The target host is running Ubuntu and has been compromised by the Kobalos Linux Trojan. You will use SSH to access the target host with the provided credentials."
+    },
+    {
+      "title": "Identify Kobalos Payload Drop Location",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/tmp/.installer",
+      "content": "ls -la /tmp\nFind the Kobalos payload drop location.",
+      "solution": "The Kobalos payload is dropped in the /tmp directory. Look for files with suspicious names related to the Kobalos Trojan, such as /tmp/.installer.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Look for files with suspicious names related to the Kobalos Trojan in common directories such as /tmp, /var/tmp, or /home/user/.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "list_files",
+          "prereq_state": [],
+          "cmd": "ls -la /tmp",
+          "cmd_type": "bash-command",
+          "cmd_regex": "^.*\\/tmp\\/.installer.*$"
+        }
+      ],
+      "expected_commands": [
+        "ls -la /tmp"
+      ]
+    },
+    {
+      "title": "Investigate Kobalos Persistence Mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/etc/ld.so.preload",
+      "content": "strings /etc/ld.so.preload | grep LD_PRELOAD\nInvestigate the target host for signs of this persistence mechanism.",
+      "solution": "The Kobalos Linux Trojan is known for using various persistence mechanisms, one common technique is to use LD_PRELOAD to inject malicious code into legitimate processes. Check for the presence of LD_PRELOAD strings in the /etc/ld.so.preload file.",
+      "hints": [
+        {
+          "title": "Hint 2",
+          "content": "Check for the presence of LD_PRELOAD strings in the /etc/ld.so.preload file.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "check_ld_so_preload",
+          "prereq_state": [],
+          "cmd": "strings /etc/ld.so.preload | grep LD_PRELOAD",
+          "cmd_type": "bash-command",
+          "cmd_regex": "LD_PRELOAD"
+        }
+      ],
+      "expected_commands": [
+        "strings /etc/ld.so.preload",
+        "grep LD_PRELOAD"
+      ]
+    },
+    {
+      "title": "Identify Kobalos C2 Communication",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "7070",
+      "content": "netstat -an | grep 7070\nIdentify the IP address of the Command & Control server used by the Kobalos Linux Trojan.",
+      "solution": "The Kobalos Linux Trojan is known to communicate with its Command & Control server over a specific port. Investigate the target host for signs of this communication.",
+      "hints": [
+        {
+          "title": "Hint 3",
+          "content": "Look for open network connections on port 7070 using the `netstat` command.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "check_c2_communication",
+          "prereq_state": [],
+          "cmd": "netstat -an | grep 7070",
+          "cmd_type": "bash-command",
+          "cmd_regex": "^.*:7070.*"
+        }
+      ],
+      "expected_commands": [
+        "netstat -an",
+        "grep 7070"
+      ]
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}

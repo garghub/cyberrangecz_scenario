@@ -1,0 +1,38 @@
+---
+username: cyrano
+password: cyrano
+flag: ""
+flag_2: ""
+hosts_entries:
+- {ip: "192.168.50.5", name: "target"}
+- {ip: "192.168.40.5", name: "c2-server"}
+- {ip: "192.168.50.6", name: "next-target"}
+files_to_copy: []
+files_to_create:
+- name: /tmp/.installer
+  content: "# Planted artifact: /tmp/.installer\n"
+- name: 2c693d26ba9df26edf77557c1a709528.hash
+  content: "2c693d26ba9df26edf77557c1a709528\n"
+- name: 4e52980f06f211668df959175d6c3d58.hash
+  content: "4e52980f06f211668df959175d6c3d58\n"
+- name: 7538d0ec96869fd53d7c613a108846c0.hash
+  content: "7538d0ec96869fd53d7c613a108846c0\n"
+- name: 87837cc81c346e2a38ab1fe5e4826af2.hash
+  content: "87837cc81c346e2a38ab1fe5e4826af2\n"
+- name: bc49dd3da0b2cb1425a466a3d2f0ed41.hash
+  content: "bc49dd3da0b2cb1425a466a3d2f0ed41\n"
+- name: f54ba4ac2eeb5c12a513872acabecbc6.hash
+  content: "f54ba4ac2eeb5c12a513872acabecbc6\n"
+- name: 1dd0edc5744d63a731db8c3b42efbd09d91fed78.hash
+  content: "1dd0edc5744d63a731db8c3b42efbd09d91fed78\n"
+- name: 325f24e8f5d56db43d6914d9234c08c888cdae50.hash
+  content: "325f24e8f5d56db43d6914d9234c08c888cdae50\n"
+packages_to_install:
+- openssh-server
+flags:
+- dest: "/home/{{ username }}/flag1.txt"
+  owner: "{{ username }}"
+  content: "Flag1\n"
+- dest: "/home/{{ username }}/flag2.txt"
+  owner: "{{ username }}"
+  content: "Flag2\n"
