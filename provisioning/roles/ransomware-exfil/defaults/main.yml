@@ -1,0 +1,8 @@
+---
+username: cyrano
+ssh_key_path: /home/cyrano/.ssh/id_ed25519
+exfil_host: exfil-server
+exfil_user: cyrano
+exfil_path: /var/exfil/victim/
+source_path: /home/cyrano/
+exfil_log: /var/log/ransom-exfil.log

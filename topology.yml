@@ -1,0 +1,51 @@
+name: ransomware
+
+hosts:
+  - name: c2-server
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: victim
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: exfil-server
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+routers:
+  - name: router
+    base_box:
+      image: debian-12-x86_64
+      man_user: debian
+    flavor: standard.small
+
+networks:
+  - name: ransomware-switch
+    cidr: 192.168.90.0/24
+
+net_mappings:
+  - host: c2-server
+    network: ransomware-switch
+    ip: 192.168.90.5
+
+  - host: victim
+    network: ransomware-switch
+    ip: 192.168.90.10
+
+  - host: exfil-server
+    network: ransomware-switch
+    ip: 192.168.90.20
+
+router_mappings:
+  - router: router
+    network: ransomware-switch
+    ip: 192.168.90.1
+
+groups: []

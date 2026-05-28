@@ -1,0 +1,28 @@
+---
+username: cyrano
+password: cyrano
+hosts_entries:
+- {ip: "192.168.90.5", name: "c2-server"}
+- {ip: "192.168.90.10", name: "victim"}
+- {ip: "192.168.90.20", name: "exfil-server"}
+packages_to_install:
+- openssh-server
+- openssl
+- netcat-openbsd
+- rsync
+files_to_copy:
+- quarterly_report.txt
+- employee_data.csv
+- passwords.txt
+victim_flag: ""
+files_to_create:
+- name: Akira ransomware encryptor (Win.exe)
+  content: "Akira ransomware encryptor (Win.exe)\n"
+- name: 3298d203c2acb68c474e5fdad8379181890b4403d6491c523c13730129be3f75
+  content: "3298d203c2acb68c474e5fdad8379181890b4403d6491c523c13730129be3f75\n"
+- name: AnyDesk.exe
+  content: "AnyDesk.exe\n"
+flags:
+- dest: "/home/{{ username }}/flag1.txt"
+  owner: "{{ username }}"
+  content: "Flag1\n"

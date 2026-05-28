@@ -1,0 +1,9 @@
+---
+username: cyrano
+encrypt_dir: /home/cyrano
+ransom_key: ""
+c2_address: c2-server
+c2_port: 4443
+ransom_note_path: /home/cyrano/RANSOM_NOTE.txt
+encrypt_log: /var/log/ransom-encrypt.log
+ransomware_script_path: /tmp/.crypt_agent

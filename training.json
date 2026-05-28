@@ -1,0 +1,148 @@
+{
+  "title": "Akira Ransomware Investigation",
+  "description": "Investigate an Akira Ransomware incident in a sandboxed environment.",
+  "prerequisites": [
+    "Basic Linux skills",
+    "Familiarity with network traffic analysis"
+  ],
+  "outcomes": [
+    "Identify C2 server IP and port",
+    "Locate ransomware payload file",
+    "Analyze network traffic for suspicious activity"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 5,
+      "content": "Welcome to the Akira Ransomware Investigation scenario. Your goal is to identify and investigate an instance of the Akira Ransomware in a sandboxed environment."
+    },
+    {
+      "title": "Access Sandbox",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "passkey": "start",
+      "cloud_content": "Connect to the cloud sandbox using your preferred SSH client. The credentials are provided in the Ansible configuration files.",
+      "local_content": "Start a local VM using Vagrant and access it via SSH with the provided credentials."
+    },
+    {
+      "title": "Identify C2 Server IP",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "content": "Analyze network traffic from the victim host to identify the IP address of the C2 server.",
+      "solution": "Use tools like tcpdump or Wireshark to capture and analyze network traffic. Look for connections to an unknown IP address on port 443 or other common ransomware ports.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check the victim host's firewall logs for outbound connections.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Use nmap to scan for open ports on the victim host and identify potential C2 servers.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "nmap_scan",
+          "prereq_state": [],
+          "cmd": "nmap -p 443 -sS victim",
+          "cmd_type": "bash-command",
+          "cmd_regex": "nmap -p 443 -sS victim"
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false,
+      "answer": "192.168.90.5"
+    },
+    {
+      "title": "Identify C2 Server Port",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "content": "Determine the port number used by the Akira Ransomware for communication with its C2 server.",
+      "solution": "Analyze network traffic from the victim host to identify the port number used for communication with the C2 server. Common ransomware ports include 443, 80, and 5671.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check the victim host's firewall logs for outbound connections on common ransomware ports.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Use Wireshark to capture and analyze network traffic, then filter by the IP address of the C2 server to find the port number.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "wireshark_filter",
+          "prereq_state": [
+            "identify_c2_server_ip"
+          ],
+          "cmd": "tshark -i eth0 -Y \"tcp.port==443 && ip.src_host==192.168.90.5\"",
+          "cmd_type": "bash-command",
+          "cmd_regex": "tshark -i eth0 -Y \"tcp.port==443 && ip.src_host==192\u00a0168\u00a090\u00a0\\.5\""
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false,
+      "answer": "443"
+    },
+    {
+      "title": "Locate Ransomware Payload",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 15,
+      "content": "Find the filename of the Akira Ransomware payload on the victim host.",
+      "solution": "Use tools like find or ls to search for executable files with unusual names or hashes that were dropped by the ransomware. Look for files with known indicators from the MISP event.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check the victim host's file system for executable files with unusual names or hashes.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Use the MISP event indicators to search for known ransomware files on the victim host.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "find_files",
+          "prereq_state": [],
+          "cmd": "find / -type f -perm +111 -exec md5sum {} \\; | grep -E '3298d203c2acb68c474e5fdad8379181890b4403d6491c523c13730129be3f75'",
+          "cmd_type": "bash-command",
+          "cmd_regex": "find / -type f -perm +111 -exec md5sum {} \\; | grep -E '3298d203c2acb68c474e5fdad8379181890b4403d6491c523c13730129be3f75'"
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false,
+      "answer": "Akira ransomware encryptor (Win.exe)"
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}
