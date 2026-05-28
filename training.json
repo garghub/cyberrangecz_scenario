@@ -1,0 +1,159 @@
+{
+  "title": "BRICKSTORM Backdoor Investigation",
+  "description": "This exercise focuses on investigating a BRICKSTORM backdoor infection in a Linux environment. The goal is to identify indicators of compromise, detect malicious activities, and contain the threat.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Identify suspicious service running on the target host",
+    "Detect lateral movement between hosts",
+    "Contain C2 communication"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "content": "Scenario Name: BRICKSTORM Backdoor Investigation\nDescription: This exercise focuses on investigating a BRICKSTORM backdoor infection in a Linux environment. The goal is to identify indicators of compromise, detect malicious activities, and contain the threat."
+    },
+    {
+      "title": "Access Level",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the sandboxed environment using the provided Ansible playbook.\nHost: c2-server\nUsername: cyrano\nPassword: cyrano",
+      "local_content": "Connect to the target host (192.168.50.5) and next-target host (192.168.50.6) using SSH with the provided credentials."
+    },
+    {
+      "title": "Identify suspicious service running on the target host",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "unknown",
+      "content": "The malware's hash: 57bd98dbb5a00e54f07ffacda1fea91451a0c0b532cd7d570e98ce2ff741c21d",
+      "solution": "Use the `ps aux` command to list all processes. Search for the malware's hash (57bd98dbb5a00e54f07ffacda1fea91451a0c0b532cd7d570e98ce2ff741c21d) in the executable file name. The process name should be returned.",
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "The malware's hash is embedded within the executable file name.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "list_processes",
+          "prereq_state": [],
+          "cmd": "ps aux",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ps aux",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Detect lateral movement between hosts",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "[redacted]",
+      "content": "[redacted]",
+      "solution": "Use the `netstat -tuln` command to check open connections between the target (192.168.50.5) and next-target (192.168.50.6) hosts.\nLook for any unusual traffic patterns or signs of file transfers using tools like `rsync`.",
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "The malware may use a custom service or protocol for communication.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "max_score": 15,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "check_connections",
+          "prereq_states": [
+            "list_processes"
+          ],
+          "cmd": "netstat -tuln",
+          "cmd_type": "bash-command",
+          "cmd_regex": "netstat -tuln",
+          "optional": false
+        },
+        {
+          "state_name": "check_file_transfers",
+          "prereq_states": [
+            "list_processes"
+          ],
+          "cmd": "rsync --help",
+          "cmd_type": "bash-command",
+          "cmd_regex": "rsync --help",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": true
+    },
+    {
+      "title": "Contain C2 communication",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 5,
+      "minimal_possible_solve_time": null,
+      "answer": "[redacted]",
+      "content": "[redacted]",
+      "solution": "Use `iptables` to create a rule that denies incoming traffic from the C2 IP address ([redacted]) on the specified port ([redacted]).",
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "The C2 IP address and port are provided in the MISP event.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "max_score": 5,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "get_c2_ip_port",
+          "prereq_states": [
+            "list_processes"
+          ],
+          "cmd": "grep -E 'C2 IP|C2 port' /path/to/misp_event.json",
+          "cmd_type": "bash-command",
+          "cmd_regex": "grep -E 'C2 IP|C2 port' /path/to/misp_event.json",
+          "optional": false
+        },
+        {
+          "state_name": "block_c2_traffic",
+          "prereq_states": [
+            "get_c2_ip_port"
+          ],
+          "cmd": "iptables -A INPUT -s [redacted] -p tcp --dport [redacted] -j DROP",
+          "cmd_type": "bash-command",
+          "cmd_regex": "iptables -A INPUT -s [redacted] -p tcp --dport [redacted] -j DROP",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": true
+    }
+  ],
+  "estimated_duration": 30,
+  "variant_sandboxes": false
+}
