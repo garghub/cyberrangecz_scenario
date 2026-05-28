@@ -1,0 +1,150 @@
+{
+  "title": "Kobalos Backdoor Investigation",
+  "description": "Investigate a Kobalos backdoor on a target host and identify its indicators of compromise.",
+  "prerequisites": [
+    "Basic Linux command line skills",
+    "Understanding of network protocols"
+  ],
+  "outcomes": [
+    "Identify running services",
+    "Analyze network connections",
+    "Locate malicious files"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 5,
+      "content": "Welcome to the Kobalos Backdoor Investigation scenario. Your goal is to identify a Kobalos backdoor on a target host and locate its indicators of compromise."
+    },
+    {
+      "title": "Access the Target Host",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "access",
+      "cloud_content": "Connect to the cloud-based sandbox using SSH with the provided credentials.",
+      "local_content": "Start your local virtual machine and connect to it via SSH."
+    },
+    {
+      "title": "Identify Running Services",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "sshd",
+      "content": "List the running services on the target host and identify the service named 'sshd'.",
+      "solution": "Use the `netstat` command to list open network connections and find the service named 'sshd'.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Try using the `netstat -tuln` command.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for a service listening on port 22 (default SSH port).",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "list_services",
+          "prereq_state": [],
+          "cmd": "netstat -tuln",
+          "cmd_type": "bash-command",
+          "cmd_regex": "^tcp.*:22.*sshd.*LISTEN",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": true
+    },
+    {
+      "title": "Locate Malicious Files",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "e094dd02cc954b6104791925e0d1880782b046cf",
+      "content": "Find the file named 'e094dd02cc954b6104791925e0d1880782b046cf' on the target host.",
+      "solution": "Use the `find` command to search for the specified file name.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Try using the `find / -name e094dd02cc954b6104791925e0d1880782b046cf` command.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for the file in common directories such as /usr/bin or /etc.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "find_file",
+          "prereq_state": [],
+          "cmd": "find / -name e094dd02cc954b6104791925e0d1880782b046cf",
+          "cmd_type": "bash-command",
+          "cmd_regex": "/home/cyrano/e094dd02cc954b6104791925e0d1880782b046cf",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": true
+    },
+    {
+      "title": "Analyze Network Connections",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "151.80.57.191",
+      "content": "Identify any outbound SSH connections from the target host to the IP address '151.80.57.191'.",
+      "solution": "Use the `ss` command to list open network connections and find SSH connections to the specified IP address.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Try using the `ss -tuln` command.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Look for an SSH connection with destination IP '151.80.57.191'.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "list_connections",
+          "prereq_state": [],
+          "cmd": "ss -tuln",
+          "cmd_type": "bash-command",
+          "cmd_regex": "^tcp.*:22.*151.80.57.191.*ESTABLISHED",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": true
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}

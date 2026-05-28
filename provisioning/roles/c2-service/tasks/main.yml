@@ -1,0 +1,67 @@
+---
+- name: Install netcat
+  apt:
+    name: netcat-openbsd
+    state: present
+    update_cache: yes
+
+- name: Ensure client user exists
+  user:
+    name: "{{ client_user }}"
+    shell: /bin/bash
+    state: present
+
+- name: Create periodic check-in script
+  copy:
+    dest: "{{ connect_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      sleep $((RANDOM % {{ ((random_delay_seconds | default(0) | int) + 1) }}))
+      OUTPUT_FILE="{{ connect_output_path | default('/home/' ~ client_user ~ '/connect_data.log') }}"
+      RESPONSE=$(printf "%s\n" {{ connect_message | quote }} | nc -w 5 {{ connect_host | quote }} {{ connect_port | int }} 2>/dev/null)
+      if [ -n "$RESPONSE" ]; then
+        echo "---- $(date) ----" >> "$OUTPUT_FILE"
+        echo "$RESPONSE" >> "$OUTPUT_FILE"
+      fi
+
+- name: Create systemd service
+  copy:
+    dest: "/etc/systemd/system/{{ connect_service_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Lab periodic outbound check-in
+      After=network-online.target
+      Wants=network-online.target
+      [Service]
+      Type=oneshot
+      ExecStart={{ connect_script_path }}
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create systemd timer
+  copy:
+    dest: "/etc/systemd/system/{{ connect_timer_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Run lab periodic outbound check-in
+      [Timer]
+      OnCalendar={{ connect_schedule }}
+      Persistent=true
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable and start timer
+  systemd:
+    name: "{{ connect_timer_unit }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes
