@@ -1,0 +1,137 @@
+{
+  "title": "Kobalos Linux Backdoor Investigation",
+  "description": "Investigate a high confidence MISP event about a complex Linux backdoor named Kobalos, targeting high performance computing infrastructure.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Identify suspicious service",
+    "Investigate persistence mechanism",
+    "Identify malicious services"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "The scenario is based on a high confidence MISP event about a complex Linux backdoor named Kobalos, targeting high performance computing infrastructure. The malware is known to be portable to Linux, BSD, Solaris, and possibly AIX and Windows. It communicates with its Command and Control (C2) server over SSH on port 7070 using the IP address 151.80.57.191."
+    },
+    {
+      "title": "Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Connect to the sandbox using SSH as user cyrano with password cyrano.",
+      "local_content": "Set up your local environment for accessing the sandbox."
+    },
+    {
+      "title": "Identify/investigate/detect suspicious service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 5,
+      "minimal_possible_solve_time": null,
+      "answer": "sshd",
+      "content": "Determine if the sshd service is running on the target host.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Use the ss command to list open network connections and services.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "check_sshd",
+          "prereq_state": [],
+          "cmd": "ss -tuln | grep sshd",
+          "cmd_type": "bash-command",
+          "cmd_regex": ".*sshd.*"
+        }
+      ],
+      "expected_commands": [
+        "ss -tuln",
+        "grep sshd"
+      ]
+    },
+    {
+      "title": "Identify/investigate/detect persistence mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 5,
+      "minimal_possible_solve_time": null,
+      "answer": "73576d5a21ec2f164fe37bea86964e18dca1b800a8c7a104223cc35d74e7bd58",
+      "content": "Investigate how Kobalos establishes persistence on the target host.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Look for signs of the malware embedded in OpenSSH server executable (sshd) or stand-alone variants that connect to a C&C server or wait for an inbound connection on a given TCP port.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "check_modified_sshd",
+          "prereq_states": [
+            "check_sshd"
+          ],
+          "cmd": "md5sum /usr/bin/sshd | grep -q '73576d5a21ec2f164fe37bea86964e18dca1b800a8c7a104223cc35d74e7bd58'",
+          "cmd_type": "bash-command",
+          "cmd_regex": ".*73576d5a21ec2f164fe37bea86964e18dca1b800a8c7a104223cc35d74e7bd58.*"
+        }
+      ],
+      "expected_commands": [
+        "md5sum",
+        "grep"
+      ]
+    },
+    {
+      "title": "Identify/investigate/detect malicious services",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "Unexpected service",
+      "content": "Determine if there are any other suspicious services running on the target host that could be related to Kobalos.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Use netstat or ss commands to list open network connections and services.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "reference_solution": [
+        {
+          "state_name": "check_unusual_services",
+          "prereq_states": [
+            "check_modified_sshd"
+          ],
+          "cmd": "netstat -tuln | grep -vE '(ssh|http|https)'",
+          "cmd_type": "bash-command",
+          "cmd_regex": ".*unusual service.*"
+        }
+      ],
+      "expected_commands": [
+        "netstat",
+        "grep"
+      ]
+    }
+  ],
+  "estimated_duration": 30,
+  "variant_sandboxes": false
+}

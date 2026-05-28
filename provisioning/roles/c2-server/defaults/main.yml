@@ -1,0 +1,9 @@
+---
+username: cyrano
+password: cyrano
+flag: ""
+flag_2: ""
+hosts_entries:
+- {ip: "192.168.50.5", name: "target"}
+- {ip: "192.168.40.5", name: "c2-server"}
+- {ip: "192.168.50.6", name: "next-target"}
