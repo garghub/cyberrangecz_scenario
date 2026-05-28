@@ -1,0 +1,152 @@
+{
+  "title": "Kobalos Linux Backdoor Investigation",
+  "description": "Investigate a Kobalos Linux backdoor on a target host and identify its C2 IP address, port, and exfiltrated data.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Familiarity with SSH and network traffic analysis"
+  ],
+  "outcomes": [
+    "Identify the C2 IP address and port for a Kobalos Linux backdoor",
+    "Locate exfiltrated data from the Kobalos malware",
+    "Analyze network traffic to identify suspicious activity"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 2,
+      "content": "Welcome to the Kobalos Linux Backdoor Investigation scenario. Your goal is to investigate a Kobalos backdoor on a target host and identify its C2 IP address, port, and exfiltrated data."
+    },
+    {
+      "title": "Access Target Host",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the target host using SSH with the provided credentials.",
+      "local_content": "Connect to the target host via SSH using the following command:\n\n`ssh cyrano@192.168.50.5`"
+    },
+    {
+      "title": "Identify C2 IP Address",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 5,
+      "minimal_possible_solve_time": null,
+      "answer": "151.80.57.191",
+      "content": "Use netstat or tcpdump to identify the C2 IP address for the Kobalos backdoor.",
+      "solution": "To find the C2 IP address, use the following command:\n\n`netstat -an | grep LISTEN | grep 7070`",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check for open connections on port 7070.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Use netstat to view network connections and look for the Kobalos backdoor's C2 IP address.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "Check C2 IP",
+          "prereq_state": [],
+          "cmd": "netstat -an | grep LISTEN | grep 7070",
+          "cmd_type": "bash-command",
+          "cmd_regex": "netstat -an | grep LISTEN | grep 7070",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": true
+    },
+    {
+      "title": "Identify C2 Port",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 3,
+      "minimal_possible_solve_time": null,
+      "answer": "7070",
+      "content": "Determine the C2 port for the Kobalos backdoor.",
+      "solution": "To find the C2 port, use the following command:\n\n`netstat -an | grep LISTEN | grep 151.80.57.191`",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Look for the C2 IP address in the output of netstat.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Find the port number associated with the C2 IP address.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "Check C2 Port",
+          "prereq_state": [],
+          "cmd": "netstat -an | grep LISTEN | grep 151.80.57.191",
+          "cmd_type": "bash-command",
+          "cmd_regex": "netstat -an | grep LISTEN | grep 151.80.57.191",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": true
+    },
+    {
+      "title": "Identify Exfiltrated Data",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 5,
+      "minimal_possible_solve_time": null,
+      "content": "Locate the exfiltrated data from the Kobalos malware.",
+      "solution": "To find the exfiltrated data, look for unusual file transfers or suspicious activity on the target host, focusing on SSH credentials as a potential target of the Kobalos malware.",
+      "hints": [
+        {
+          "title": "Hint 1",
+          "content": "Check for unusual file transfers or suspicious activity on the target host.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Hint 2",
+          "content": "Focus on SSH credentials as a potential target of the Kobalos malware.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 3,
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "Check Exfiltrated Data",
+          "prereq_state": [],
+          "cmd": "",
+          "cmd_type": "manual",
+          "cmd_regex": "",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 20,
+  "variant_sandboxes": false
+}
