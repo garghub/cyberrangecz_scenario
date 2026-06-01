@@ -1,0 +1,849 @@
+data.openstack_images_image_ids_v2.image_data_source-default-p0000000028-s0000000026-router: Reading...
+data.openstack_images_image_ids_v2.image_data_source-default-p0000000028-s0000000026-exfil-server: Reading...
+data.openstack_networking_network_v2.base-net: Reading...
+data.openstack_images_image_ids_v2.image_data_source-default-p0000000028-s0000000026-man: Reading...
+data.openstack_images_image_ids_v2.image_data_source-default-p0000000028-s0000000026-victim: Reading...
+data.openstack_images_image_ids_v2.image_data_source-default-p0000000028-s0000000026-c2-server: Reading...
+data.openstack_networking_secgroup_v2.sandbox-internal-sg: Reading...
+data.openstack_networking_secgroup_v2.sandbox-man-sg: Reading...
+data.openstack_networking_secgroup_v2.sandbox-man-int-sg: Reading...
+data.openstack_networking_secgroup_v2.sandbox-access-sg: Reading...
+data.openstack_images_image_ids_v2.image_data_source-default-p0000000028-s0000000026-exfil-server: Read complete after 0s [id=2215401803]
+data.openstack_images_image_ids_v2.image_data_source-default-p0000000028-s0000000026-router: Read complete after 0s [id=3718318825]
+data.openstack_images_image_ids_v2.image_data_source-default-p0000000028-s0000000026-victim: Read complete after 0s [id=2215401803]
+data.openstack_images_image_ids_v2.image_data_source-default-p0000000028-s0000000026-c2-server: Read complete after 0s [id=2215401803]
+data.openstack_images_image_ids_v2.image_data_source-default-p0000000028-s0000000026-man: Read complete after 0s [id=2215401803]
+data.openstack_networking_secgroup_v2.sandbox-man-sg: Read complete after 0s [id=d318bcac-a977-4da2-a36c-6fc646adfd56]
+data.openstack_networking_secgroup_v2.sandbox-man-int-sg: Read complete after 0s [id=c0f8ada3-ea6b-4204-8e6b-03fb49be5ab5]
+data.openstack_networking_secgroup_v2.sandbox-internal-sg: Read complete after 0s [id=0a14006d-c778-45be-9747-18bb05e2c46f]
+data.openstack_networking_secgroup_v2.sandbox-access-sg: Read complete after 0s [id=fe29039a-d081-4023-adad-9641c8059c30]
+data.openstack_networking_network_v2.base-net: Read complete after 0s [id=9d8f9b2a-992c-4edc-8444-0bfc3c2b3cef]
+
+OpenTofu used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+OpenTofu will perform the following actions:
+
+  # openstack_compute_instance_v2.default-p0000000028-s0000000026-c2-server will be created
+  + resource "openstack_compute_instance_v2" "default-p0000000028-s0000000026-c2-server" {
+      + access_ip_v4        = (known after apply)
+      + access_ip_v6        = (known after apply)
+      + all_metadata        = (known after apply)
+      + all_tags            = (known after apply)
+      + availability_zone   = (known after apply)
+      + config_drive        = true
+      + created             = (known after apply)
+      + flavor_id           = (known after apply)
+      + flavor_name         = "standard.small"
+      + force_delete        = false
+      + hypervisor_hostname = (known after apply)
+      + id                  = (known after apply)
+      + image_id            = (known after apply)
+      + image_name          = "ubuntu-noble-x86_64"
+      + key_pair            = "default-p0000000028-b51b324b-ssh"
+      + name                = "default-p0000000028-s0000000026-c2-server"
+      + power_state         = "active"
+      + region              = (known after apply)
+      + security_groups     = (known after apply)
+      + stop_before_destroy = false
+      + updated             = (known after apply)
+
+      + network {
+          + access_network = false
+          + fixed_ip_v4    = (known after apply)
+          + fixed_ip_v6    = (known after apply)
+          + mac            = (known after apply)
+          + name           = (known after apply)
+          + port           = (known after apply)
+          + uuid           = (known after apply)
+        }
+      + network {
+          + access_network = false
+          + fixed_ip_v4    = (known after apply)
+          + fixed_ip_v6    = (known after apply)
+          + mac            = (known after apply)
+          + name           = (known after apply)
+          + port           = (known after apply)
+          + uuid           = (known after apply)
+        }
+    }
+
+  # openstack_compute_instance_v2.default-p0000000028-s0000000026-exfil-server will be created
+  + resource "openstack_compute_instance_v2" "default-p0000000028-s0000000026-exfil-server" {
+      + access_ip_v4        = (known after apply)
+      + access_ip_v6        = (known after apply)
+      + all_metadata        = (known after apply)
+      + all_tags            = (known after apply)
+      + availability_zone   = (known after apply)
+      + config_drive        = true
+      + created             = (known after apply)
+      + flavor_id           = (known after apply)
+      + flavor_name         = "standard.small"
+      + force_delete        = false
+      + hypervisor_hostname = (known after apply)
+      + id                  = (known after apply)
+      + image_id            = (known after apply)
+      + image_name          = "ubuntu-noble-x86_64"
+      + key_pair            = "default-p0000000028-b51b324b-ssh"
+      + name                = "default-p0000000028-s0000000026-exfil-server"
+      + power_state         = "active"
+      + region              = (known after apply)
+      + security_groups     = (known after apply)
+      + stop_before_destroy = false
+      + updated             = (known after apply)
+
+      + network {
+          + access_network = false
+          + fixed_ip_v4    = (known after apply)
+          + fixed_ip_v6    = (known after apply)
+          + mac            = (known after apply)
+          + name           = (known after apply)
+          + port           = (known after apply)
+          + uuid           = (known after apply)
+        }
+      + network {
+          + access_network = false
+          + fixed_ip_v4    = (known after apply)
+          + fixed_ip_v6    = (known after apply)
+          + mac            = (known after apply)
+          + name           = (known after apply)
+          + port           = (known after apply)
+          + uuid           = (known after apply)
+        }
+    }
+
+  # openstack_compute_instance_v2.default-p0000000028-s0000000026-man will be created
+  + resource "openstack_compute_instance_v2" "default-p0000000028-s0000000026-man" {
+      + access_ip_v4        = (known after apply)
+      + access_ip_v6        = (known after apply)
+      + all_metadata        = (known after apply)
+      + all_tags            = (known after apply)
+      + availability_zone   = (known after apply)
+      + config_drive        = true
+      + created             = (known after apply)
+      + flavor_id           = (known after apply)
+      + flavor_name         = "standard.medium"
+      + force_delete        = false
+      + hypervisor_hostname = (known after apply)
+      + id                  = (known after apply)
+      + image_id            = (known after apply)
+      + image_name          = "ubuntu-noble-x86_64"
+      + key_pair            = "default-p0000000028-b51b324b-ssh"
+      + name                = "default-p0000000028-s0000000026-man"
+      + power_state         = "active"
+      + region              = (known after apply)
+      + security_groups     = (known after apply)
+      + stop_before_destroy = false
+      + updated             = (known after apply)
+
+      + network {
+          + access_network = false
+          + fixed_ip_v4    = (known after apply)
+          + fixed_ip_v6    = (known after apply)
+          + mac            = (known after apply)
+          + name           = (known after apply)
+          + port           = (known after apply)
+          + uuid           = (known after apply)
+        }
+      + network {
+          + access_network = false
+          + fixed_ip_v4    = (known after apply)
+          + fixed_ip_v6    = (known after apply)
+          + mac            = (known after apply)
+          + name           = (known after apply)
+          + port           = (known after apply)
+          + uuid           = (known after apply)
+        }
+      + network {
+          + access_network = false
+          + fixed_ip_v4    = (known after apply)
+          + fixed_ip_v6    = (known after apply)
+          + mac            = (known after apply)
+          + name           = (known after apply)
+          + port           = (known after apply)
+          + uuid           = (known after apply)
+        }
+    }
+
+  # openstack_compute_instance_v2.default-p0000000028-s0000000026-router will be created
+  + resource "openstack_compute_instance_v2" "default-p0000000028-s0000000026-router" {
+      + access_ip_v4        = (known after apply)
+      + access_ip_v6        = (known after apply)
+      + all_metadata        = (known after apply)
+      + all_tags            = (known after apply)
+      + availability_zone   = (known after apply)
+      + config_drive        = true
+      + created             = (known after apply)
+      + flavor_id           = (known after apply)
+      + flavor_name         = "standard.small"
+      + force_delete        = false
+      + hypervisor_hostname = (known after apply)
+      + id                  = (known after apply)
+      + image_id            = (known after apply)
+      + image_name          = "debian-12-x86_64"
+      + key_pair            = "default-p0000000028-b51b324b-ssh"
+      + name                = "default-p0000000028-s0000000026-router"
+      + power_state         = "active"
+      + region              = (known after apply)
+      + security_groups     = (known after apply)
+      + stop_before_destroy = false
+      + updated             = (known after apply)
+
+      + network {
+          + access_network = false
+          + fixed_ip_v4    = (known after apply)
+          + fixed_ip_v6    = (known after apply)
+          + mac            = (known after apply)
+          + name           = (known after apply)
+          + port           = (known after apply)
+          + uuid           = (known after apply)
+        }
+      + network {
+          + access_network = false
+          + fixed_ip_v4    = (known after apply)
+          + fixed_ip_v6    = (known after apply)
+          + mac            = (known after apply)
+          + name           = (known after apply)
+          + port           = (known after apply)
+          + uuid           = (known after apply)
+        }
+      + network {
+          + access_network = false
+          + fixed_ip_v4    = (known after apply)
+          + fixed_ip_v6    = (known after apply)
+          + mac            = (known after apply)
+          + name           = (known after apply)
+          + port           = (known after apply)
+          + uuid           = (known after apply)
+        }
+    }
+
+  # openstack_compute_instance_v2.default-p0000000028-s0000000026-victim will be created
+  + resource "openstack_compute_instance_v2" "default-p0000000028-s0000000026-victim" {
+      + access_ip_v4        = (known after apply)
+      + access_ip_v6        = (known after apply)
+      + all_metadata        = (known after apply)
+      + all_tags            = (known after apply)
+      + availability_zone   = (known after apply)
+      + config_drive        = true
+      + created             = (known after apply)
+      + flavor_id           = (known after apply)
+      + flavor_name         = "standard.small"
+      + force_delete        = false
+      + hypervisor_hostname = (known after apply)
+      + id                  = (known after apply)
+      + image_id            = (known after apply)
+      + image_name          = "ubuntu-noble-x86_64"
+      + key_pair            = "default-p0000000028-b51b324b-ssh"
+      + name                = "default-p0000000028-s0000000026-victim"
+      + power_state         = "active"
+      + region              = (known after apply)
+      + security_groups     = (known after apply)
+      + stop_before_destroy = false
+      + updated             = (known after apply)
+
+      + network {
+          + access_network = false
+          + fixed_ip_v4    = (known after apply)
+          + fixed_ip_v6    = (known after apply)
+          + mac            = (known after apply)
+          + name           = (known after apply)
+          + port           = (known after apply)
+          + uuid           = (known after apply)
+        }
+      + network {
+          + access_network = false
+          + fixed_ip_v4    = (known after apply)
+          + fixed_ip_v6    = (known after apply)
+          + mac            = (known after apply)
+          + name           = (known after apply)
+          + port           = (known after apply)
+          + uuid           = (known after apply)
+        }
+    }
+
+  # openstack_networking_network_v2.default-p0000000028-s0000000026-man-network will be created
+  + resource "openstack_networking_network_v2" "default-p0000000028-s0000000026-man-network" {
+      + admin_state_up          = true
+      + all_tags                = (known after apply)
+      + availability_zone_hints = (known after apply)
+      + dns_domain              = (known after apply)
+      + external                = (known after apply)
+      + id                      = (known after apply)
+      + mtu                     = (known after apply)
+      + name                    = "default-p0000000028-s0000000026-man-network"
+      + port_security_enabled   = (known after apply)
+      + qos_policy_id           = (known after apply)
+      + region                  = (known after apply)
+      + shared                  = (known after apply)
+      + tenant_id               = (known after apply)
+      + transparent_vlan        = (known after apply)
+
+      + segments (known after apply)
+    }
+
+  # openstack_networking_network_v2.default-p0000000028-s0000000026-ransomware-switch will be created
+  + resource "openstack_networking_network_v2" "default-p0000000028-s0000000026-ransomware-switch" {
+      + admin_state_up          = true
+      + all_tags                = (known after apply)
+      + availability_zone_hints = (known after apply)
+      + dns_domain              = (known after apply)
+      + external                = (known after apply)
+      + id                      = (known after apply)
+      + mtu                     = (known after apply)
+      + name                    = "default-p0000000028-s0000000026-ransomware-switch"
+      + port_security_enabled   = (known after apply)
+      + qos_policy_id           = (known after apply)
+      + region                  = (known after apply)
+      + shared                  = (known after apply)
+      + tenant_id               = (known after apply)
+      + transparent_vlan        = (known after apply)
+
+      + segments (known after apply)
+    }
+
+  # openstack_networking_network_v2.default-p0000000028-s0000000026-wan will be created
+  + resource "openstack_networking_network_v2" "default-p0000000028-s0000000026-wan" {
+      + admin_state_up          = true
+      + all_tags                = (known after apply)
+      + availability_zone_hints = (known after apply)
+      + dns_domain              = (known after apply)
+      + external                = (known after apply)
+      + id                      = (known after apply)
+      + mtu                     = (known after apply)
+      + name                    = "default-p0000000028-s0000000026-wan"
+      + port_security_enabled   = (known after apply)
+      + qos_policy_id           = (known after apply)
+      + region                  = (known after apply)
+      + shared                  = (known after apply)
+      + tenant_id               = (known after apply)
+      + transparent_vlan        = (known after apply)
+
+      + segments (known after apply)
+    }
+
+  # openstack_networking_port_v2.default-p0000000028-s0000000026-link-1 will be created
+  + resource "openstack_networking_port_v2" "default-p0000000028-s0000000026-link-1" {
+      + admin_state_up         = true
+      + all_fixed_ips          = (known after apply)
+      + all_security_group_ids = (known after apply)
+      + all_tags               = (known after apply)
+      + device_id              = (known after apply)
+      + device_owner           = (known after apply)
+      + dns_assignment         = (known after apply)
+      + dns_name               = (known after apply)
+      + id                     = (known after apply)
+      + mac_address            = (known after apply)
+      + name                   = "default-p0000000028-s0000000026-link-1"
+      + network_id             = (known after apply)
+      + port_security_enabled  = (known after apply)
+      + qos_policy_id          = (known after apply)
+      + region                 = (known after apply)
+      + security_group_ids     = [
+          + "d318bcac-a977-4da2-a36c-6fc646adfd56",
+        ]
+      + tenant_id              = (known after apply)
+
+      + allowed_address_pairs {
+          + ip_address = "192.168.128.0/17"
+        }
+
+      + binding (known after apply)
+
+      + fixed_ip {
+          + subnet_id = (known after apply)
+        }
+    }
+
+  # openstack_networking_port_v2.default-p0000000028-s0000000026-link-10 will be created
+  + resource "openstack_networking_port_v2" "default-p0000000028-s0000000026-link-10" {
+      + admin_state_up         = true
+      + all_fixed_ips          = (known after apply)
+      + all_security_group_ids = (known after apply)
+      + all_tags               = (known after apply)
+      + device_id              = (known after apply)
+      + device_owner           = (known after apply)
+      + dns_assignment         = (known after apply)
+      + dns_name               = (known after apply)
+      + id                     = (known after apply)
+      + mac_address            = (known after apply)
+      + name                   = "default-p0000000028-s0000000026-link-10"
+      + network_id             = (known after apply)
+      + port_security_enabled  = (known after apply)
+      + qos_policy_id          = (known after apply)
+      + region                 = (known after apply)
+      + security_group_ids     = [
+          + "0a14006d-c778-45be-9747-18bb05e2c46f",
+        ]
+      + tenant_id              = (known after apply)
+
+      + allowed_address_pairs {
+          + ip_address = "0.0.0.0/0"
+        }
+
+      + binding (known after apply)
+
+      + fixed_ip {
+          + subnet_id = (known after apply)
+        }
+    }
+
+  # openstack_networking_port_v2.default-p0000000028-s0000000026-link-11 will be created
+  + resource "openstack_networking_port_v2" "default-p0000000028-s0000000026-link-11" {
+      + admin_state_up         = true
+      + all_fixed_ips          = (known after apply)
+      + all_security_group_ids = (known after apply)
+      + all_tags               = (known after apply)
+      + device_id              = (known after apply)
+      + device_owner           = (known after apply)
+      + dns_assignment         = (known after apply)
+      + dns_name               = (known after apply)
+      + id                     = (known after apply)
+      + mac_address            = (known after apply)
+      + name                   = "default-p0000000028-s0000000026-link-11"
+      + network_id             = (known after apply)
+      + port_security_enabled  = (known after apply)
+      + qos_policy_id          = (known after apply)
+      + region                 = (known after apply)
+      + security_group_ids     = [
+          + "0a14006d-c778-45be-9747-18bb05e2c46f",
+        ]
+      + tenant_id              = (known after apply)
+
+      + allowed_address_pairs {
+          + ip_address = "0.0.0.0/0"
+        }
+
+      + binding (known after apply)
+
+      + fixed_ip {
+          + ip_address = "192.168.90.1"
+          + subnet_id  = (known after apply)
+        }
+    }
+
+  # openstack_networking_port_v2.default-p0000000028-s0000000026-link-2 will be created
+  + resource "openstack_networking_port_v2" "default-p0000000028-s0000000026-link-2" {
+      + admin_state_up         = true
+      + all_fixed_ips          = (known after apply)
+      + all_security_group_ids = (known after apply)
+      + all_tags               = (known after apply)
+      + device_id              = (known after apply)
+      + device_owner           = (known after apply)
+      + dns_assignment         = (known after apply)
+      + dns_name               = (known after apply)
+      + id                     = (known after apply)
+      + mac_address            = (known after apply)
+      + name                   = "default-p0000000028-s0000000026-link-2"
+      + network_id             = (known after apply)
+      + port_security_enabled  = (known after apply)
+      + qos_policy_id          = (known after apply)
+      + region                 = (known after apply)
+      + security_group_ids     = [
+          + "0a14006d-c778-45be-9747-18bb05e2c46f",
+        ]
+      + tenant_id              = (known after apply)
+
+      + allowed_address_pairs {
+          + ip_address = "0.0.0.0/0"
+        }
+
+      + binding (known after apply)
+
+      + fixed_ip {
+          + subnet_id = (known after apply)
+        }
+    }
+
+  # openstack_networking_port_v2.default-p0000000028-s0000000026-link-3 will be created
+  + resource "openstack_networking_port_v2" "default-p0000000028-s0000000026-link-3" {
+      + admin_state_up         = true
+      + all_fixed_ips          = (known after apply)
+      + all_security_group_ids = (known after apply)
+      + all_tags               = (known after apply)
+      + device_id              = (known after apply)
+      + device_owner           = (known after apply)
+      + dns_assignment         = (known after apply)
+      + dns_name               = (known after apply)
+      + id                     = (known after apply)
+      + mac_address            = (known after apply)
+      + name                   = "default-p0000000028-s0000000026-link-3"
+      + network_id             = (known after apply)
+      + port_security_enabled  = (known after apply)
+      + qos_policy_id          = (known after apply)
+      + region                 = (known after apply)
+      + security_group_ids     = [
+          + "c0f8ada3-ea6b-4204-8e6b-03fb49be5ab5",
+        ]
+      + tenant_id              = (known after apply)
+
+      + allowed_address_pairs {
+          + ip_address = "192.168.128.0/17"
+        }
+
+      + binding (known after apply)
+
+      + fixed_ip {
+          + subnet_id = (known after apply)
+        }
+    }
+
+  # openstack_networking_port_v2.default-p0000000028-s0000000026-link-4 will be created
+  + resource "openstack_networking_port_v2" "default-p0000000028-s0000000026-link-4" {
+      + admin_state_up         = true
+      + all_fixed_ips          = (known after apply)
+      + all_security_group_ids = (known after apply)
+      + all_tags               = (known after apply)
+      + device_id              = (known after apply)
+      + device_owner           = (known after apply)
+      + dns_assignment         = (known after apply)
+      + dns_name               = (known after apply)
+      + id                     = (known after apply)
+      + mac_address            = (known after apply)
+      + name                   = "default-p0000000028-s0000000026-link-4"
+      + network_id             = (known after apply)
+      + port_security_enabled  = (known after apply)
+      + qos_policy_id          = (known after apply)
+      + region                 = (known after apply)
+      + security_group_ids     = [
+          + "c0f8ada3-ea6b-4204-8e6b-03fb49be5ab5",
+        ]
+      + tenant_id              = (known after apply)
+
+      + allowed_address_pairs {
+          + ip_address = "192.168.128.0/17"
+        }
+
+      + binding (known after apply)
+
+      + fixed_ip {
+          + subnet_id = (known after apply)
+        }
+    }
+
+  # openstack_networking_port_v2.default-p0000000028-s0000000026-link-5 will be created
+  + resource "openstack_networking_port_v2" "default-p0000000028-s0000000026-link-5" {
+      + admin_state_up         = true
+      + all_fixed_ips          = (known after apply)
+      + all_security_group_ids = (known after apply)
+      + all_tags               = (known after apply)
+      + device_id              = (known after apply)
+      + device_owner           = (known after apply)
+      + dns_assignment         = (known after apply)
+      + dns_name               = (known after apply)
+      + id                     = (known after apply)
+      + mac_address            = (known after apply)
+      + name                   = "default-p0000000028-s0000000026-link-5"
+      + network_id             = (known after apply)
+      + port_security_enabled  = (known after apply)
+      + qos_policy_id          = (known after apply)
+      + region                 = (known after apply)
+      + security_group_ids     = [
+          + "c0f8ada3-ea6b-4204-8e6b-03fb49be5ab5",
+        ]
+      + tenant_id              = (known after apply)
+
+      + allowed_address_pairs {
+          + ip_address = "192.168.128.0/17"
+        }
+
+      + binding (known after apply)
+
+      + fixed_ip {
+          + subnet_id = (known after apply)
+        }
+    }
+
+  # openstack_networking_port_v2.default-p0000000028-s0000000026-link-6 will be created
+  + resource "openstack_networking_port_v2" "default-p0000000028-s0000000026-link-6" {
+      + admin_state_up         = true
+      + all_fixed_ips          = (known after apply)
+      + all_security_group_ids = (known after apply)
+      + all_tags               = (known after apply)
+      + device_id              = (known after apply)
+      + device_owner           = (known after apply)
+      + dns_assignment         = (known after apply)
+      + dns_name               = (known after apply)
+      + id                     = (known after apply)
+      + mac_address            = (known after apply)
+      + name                   = "default-p0000000028-s0000000026-link-6"
+      + network_id             = (known after apply)
+      + port_security_enabled  = (known after apply)
+      + qos_policy_id          = (known after apply)
+      + region                 = (known after apply)
+      + security_group_ids     = [
+          + "0a14006d-c778-45be-9747-18bb05e2c46f",
+        ]
+      + tenant_id              = (known after apply)
+
+      + allowed_address_pairs {
+          + ip_address = "192.168.90.0/24"
+        }
+
+      + binding (known after apply)
+
+      + fixed_ip {
+          + ip_address = "192.168.90.5"
+          + subnet_id  = (known after apply)
+        }
+    }
+
+  # openstack_networking_port_v2.default-p0000000028-s0000000026-link-7 will be created
+  + resource "openstack_networking_port_v2" "default-p0000000028-s0000000026-link-7" {
+      + admin_state_up         = true
+      + all_fixed_ips          = (known after apply)
+      + all_security_group_ids = (known after apply)
+      + all_tags               = (known after apply)
+      + device_id              = (known after apply)
+      + device_owner           = (known after apply)
+      + dns_assignment         = (known after apply)
+      + dns_name               = (known after apply)
+      + id                     = (known after apply)
+      + mac_address            = (known after apply)
+      + name                   = "default-p0000000028-s0000000026-link-7"
+      + network_id             = (known after apply)
+      + port_security_enabled  = (known after apply)
+      + qos_policy_id          = (known after apply)
+      + region                 = (known after apply)
+      + security_group_ids     = [
+          + "0a14006d-c778-45be-9747-18bb05e2c46f",
+        ]
+      + tenant_id              = (known after apply)
+
+      + allowed_address_pairs {
+          + ip_address = "192.168.90.0/24"
+        }
+
+      + binding (known after apply)
+
+      + fixed_ip {
+          + ip_address = "192.168.90.10"
+          + subnet_id  = (known after apply)
+        }
+    }
+
+  # openstack_networking_port_v2.default-p0000000028-s0000000026-link-8 will be created
+  + resource "openstack_networking_port_v2" "default-p0000000028-s0000000026-link-8" {
+      + admin_state_up         = true
+      + all_fixed_ips          = (known after apply)
+      + all_security_group_ids = (known after apply)
+      + all_tags               = (known after apply)
+      + device_id              = (known after apply)
+      + device_owner           = (known after apply)
+      + dns_assignment         = (known after apply)
+      + dns_name               = (known after apply)
+      + id                     = (known after apply)
+      + mac_address            = (known after apply)
+      + name                   = "default-p0000000028-s0000000026-link-8"
+      + network_id             = (known after apply)
+      + port_security_enabled  = (known after apply)
+      + qos_policy_id          = (known after apply)
+      + region                 = (known after apply)
+      + security_group_ids     = [
+          + "0a14006d-c778-45be-9747-18bb05e2c46f",
+        ]
+      + tenant_id              = (known after apply)
+
+      + allowed_address_pairs {
+          + ip_address = "192.168.90.0/24"
+        }
+
+      + binding (known after apply)
+
+      + fixed_ip {
+          + ip_address = "192.168.90.20"
+          + subnet_id  = (known after apply)
+        }
+    }
+
+  # openstack_networking_port_v2.default-p0000000028-s0000000026-link-9 will be created
+  + resource "openstack_networking_port_v2" "default-p0000000028-s0000000026-link-9" {
+      + admin_state_up         = true
+      + all_fixed_ips          = (known after apply)
+      + all_security_group_ids = (known after apply)
+      + all_tags               = (known after apply)
+      + device_id              = (known after apply)
+      + device_owner           = (known after apply)
+      + dns_assignment         = (known after apply)
+      + dns_name               = (known after apply)
+      + id                     = (known after apply)
+      + mac_address            = (known after apply)
+      + name                   = "default-p0000000028-s0000000026-link-9"
+      + network_id             = (known after apply)
+      + port_security_enabled  = (known after apply)
+      + qos_policy_id          = (known after apply)
+      + region                 = (known after apply)
+      + security_group_ids     = [
+          + "c0f8ada3-ea6b-4204-8e6b-03fb49be5ab5",
+        ]
+      + tenant_id              = (known after apply)
+
+      + allowed_address_pairs {
+          + ip_address = "192.168.128.0/17"
+        }
+
+      + binding (known after apply)
+
+      + fixed_ip {
+          + subnet_id = (known after apply)
+        }
+    }
+
+  # openstack_networking_port_v2.default-p0000000028-s0000000026-man-out-port will be created
+  + resource "openstack_networking_port_v2" "default-p0000000028-s0000000026-man-out-port" {
+      + admin_state_up         = true
+      + all_fixed_ips          = (known after apply)
+      + all_security_group_ids = (known after apply)
+      + all_tags               = (known after apply)
+      + device_id              = (known after apply)
+      + device_owner           = (known after apply)
+      + dns_assignment         = (known after apply)
+      + dns_name               = (known after apply)
+      + id                     = (known after apply)
+      + mac_address            = (known after apply)
+      + name                   = "default-p0000000028-s0000000026-man-out-port"
+      + network_id             = "9d8f9b2a-992c-4edc-8444-0bfc3c2b3cef"
+      + port_security_enabled  = (known after apply)
+      + qos_policy_id          = (known after apply)
+      + region                 = (known after apply)
+      + security_group_ids     = [
+          + "fe29039a-d081-4023-adad-9641c8059c30",
+        ]
+      + tenant_id              = (known after apply)
+
+      + allowed_address_pairs {
+          + ip_address = "0.0.0.0/0"
+        }
+
+      + binding (known after apply)
+    }
+
+  # openstack_networking_subnet_v2.default-p0000000028-s0000000026-man-network-subnet will be created
+  + resource "openstack_networking_subnet_v2" "default-p0000000028-s0000000026-man-network-subnet" {
+      + all_tags          = (known after apply)
+      + cidr              = "192.168.128.0/17"
+      + dns_nameservers   = [
+          + "1.1.1.1",
+          + "1.0.0.1",
+        ]
+      + enable_dhcp       = true
+      + gateway_ip        = (known after apply)
+      + id                = (known after apply)
+      + ip_version        = 4
+      + ipv6_address_mode = (known after apply)
+      + ipv6_ra_mode      = (known after apply)
+      + name              = "default-p0000000028-s0000000026-man-network-subnet"
+      + network_id        = (known after apply)
+      + no_gateway        = true
+      + region            = (known after apply)
+      + service_types     = (known after apply)
+      + tenant_id         = (known after apply)
+
+      + allocation_pool (known after apply)
+    }
+
+  # openstack_networking_subnet_v2.default-p0000000028-s0000000026-ransomware-switch-subnet will be created
+  + resource "openstack_networking_subnet_v2" "default-p0000000028-s0000000026-ransomware-switch-subnet" {
+      + all_tags          = (known after apply)
+      + cidr              = "192.168.90.0/24"
+      + dns_nameservers   = [
+          + "1.1.1.1",
+          + "1.0.0.1",
+        ]
+      + enable_dhcp       = true
+      + gateway_ip        = "192.168.90.1"
+      + id                = (known after apply)
+      + ip_version        = 4
+      + ipv6_address_mode = (known after apply)
+      + ipv6_ra_mode      = (known after apply)
+      + name              = "default-p0000000028-s0000000026-ransomware-switch-subnet"
+      + network_id        = (known after apply)
+      + no_gateway        = false
+      + region            = (known after apply)
+      + service_types     = (known after apply)
+      + tenant_id         = (known after apply)
+
+      + allocation_pool (known after apply)
+    }
+
+  # openstack_networking_subnet_v2.default-p0000000028-s0000000026-wan-subnet will be created
+  + resource "openstack_networking_subnet_v2" "default-p0000000028-s0000000026-wan-subnet" {
+      + all_tags          = (known after apply)
+      + cidr              = "100.100.100.0/24"
+      + dns_nameservers   = [
+          + "1.1.1.1",
+          + "1.0.0.1",
+        ]
+      + enable_dhcp       = true
+      + gateway_ip        = (known after apply)
+      + id                = (known after apply)
+      + ip_version        = 4
+      + ipv6_address_mode = (known after apply)
+      + ipv6_ra_mode      = (known after apply)
+      + name              = "default-p0000000028-s0000000026-wan-subnet"
+      + network_id        = (known after apply)
+      + no_gateway        = true
+      + region            = (known after apply)
+      + service_types     = (known after apply)
+      + tenant_id         = (known after apply)
+
+      + allocation_pool (known after apply)
+    }
+
+Plan: 23 to add, 0 to change, 0 to destroy.
+openstack_networking_network_v2.default-p0000000028-s0000000026-man-network: Creating...
+openstack_networking_network_v2.default-p0000000028-s0000000026-ransomware-switch: Creating...
+openstack_networking_port_v2.default-p0000000028-s0000000026-man-out-port: Creating...
+openstack_networking_network_v2.default-p0000000028-s0000000026-wan: Creating...
+openstack_networking_network_v2.default-p0000000028-s0000000026-ransomware-switch: Creation complete after 0s [id=f43780a7-44db-412f-90ed-bc8233757fab]
+openstack_networking_subnet_v2.default-p0000000028-s0000000026-ransomware-switch-subnet: Creating...
+openstack_networking_network_v2.default-p0000000028-s0000000026-wan: Creation complete after 0s [id=d628b6ec-648b-43e9-8f13-3f0bd1bd98c6]
+openstack_networking_subnet_v2.default-p0000000028-s0000000026-wan-subnet: Creating...
+openstack_networking_network_v2.default-p0000000028-s0000000026-man-network: Creation complete after 0s [id=4faceac2-bda5-4f18-9da6-04b4eaba5b5a]
+openstack_networking_subnet_v2.default-p0000000028-s0000000026-man-network-subnet: Creating...
+openstack_networking_subnet_v2.default-p0000000028-s0000000026-ransomware-switch-subnet: Creation complete after 1s [id=75f33df0-4814-446c-b603-4228baa65a72]
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-8: Creating...
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-11: Creating...
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-6: Creating...
+openstack_networking_port_v2.default-p0000000028-s0000000026-man-out-port: Creation complete after 1s [id=9a317eb7-f7af-4d24-8f05-4fea4b84f578]
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-7: Creating...
+openstack_networking_subnet_v2.default-p0000000028-s0000000026-man-network-subnet: Creation complete after 1s [id=09290832-f5ff-48f6-97e2-20053b67ca37]
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-3: Creating...
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-4: Creating...
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-9: Creating...
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-1: Creating...
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-5: Creating...
+openstack_networking_subnet_v2.default-p0000000028-s0000000026-wan-subnet: Creation complete after 1s [id=56f819f7-972d-49a4-9451-83f4c193a32a]
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-2: Creating...
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-8: Creation complete after 0s [id=09c3a49b-89ac-4dfd-a240-5f84990336ff]
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-10: Creating...
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-11: Creation complete after 0s [id=292f7bee-e298-4b3a-8fe0-07c2f2b558c6]
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-9: Creation complete after 0s [id=28d4db71-0ef0-4a97-bf8f-6fddd25aeea6]
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-1: Creation complete after 0s [id=fac52aba-a478-4deb-8f6f-9ea4dafd7a1f]
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-4: Creation complete after 0s [id=cab633bc-00bd-4e4f-a727-62d5397449af]
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-6: Creation complete after 0s [id=26b621ef-7e02-4642-a116-2051200612a5]
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-7: Creation complete after 0s [id=e564b308-7371-4893-96b1-a9485bc70081]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-victim: Creating...
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-2: Creation complete after 0s [id=24ae5754-47c8-468c-8312-ff3e74669afd]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-man: Creating...
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-10: Creation complete after 0s [id=49f34c25-7822-4aea-88c1-6cb8119fb67b]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-router: Creating...
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-5: Creation complete after 0s [id=8bf3d7f1-3a86-4c90-8cbf-1b23a959f8b9]
+openstack_networking_port_v2.default-p0000000028-s0000000026-link-3: Creation complete after 0s [id=5115c920-cf38-458b-835b-fee771c5ad27]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-exfil-server: Creating...
+openstack_compute_instance_v2.default-p0000000028-s0000000026-c2-server: Creating...
+openstack_compute_instance_v2.default-p0000000028-s0000000026-victim: Still creating... [10s elapsed]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-man: Still creating... [10s elapsed]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-exfil-server: Still creating... [10s elapsed]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-c2-server: Still creating... [10s elapsed]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-victim: Still creating... [20s elapsed]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-man: Still creating... [20s elapsed]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-exfil-server: Still creating... [20s elapsed]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-c2-server: Still creating... [20s elapsed]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-victim: Creation complete after 20s [id=107ad7c6-2c9b-463a-9ad3-3aac0a903b04]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-exfil-server: Creation complete after 20s [id=a63dd1d0-076e-4492-946f-427c5e963739]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-c2-server: Creation complete after 20s [id=2fd48486-a0b1-4518-a119-813e7a11c8f2]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-man: Still creating... [30s elapsed]
+openstack_compute_instance_v2.default-p0000000028-s0000000026-man: Creation complete after 31s [id=baa90f1e-d66e-4787-9aad-ac4709876944]
+There are some problems with the provider_installation configuration:╷│ Error: Invalid provider source exclusion patterns││ CLI config specifies invalid provider exclusion patterns: invalid provider│ matching pattern "*": must have either two or three slash-separated│ segments.╵As a result of the above problems, OpenTofu's provider installer may not behave as intended.Error: Error waiting for instance (a9878c1a-e34d-4673-8238-d3c3555ae001) to become ready: unexpected state 'ERROR', wanted target 'ACTIVE'. last error: %!s(<nil>)  with openstack_compute_instance_v2.default-p0000000028-s0000000026-router,  on deploy.tf line 327, in resource "openstack_compute_instance_v2" "default-p0000000028-s0000000026-router": 327: resource "openstack_compute_instance_v2" "default-p0000000028-s0000000026-router" {
