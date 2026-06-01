@@ -1,0 +1,1 @@
+Failed to assign attribute `name` to `_trojan`, got: Cannot set TopologyDefinition.name to "_trojan". It does not match regex "^[a-z]([a-z0-9A-Z-])*$"
