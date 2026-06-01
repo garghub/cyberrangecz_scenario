@@ -1,0 +1,1 @@
+Coerced `<class 'NoneType'>` to `<class 'str'>`, but the new value `None` is not equal to old `None`.
