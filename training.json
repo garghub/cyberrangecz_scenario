@@ -1,0 +1,231 @@
+{
+  "title": "BRICKSTORM Backdoor Investigation",
+  "description": "You are an incident responder tasked with investigating a suspected BRICKSTORM backdoor infection on your organization's Linux systems. The BRICKSTORM backdoor is known for its sophisticated evasion techniques and multi-layered communication capabilities. Your goal is to identify, investigate, and contain the threat throughout its lifecycle, from initial compromise to persistence and command and control communication.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Usage of nmap",
+    "Usage of metasploit",
+    "Password cracking techniques"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "You are an incident responder tasked with investigating a suspected BRICKSTORM backdoor infection on your organization's Linux systems. The BRICKSTORM backdoor is known for its sophisticated evasion techniques and multi-layered communication capabilities. Your goal is to identify, investigate, and contain the threat throughout its lifecycle, from initial compromise to persistence and command and control communication."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Instructions for accessing the sandbox in cloud.",
+      "local_content": "Connect to the target system using SSH with the following credentials: Username: cyrano, Password: cyrano, IP: 192.168.50.5"
+    },
+    {
+      "title": "Identify Suspicious Service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "updatemgr.service",
+      "answer_variable_name": null,
+      "content": "The BRICKSTORM backdoor is known for its sophisticated evasion techniques, which include disguising itself as a legitimate service. Identify the suspicious service related to the BRICKSTORM backdoor by examining all running services.",
+      "solution": "1. Connect to the target system using SSH. 2. List all running services using the command 'systemctl list-units --type=service'. 3. Look for any suspicious or unfamiliar services. 4. Identify the service related to the BRICKSTORM backdoor. 5. Verify the service's characteristics to confirm its suspicious nature.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "Conceptual Hint",
+          "content": "The backdoor likely disguises itself as a legitimate service. Look for services that don't match standard system services.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Command Hint",
+          "content": "Use systemctl to list all running services and examine their details.",
+          "hint_penalty": 1,
+          "order": 1
+        },
+        {
+          "title": "Near-Spoiler Hint",
+          "content": "Check for services named 'updatemgr' as they are known to be associated with the BRICKSTORM backdoor.",
+          "hint_penalty": 2,
+          "order": 2
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "identify_service",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-units --type=service",
+          "optional": false
+        },
+        {
+          "state_name": "verify_service",
+          "prereq_state": [
+            "identify_service"
+          ],
+          "cmd": "systemctl status updatemgr.service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl status updatemgr.service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Investigate Service Persistence",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 20,
+      "minimal_possible_solve_time": null,
+      "answer": "/etc/systemd/system/updatemgr.service",
+      "answer_variable_name": null,
+      "content": "The BRICKSTORM backdoor is known to use persistence mechanisms to maintain its presence on infected systems. Investigate how the identified service maintains persistence by examining its unit file and related configurations.",
+      "solution": "1. Examine the service unit file for the suspicious service using the command 'cat /etc/systemd/system/updatemgr.service'. 2. Identify the persistence mechanism used by the service. 3. Note the path to the service unit file. 4. Check for any additional scripts or configurations that contribute to the service's persistence.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "Conceptual Hint",
+          "content": "Persistence mechanisms often involve startup scripts or configurations. Look for these in the service unit file.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Command Hint",
+          "content": "Use cat to view the service unit file and look for ExecStart and other relevant directives.",
+          "hint_penalty": 1,
+          "order": 1
+        },
+        {
+          "title": "Near-Spoiler Hint",
+          "content": "Check the file '/etc/systemd/system/updatemgr.service' for persistence mechanisms.",
+          "hint_penalty": 2,
+          "order": 2
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "investigate_persistence",
+          "prereq_state": [],
+          "cmd": "cat /etc/systemd/system/updatemgr.service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "cat /etc/systemd/system/updatemgr.service",
+          "optional": false
+        },
+        {
+          "state_name": "check_scripts",
+          "prereq_state": [
+            "investigate_persistence"
+          ],
+          "cmd": "ls -la /etc/systemd/system/updatemgr.service.d/",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ls -la /etc/systemd/system/updatemgr.service.d/",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Contain C2 Communication",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 25,
+      "minimal_possible_solve_time": null,
+      "answer": "8090",
+      "answer_variable_name": null,
+      "content": "The BRICKSTORM backdoor communicates with a command and control (C2) server using sophisticated multi-layered communication capabilities. To contain the threat, you need to block this communication and verify the blocking.",
+      "solution": "1. Identify the port used by the suspicious service for C2 communication using the command 'ss -tulnp | grep updatemgr'. 2. Block the identified port using the firewall with the command 'iptables -A INPUT -p tcp --dport 8090 -j DROP'. 3. Verify that the port is blocked using the command 'ss -tulnp | grep 8090'. 4. Ensure no other ports are being used for C2 communication.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "Conceptual Hint",
+          "content": "C2 communication typically occurs over specific ports. Identify the port used by the suspicious service.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Command Hint",
+          "content": "Use ss or netstat to identify the port used by the service and iptables or ufw to block the port.",
+          "hint_penalty": 1,
+          "order": 1
+        },
+        {
+          "title": "Near-Spoiler Hint",
+          "content": "The port '8090' is used for C2 communication. Block this port using iptables.",
+          "hint_penalty": 2,
+          "order": 2
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "contain_c2",
+          "prereq_state": [],
+          "cmd": "ss -tulnp | grep updatemgr",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ss -tulnp | grep updatemgr",
+          "optional": false
+        },
+        {
+          "state_name": "block_port",
+          "prereq_state": [
+            "contain_c2"
+          ],
+          "cmd": "iptables -A INPUT -p tcp --dport 8090 -j DROP",
+          "cmd_type": "bash-command",
+          "cmd_regex": "iptables -A INPUT -p tcp --dport 8090 -j DROP",
+          "optional": false
+        },
+        {
+          "state_name": "verify_block",
+          "prereq_state": [
+            "block_port"
+          ],
+          "cmd": "ss -tulnp | grep 8090",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ss -tulnp | grep 8090",
+          "optional": false
+        },
+        {
+          "state_name": "check_other_ports",
+          "prereq_state": [
+            "verify_block"
+          ],
+          "cmd": "ss -tulnp | grep -E '8091|8092|8093'",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ss -tulnp | grep -E '8091|8092|8093'",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}
