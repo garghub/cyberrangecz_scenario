@@ -1,0 +1,59 @@
+name: bibi
+
+hosts:
+  - name: attacker
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: workstation
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: file-server
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+routers:
+  - name: router
+    base_box:
+      image: debian-12-x86_64
+      man_user: debian
+    flavor: standard.small
+
+networks:
+  - name: attacker-switch
+    cidr: 192.168.40.0/24
+    accessible_by_user: False
+
+  - name: corp-switch
+    cidr: 192.168.50.0/24
+    accessible_by_user: True
+
+net_mappings:
+  - host: attacker
+    network: attacker-switch
+    ip: 192.168.40.5
+
+  - host: workstation
+    network: corp-switch
+    ip: 192.168.50.5
+
+  - host: file-server
+    network: corp-switch
+    ip: 192.168.50.6
+
+router_mappings:
+  - router: router
+    network: attacker-switch
+    ip: 192.168.40.1
+  - router: router
+    network: corp-switch
+    ip: 192.168.50.1
+
+groups: []

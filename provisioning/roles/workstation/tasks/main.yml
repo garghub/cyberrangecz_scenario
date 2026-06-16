@@ -1,0 +1,109 @@
+---
+- name: Add host aliases
+  lineinfile:
+    path: '/etc/hosts'
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Add user and set password
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash(''sha512'') }}'
+    shell: '/bin/bash'
+    groups: sudo
+    append: yes
+
+- name: Install packages
+  apt:
+    name: "{{ packages_to_install }}"
+    state: present
+    update_cache: yes
+
+# ── Company data (created before wiper runs) ──────────────────────────────────
+
+- name: Create company data directory tree
+  file:
+    path: "{{ company_data_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0755"
+  loop:
+    - hr
+    - finance
+    - engineering
+    - admin
+    - contracts
+
+- name: Populate company data files
+  copy:
+    dest: "{{ company_data_dir }}/{{ item.path }}"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0644"
+    content: "{{ item.content }}"
+  loop:
+    - path: hr/employee_records.csv
+      content: |
+        id,name,department,salary,email
+        1,Alice Martin,Engineering,72000,alice@corp.local
+        2,Bob Chen,Finance,65000,bob@corp.local
+        3,Carol Singh,HR,58000,carol@corp.local
+        4,David Park,Admin,61000,david@corp.local
+    - path: hr/access_groups.txt
+      content: |
+        [engineering]
+        alice, david
+
+        [admin]
+        david, carol
+
+        [vpn_users]
+        alice, bob, carol, david
+    - path: finance/budget_q1_2026.txt
+      content: |
+        Q1 2026 BUDGET PLAN
+        ====================
+        Infrastructure:  USD 120,000
+        Salaries:        USD 890,000
+        R&D:             USD 340,000
+        Operations:      USD 75,000
+        TOTAL:           USD 1,425,000
+    - path: finance/annual_report_2025.txt
+      content: |
+        ANNUAL REPORT 2025
+        Revenue:   USD 8,200,000
+        EBITDA:    USD 1,100,000
+        Net profit: USD 640,000
+    - path: engineering/server_inventory.txt
+      content: |
+        HOST          IP              ROLE          OS
+        workstation   192.168.50.5    Workstation   Ubuntu 24.04
+        file-server   192.168.50.6    File Server   Ubuntu 24.04
+        db-server     192.168.50.10   Database      Ubuntu 22.04
+    - path: engineering/deployment_notes.txt
+      content: |
+        DEPLOYMENT NOTES - 2026-04
+        - Database migration scheduled for 2026-04-30
+        - Firewall rules updated on 2026-04-15
+        - Backup policy: daily at 02:00, retention 30 days
+    - path: admin/service_credentials.txt
+      content: |
+        # Internal service credentials - CONFIDENTIAL
+        db_admin:Adm1n2026!
+        backup_svc:Bkp#S3cur3
+        monitoring:M0n1t0r99
+    - path: admin/backup_manifest.txt
+      content: |
+        BACKUP MANIFEST 2026-04-21
+        /data/company_files  ->  /backup/2026-04-21.tar.gz
+        /etc                 ->  /backup/etc-2026-04-21.tar.gz
+        Status: COMPLETED
+    - path: contracts/vendor_contract_001.txt
+      content: |
+        CONTRACT 001 - Software Licensing
+        Vendor: TechCorp Solutions Ltd.
+        Value:  USD 48,000/year
+        Term:   2025-01-01 to 2026-12-31
+        Status: ACTIVE

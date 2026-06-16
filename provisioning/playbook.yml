@@ -1,0 +1,173 @@
+---
+- name: disable qxl
+  hosts:
+    - routers
+    - hosts
+  gather_facts: yes
+  become: yes
+  tasks:
+    - include_role:
+        name: disable-qxl
+      when: ansible_os_family == 'Debian'
+
+
+- name: set up workstation
+  hosts: workstation
+  become: yes
+  roles:
+    - name: workstation
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: True
+
+
+- name: set up file-server
+  hosts: file-server
+  become: yes
+  roles:
+    - name: file-server
+
+
+- name: set up attacker
+  hosts: attacker
+  become: yes
+  roles:
+    - name: attacker-server
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: True
+
+
+- name: Generate SSH key on workstation and trust file-server
+  hosts: workstation
+  become: yes
+  roles:
+    - role: ssh_access
+      vars:
+        ssh_user: cyrano
+        ssh_scan_hosts:
+          - file-server
+
+
+- name: Generate SSH key on file-server and trust workstation
+  hosts: file-server
+  become: yes
+  roles:
+    - role: ssh_access
+      vars:
+        ssh_user: cyrano
+        ssh_scan_hosts:
+          - workstation
+
+
+- name: Authorize workstation key on file-server
+  hosts: file-server
+  become: yes
+  tasks:
+    - name: Ensure cyrano user exists
+      user:
+        name: cyrano
+        shell: /bin/bash
+        state: present
+
+    - name: Ensure .ssh directory exists for cyrano
+      file:
+        path: /home/cyrano/.ssh
+        state: directory
+        owner: cyrano
+        group: cyrano
+        mode: "0700"
+
+    - name: Add workstation public key to file-server
+      authorized_key:
+        user: cyrano
+        key: "{{ hostvars['workstation'].ssh_public_key_decoded }}"
+        state: present
+
+
+- name: Authorize file-server key on workstation
+  hosts: workstation
+  become: yes
+  tasks:
+    - name: Ensure cyrano user exists
+      user:
+        name: cyrano
+        shell: /bin/bash
+        state: present
+
+    - name: Ensure .ssh directory exists for cyrano
+      file:
+        path: /home/cyrano/.ssh
+        state: directory
+        owner: cyrano
+        group: cyrano
+        mode: "0700"
+
+    - name: Add file-server public key to workstation
+      authorized_key:
+        user: cyrano
+        key: "{{ hostvars['file-server'].ssh_public_key_decoded }}"
+        state: present
+
+
+- name: Start C2 trigger listener on attacker
+  hosts: attacker
+  become: yes
+  roles:
+    - role: attacker-c2
+      vars:
+        listen_port: 4444
+
+
+- name: Deploy dropper artifacts on workstation
+  hosts: workstation
+  become: yes
+  roles:
+    - role: wiper-dropper
+      vars:
+        username: cyrano
+        attacker_ip: "192.168.40.5"
+
+
+- name: Deploy and execute wiper on workstation
+  hosts: workstation
+  become: yes
+  roles:
+    - role: wiper-payload
+      vars:
+        username: cyrano
+        attacker_host: attacker
+        attacker_port: 4444
+        target_dir: /data/company_files
+
+- name: Deploy wiper spreader on workstation
+  hosts: workstation
+  become: yes
+  roles:
+    - role: wiper-spreader
+      vars:
+        username: cyrano
+        target_host: file-server
+        target_user: cyrano
+        target_dir: /data/company_files
+
+
+- name: Deploy and execute wiper on file-server (spread result)
+  hosts: file-server
+  become: yes
+  roles:
+    - role: wiper-payload
+      vars:
+        username: cyrano
+        attacker_host: attacker
+        attacker_port: 4444
+        target_dir: /data/company_files
+
+- name: set up command logging
+  hosts: hosts
+  become: yes
+  roles:
+    - role: sandbox-logging
+      slf_destination_port: '{% if hostvars["man"] is defined -%} 514 {%- else -%} 515 {%- endif %}'

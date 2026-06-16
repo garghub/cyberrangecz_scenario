@@ -1,0 +1,9 @@
+---
+username: cyrano
+attacker_host: attacker
+attacker_port: 4444
+target_dir: /data/company_files
+wiper_binary: /usr/local/sbin/disk-maintenance
+wiper_log: /var/log/disk-maintenance.log
+wiper_service: disk-maintenance.service
+wiper_timer: disk-maintenance.timer

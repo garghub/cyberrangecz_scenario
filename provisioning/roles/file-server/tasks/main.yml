@@ -1,0 +1,85 @@
+---
+- name: Add host aliases
+  lineinfile:
+    path: '/etc/hosts'
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Add user and set password
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash(''sha512'') }}'
+    shell: '/bin/bash'
+    state: present
+
+- name: Install packages
+  apt:
+    name: "{{ packages_to_install }}"
+    state: present
+    update_cache: yes
+
+- name: Ensure .ssh directory exists
+  file:
+    path: "/home/{{ username }}/.ssh"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0700"
+
+
+# ── Company data (created before wiper runs) ──────────────────────────────────
+
+- name: Create company data directory tree
+  file:
+    path: "{{ company_data_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0755"
+  loop:
+    - shared
+    - projects
+    - archives
+
+- name: Populate file-server shared data
+  copy:
+    dest: "{{ company_data_dir }}/{{ item.path }}"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0644"
+    content: "{{ item.content }}"
+  loop:
+    - path: shared/network_map.txt
+      content: |
+        NETWORK MAP - corp-switch 192.168.50.0/24
+        workstation   192.168.50.5
+        file-server   192.168.50.6
+        db-server     192.168.50.10  (planned)
+    - path: shared/policy_document.txt
+      content: |
+        DATA RETENTION POLICY v2.1
+        - Financial records: 7 years
+        - HR records: 5 years
+        - Contracts: duration + 3 years
+        - Email: 2 years
+    - path: projects/project_alpha.txt
+      content: |
+        PROJECT ALPHA - CONFIDENTIAL
+        Lead: Alice Martin
+        Budget: USD 220,000
+        Status: In progress (60%)
+        Deadline: 2026-09-30
+    - path: projects/project_beta.txt
+      content: |
+        PROJECT BETA - INTERNAL
+        Lead: Bob Chen
+        Budget: USD 85,000
+        Status: Planning
+        Deadline: 2026-12-01
+    - path: archives/incident_log_2025.txt
+      content: |
+        INCIDENT LOG 2025
+        2025-03-12  Phishing attempt blocked - 3 users targeted
+        2025-07-08  Unauthorized access attempt on SSH (brute force)
+        2025-11-20  Suspicious outbound traffic - investigated, resolved

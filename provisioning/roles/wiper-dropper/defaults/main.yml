@@ -1,0 +1,4 @@
+---
+username: cyrano
+attacker_ip: "192.168.40.5"
+dropper_path: /tmp/disk-cleanup-installer.sh

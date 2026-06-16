@@ -1,0 +1,254 @@
+{
+  "title": "BiBi-Linux Wiper Incident Response",
+  "description": "Investigate and respond to a destructive malware attack using the BiBi-Linux Wiper.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge",
+    "Incident response fundamentals"
+  ],
+  "outcomes": [
+    "Investigate file destruction activity",
+    "Analyze malware execution logs and forensic artifacts",
+    "Contain and disable malicious timers and destructive services"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "The scenario simulates a destructive malware attack using the BiBi-Linux Wiper. This malware is designed to corrupt files with random data, manipulate partition tables, and append mocking 'BiBi' extensions. It has no ransom note or command-and-control (C2) servers, indicating its sole purpose is data destruction. The malware targets Linux systems and has been detected on the workstation and file-server hosts in the network. The scenario focuses on investigating and responding to the malware on these specific hosts."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "You will start with access to the workstation host as the user 'cyrano' with the password 'cyrano'. From there, you can investigate the compromise, analyze the malware, and take appropriate response actions. You may need to access other hosts in the network as part of your investigation.",
+      "local_content": "Local sandbox access is not required for this scenario."
+    },
+    {
+      "title": "Investigate suspicious file destruction activity",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/usr/local/sbin/disk-maintenance",
+      "answer_variable_name": null,
+      "content": "Users have reported that important files on the workstation have been corrupted or renamed. Investigate the file destruction activity and identify any suspicious processes or artifacts related to this incident.",
+      "solution": "To investigate the file destruction activity, follow these steps:\n1. Check the system logs for any unusual activity, such as file modifications or renaming.\n2. Identify the suspicious process related to file destruction by examining the logs and file modification timestamps.\n3. Provide the path to the wiper binary.\n4. Identify at least three files that have been modified or renamed by the wiper malware.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Start by examining system logs for unusual file modifications or renaming activities.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Look for processes that might be responsible for the file modifications. Check the timestamps of modified files.",
+          "hint_penalty": 1,
+          "order": 1
+        },
+        {
+          "title": "Third hint title",
+          "content": "Use the command 'grep -i 'file modification' /var/log/syslog' to find relevant log entries.",
+          "hint_penalty": 2,
+          "order": 2
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "investigate_file_destruction",
+          "prereq_state": [],
+          "cmd": "grep -i 'file modification' /var/log/syslog",
+          "cmd_type": "bash-command",
+          "cmd_regex": "grep -i 'file modification' /var/log/syslog",
+          "optional": false
+        },
+        {
+          "state_name": "identify_suspicious_process",
+          "prereq_state": [],
+          "cmd": "ps aux | grep -i 'disk-maintenance'",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ps aux | grep -i 'disk-maintenance'",
+          "optional": false
+        },
+        {
+          "state_name": "identify_modified_files",
+          "prereq_state": [],
+          "cmd": "find /data/company_files -type f -mtime -1",
+          "cmd_type": "bash-command",
+          "cmd_regex": "find /data/company_files -type f -mtime -1",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Analyze malware execution logs and forensic artifacts",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "/var/cache/.mbr_wipe",
+      "answer_variable_name": null,
+      "content": "Examine the logs and artifacts left by the wiper malware to understand its behavior and impact. Look for any evidence of anti-forensic activity, such as log clearing or disk manipulation.",
+      "solution": "To analyze the malware execution logs and forensic artifacts, follow these steps:\n1. Check the system logs for any unusual activity, such as log clearing or disk manipulation.\n2. Identify at least three logs that have been cleared or modified by the wiper malware.\n3. Provide the path to the artifact that simulates MBR overwrite.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Begin by checking system logs for signs of log clearing or disk manipulation.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Look for evidence of anti-forensic activity, such as logs being cleared or modified.",
+          "hint_penalty": 1,
+          "order": 1
+        },
+        {
+          "title": "Third hint title",
+          "content": "Use the command 'grep -i 'cleared' /var/log/syslog' to find relevant log entries.",
+          "hint_penalty": 2,
+          "order": 2
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "analyze_logs",
+          "prereq_state": [],
+          "cmd": "grep -i 'cleared' /var/log/syslog",
+          "cmd_type": "bash-command",
+          "cmd_regex": "grep -i 'cleared' /var/log/syslog",
+          "optional": false
+        },
+        {
+          "state_name": "identify_cleared_logs",
+          "prereq_state": [],
+          "cmd": "ls -la /var/log/journal",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ls -la /var/log/journal",
+          "optional": false
+        },
+        {
+          "state_name": "identify_mbr_artifact",
+          "prereq_state": [],
+          "cmd": "ls -la /var/cache/.mbr_wipe",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ls -la /var/cache/.mbr_wipe",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Contain and disable malicious timers and destructive services",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": null,
+      "answer": "disk-maintenance.service",
+      "answer_variable_name": null,
+      "content": "To prevent further damage, you need to contain and disable the malicious timers and services associated with the wiper malware. Investigate the systemd services and timers to identify and disable any suspicious entries.",
+      "solution": "To contain and disable malicious timers and destructive services, follow these steps:\n1. Check the systemd services and timers for any unusual entries.\n2. Identify and disable the malicious systemd service associated with the wiper malware.\n3. Identify and disable the malicious systemd timer associated with the wiper malware.\n4. Verify that the wiper malware can no longer execute automatically after a system reboot.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Start by examining systemd services and timers for any unusual entries.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "Look for suspicious systemd services or timers that might be related to the wiper malware.",
+          "hint_penalty": 1,
+          "order": 1
+        },
+        {
+          "title": "Third hint title",
+          "content": "Use the command 'systemctl list-units --type=service' to list all services.",
+          "hint_penalty": 2,
+          "order": 2
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "investigate_systemd_services",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-units --type=service",
+          "optional": false
+        },
+        {
+          "state_name": "disable_malicious_service",
+          "prereq_state": [],
+          "cmd": "systemctl disable disk-maintenance.service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl disable disk-maintenance.service",
+          "optional": false
+        },
+        {
+          "state_name": "verify_malicious_service_disabled",
+          "prereq_state": [],
+          "cmd": "systemctl is-enabled disk-maintenance.service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl is-enabled disk-maintenance.service",
+          "optional": false
+        },
+        {
+          "state_name": "disable_malicious_timer",
+          "prereq_state": [],
+          "cmd": "systemctl disable disk-maintenance.timer",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl disable disk-maintenance.timer",
+          "optional": false
+        },
+        {
+          "state_name": "verify_malicious_timer_disabled",
+          "prereq_state": [],
+          "cmd": "systemctl is-enabled disk-maintenance.timer",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl is-enabled disk-maintenance.timer",
+          "optional": false
+        },
+        {
+          "state_name": "verify_wiper_disabled",
+          "prereq_state": [],
+          "cmd": "systemctl is-enabled disk-maintenance.service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl is-enabled disk-maintenance.service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 40,
+  "variant_sandboxes": false
+}

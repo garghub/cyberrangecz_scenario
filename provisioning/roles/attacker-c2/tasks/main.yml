@@ -1,0 +1,55 @@
+---
+- name: Install ncat
+  apt:
+    name: ncat
+    state: present
+    update_cache: yes
+
+- name: Create C2 log directory
+  file:
+    path: "{{ c2_log_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Create C2 event handler script
+  copy:
+    dest: "{{ c2_handler_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      LOG="{{ c2_log_file }}"
+      while IFS= read -r line; do
+        [ -z "$line" ] && continue
+        echo "[$(date -Is)] $line" >> "$LOG"
+      done
+
+- name: Create C2 receiver service
+  copy:
+    dest: "/etc/systemd/system/{{ c2_service }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Wiper C2 event receiver
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/bin/ncat -lk {{ listen_port }} -c "{{ c2_handler_script }}"
+      Restart=always
+      RestartSec=2
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable and start C2 receiver
+  systemd:
+    name: "{{ c2_service }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes

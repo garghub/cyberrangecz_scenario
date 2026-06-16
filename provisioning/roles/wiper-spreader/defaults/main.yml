@@ -1,0 +1,10 @@
+---
+username: cyrano
+target_host: file-server
+target_user: cyrano
+target_dir: /data/company_files
+wiper_binary: /usr/local/sbin/disk-maintenance
+spread_script: /usr/local/bin/net-sync.sh
+spread_log: "/home/cyrano/net-sync.log"
+spread_service: net-sync.service
+spread_timer: net-sync.timer
