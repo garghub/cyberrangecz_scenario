@@ -1,0 +1,10 @@
+---
+username: cyrano
+password: cyrano
+hosts_entries:
+- {ip: "192.168.50.5", name: "victim"}
+- {ip: "192.168.40.5", name: "attacker"}
+- {ip: "192.168.50.6", name: "victim2"}
+packages_to_install:
+- openssh-server
+- ncat

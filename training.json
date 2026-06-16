@@ -1,0 +1,182 @@
+{
+  "title": "Umbreon Rootkit Investigation",
+  "description": "Investigate and analyze the compromised systems to identify and mitigate the Umbreon rootkit's presence.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux system administration",
+    "Basic networking knowledge",
+    "Understanding of rootkit behaviors and techniques",
+    "Familiarity with system file structures and configurations"
+  ],
+  "outcomes": [
+    "Detection and analysis of rootkit artifacts",
+    "Investigation of system-wide configuration files"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "The Umbreon rootkit is a Pok\u00e9mon-themed Linux rootkit that targets both x86 and ARM systems. It is designed to hide processes, files, and network connections from system administrators. The rootkit uses various techniques to maintain persistence and evade detection. Your task is to investigate and analyze the compromised systems to identify and mitigate the rootkit's presence."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the victim machine (IP: 192.168.50.5) using the provided credentials.",
+      "local_content": "Access the victim machine (IP: 192.168.50.5) using the provided credentials."
+    },
+    {
+      "title": "Identify the suspicious shared library injection",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 20,
+      "minimal_possible_solve_time": null,
+      "answer": "Umbreon rootkit module",
+      "answer_variable_name": null,
+      "content": "Investigate the system for any suspicious shared libraries that might be used by the Umbreon rootkit.",
+      "solution": "Check the /lib/x86_64-linux-gnu/ directory for any unusual files. The suspicious shared library is libsysmon.so.1. Examine its content to identify the rootkit module.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "Conceptual Hint",
+          "content": "Rootkits often hide their presence by injecting malicious shared libraries.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Directional Hint",
+          "content": "Check directories where shared libraries are typically stored.",
+          "hint_penalty": 1,
+          "order": 1
+        },
+        {
+          "title": "Near-Spoiler Hint",
+          "content": "Look for unusual files in the /lib/x86_64-linux-gnu/ directory.",
+          "hint_penalty": 2,
+          "order": 2
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "ls -la /lib/x86_64-linux-gnu/libsysmon.so.1",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ls -la /lib/x86_64-linux-gnu/libsysmon.so.1",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the malicious system-wide preload configuration",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 25,
+      "minimal_possible_solve_time": null,
+      "answer": "Umbreon rootkit preload",
+      "answer_variable_name": null,
+      "content": "Examine the system-wide preload configuration to detect any malicious entries that might be used by the Umbreon rootkit.",
+      "solution": "Check the /etc/ld.so.preload file for any suspicious entries. The malicious entry is /lib/x86_64-linux-gnu/libsysmon.so.1. Examine its content to identify the rootkit preload.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "Conceptual Hint",
+          "content": "Rootkits can manipulate the system-wide preload configuration to load malicious libraries.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Directional Hint",
+          "content": "Check the /etc/ld.so.preload file for any unusual entries.",
+          "hint_penalty": 1,
+          "order": 1
+        },
+        {
+          "title": "Near-Spoiler Hint",
+          "content": "Look for paths to suspicious shared libraries in the preload file.",
+          "hint_penalty": 2,
+          "order": 2
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "grep /lib/x86_64-linux-gnu/libsysmon.so.1 /etc/ld.so.preload",
+          "cmd_type": "bash-command",
+          "cmd_regex": "grep /lib/x86_64-linux-gnu/libsysmon.so.1 /etc/ld.so.preload",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the hidden privileged account",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 30,
+      "minimal_possible_solve_time": null,
+      "answer": "cyrano",
+      "answer_variable_name": null,
+      "content": "Investigate the system for any hidden privileged accounts that might have been created by the Umbreon rootkit.",
+      "solution": "Check the /etc/passwd and /etc/shadow files for any unusual user entries. The hidden privileged account is cyrano.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "Conceptual Hint",
+          "content": "Rootkits often create hidden privileged accounts to maintain access.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Directional Hint",
+          "content": "Check the /etc/passwd and /etc/shadow files for any unusual user entries.",
+          "hint_penalty": 1,
+          "order": 1
+        },
+        {
+          "title": "Near-Spoiler Hint",
+          "content": "Look for entries with unusual user IDs or names.",
+          "hint_penalty": 2,
+          "order": 2
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "grep cyrano /etc/passwd",
+          "cmd_type": "bash-command",
+          "cmd_regex": "grep cyrano /etc/passwd",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 85,
+  "variant_sandboxes": false
+}

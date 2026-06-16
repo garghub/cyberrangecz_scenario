@@ -1,0 +1,6 @@
+---
+listen_port: 4444
+c2_log_dir: /var/log/c2-receiver
+c2_log_file: /var/log/c2-receiver/beacons.log
+c2_handler_script: /usr/local/bin/c2-handler.sh
+c2_service: c2-receiver.service
