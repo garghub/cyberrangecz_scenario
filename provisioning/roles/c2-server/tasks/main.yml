@@ -1,0 +1,24 @@
+---
+- name: Add c2admin user
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash("sha512") }}'
+    shell: '/bin/bash'
+    groups: sudo
+    append: yes
+
+- name: Add host aliases
+  lineinfile:
+    path: '/etc/hosts'
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Create C2 log directory
+  file:
+    path: /var/log/botnet-c2
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+

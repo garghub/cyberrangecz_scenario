@@ -1,0 +1,163 @@
+{
+  "title": "Mirai Botnet Investigation and Mitigation",
+  "description": "You are an incident responder tasked with investigating and mitigating a Mirai botnet infection on your network. The Mirai botnet, specifically the Linux/Mirai-Hilix variant, targets Linux hosts, exploiting vulnerabilities to deliver payloads and establish a botnet for Distributed Denial of Service (DDoS) attacks. These attacks can cause significant disruption, including service outages and financial losses. Your goal is to identify the compromised hosts, understand the botnet's behavior, and implement containment measures to protect your network.",
+  "prerequisites": [
+    "Basic knowledge of Linux commands and network protocols.",
+    "Familiarity with incident response procedures."
+  ],
+  "outcomes": [
+    "Identify and investigate suspicious services related to the Mirai botnet.",
+    "Detect and analyze the botnet's command-and-control (C2) communication.",
+    "Implement containment measures to block C2 communication and mitigate the DDoS attack."
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "You are an incident responder tasked with investigating and mitigating a Mirai botnet infection on your network. The Mirai botnet, specifically the Linux/Mirai-Hilix variant, targets Linux hosts, exploiting vulnerabilities to deliver payloads and establish a botnet for Distributed Denial of Service (DDoS) attacks. These attacks can cause significant disruption, including service outages and financial losses. Your goal is to identify the compromised hosts, understand the botnet's behavior, and implement containment measures to protect your network."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the sandbox environment via the provided link. Use the following credentials to log in: Username: cyrano, Password: cyrano.",
+      "local_content": "Local sandbox access is not required for this scenario."
+    },
+    {
+      "title": "Identify Suspicious Beacon Service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 20,
+      "minimal_possible_solve_time": null,
+      "answer": "bot-beacon-Hilix.sh.service",
+      "answer_variable_name": null,
+      "content": "Investigate the services running on bot1 and identify the suspicious beacon service used by the Mirai botnet for C2 communication.\n\nSteps:\n1. SSH into bot1 using the provided credentials.\n2. List all running services using the `systemctl list-units --type=service` command.\n3. Identify the suspicious beacon service related to the Mirai botnet.",
+      "solution": "1. SSH into bot1 using the provided credentials.\n2. Run the command `systemctl list-units --type=service` to list all running services.\n3. Look for the service named `bot-beacon-Hilix.sh.service` which is the suspicious beacon service used by the Mirai botnet.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for services with unusual names or those that are not part of the standard system services.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "The suspicious beacon service is related to the Mirai botnet and is used for C2 communication.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "identify_beacon_service",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-units --type=service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify Suspicious Outbound IP and Port",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 30,
+      "minimal_possible_solve_time": null,
+      "answer": "192.168.70.5:44382",
+      "answer_variable_name": null,
+      "content": "Analyze the network connections on bot1 to identify the suspicious outbound IP address and port used for C2 communication.\n\nSteps:\n1. SSH into bot1 using the provided credentials.\n2. Use the `netstat -tuln` command to list all network connections.\n3. Identify the suspicious outbound IP address and port used for C2 communication.",
+      "solution": "1. SSH into bot1 using the provided credentials.\n2. Run the command `netstat -tuln` to list all network connections.\n3. Look for the connection to the IP address `192.168.70.5` on port `44382`, which is the suspicious outbound IP address and port used for C2 communication.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for connections to unusual IP addresses or ports that are not part of the standard network traffic.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "The suspicious outbound IP address and port used for C2 communication are `192.168.70.5` and `44382` respectively.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "identify_outbound_ip_port",
+          "prereq_state": [],
+          "cmd": "netstat -tuln",
+          "cmd_type": "bash-command",
+          "cmd_regex": "netstat -tuln",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Contain C2 Communication",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 25,
+      "minimal_possible_solve_time": null,
+      "answer": "44382",
+      "answer_variable_name": null,
+      "content": "Implement containment measures to block the C2 communication between bot1 and the C2 server.\n\nSteps:\n1. SSH into bot1 using the provided credentials.\n2. Use the `iptables` command to block the suspicious outbound port identified in the previous task.\n3. Verify that the C2 communication is blocked by checking the network connections again.",
+      "solution": "1. SSH into bot1 using the provided credentials.\n2. Run the command `iptables -A OUTPUT -p tcp --dport 44382 -j DROP` to block the suspicious outbound port `44382`.\n3. Verify that the C2 communication is blocked by running the command `netstat -tuln` again.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Use the `iptables -A OUTPUT -p tcp --dport <port> -j DROP` command to block the port.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second hint title",
+          "content": "The suspicious outbound port to block is `44382`.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "contain_c2_communication",
+          "prereq_state": [],
+          "cmd": "iptables -A OUTPUT -p tcp --dport 44382 -j DROP",
+          "cmd_type": "bash-command",
+          "cmd_regex": "iptables -A OUTPUT -p tcp --dport 44382 -j DROP",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 80,
+  "variant_sandboxes": false
+}

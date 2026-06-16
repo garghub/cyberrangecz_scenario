@@ -1,0 +1,6 @@
+ssh_user: cyrano
+ssh_user_home: "/home/{{ ssh_user }}"
+ssh_key_type: ed25519
+ssh_key_filename: id_ed25519
+ssh_generate_keypair: true
+ssh_known_hosts: []
