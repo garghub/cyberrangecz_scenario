@@ -1,0 +1,84 @@
+---
+- name: Install packages needed for synthetic transfer
+  apt:
+    name:
+      - rsync
+      - openssh-client
+    state: present
+    update_cache: true
+
+- name: Create continuous transfer payload script from target to next-target
+  copy:
+    dest: /usr/local/bin/payload-transfer.sh
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      set -eu
+      SOURCE_DIR="/home/{{ username }}"
+      LOG_FILE="/home/{{ username }}/payload-transfer.log"
+      NEXT_HOST="{{ next_target_host }}"
+      NEXT_USER="{{ next_target_user }}"
+      NEXT_PATH="/home/{{ username }}/"
+      POLL_INTERVAL="{{ transfer_poll_interval | default(5) }}"
+      touch "$LOG_FILE"
+      while true; do
+        rsync -az --timeout=10 \
+          -e "ssh -o BatchMode=yes -o StrictHostKeyChecking=no" \
+          "${SOURCE_DIR}/" "${NEXT_USER}@${NEXT_HOST}:${NEXT_PATH}" \
+          >> "$LOG_FILE" 2>&1 || true
+        sleep "$POLL_INTERVAL"
+      done
+
+- name: Create systemd service for payload transfer
+  copy:
+    dest: /etc/systemd/system/payload-transfer.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Generate and sync payload test data
+      After=network-online.target
+      Wants=network-online.target
+      [Service]
+      Type=simple
+      User={{ username }}
+      ExecStart=/usr/local/bin/payload-transfer.sh
+      Restart=always
+      RestartSec=5
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: true
+
+- name: Enable and start payload-transfer service
+  systemd:
+    name: payload-transfer.service
+    enabled: true
+    state: started
+
+- name: Create systemd timer for payload transfer
+  copy:
+    dest: /etc/systemd/system/payload-transfer.timer
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Run payload transfer periodically
+      [Timer]
+      OnBootSec=2min
+      OnUnitActiveSec={{ synthetic_transfer_interval | default('5min') }}
+      Unit=payload-transfer.service
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable and start payload transfer timer
+  systemd:
+    name: payload-transfer.timer
+    enabled: true
+    state: started

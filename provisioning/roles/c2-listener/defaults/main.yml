@@ -1,0 +1,7 @@
+---
+# defaults file for c2-listener
+
+listen_port: 7070
+listen_log: /var/log/lab-checkin.log
+file_to_send: /var/log/local-inventory/inventory.log
+listen_service_unit: OpenSSHserver.service
