@@ -1,0 +1,100 @@
+---
+- name: Add dist user
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash("sha512") }}'
+    shell: '/bin/bash'
+    groups: sudo
+    append: yes
+
+- name: Add host aliases
+  lineinfile:
+    path: '/etc/hosts'
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Install python3 (for HTTP server)
+  apt:
+    name: python3
+    state: present
+    update_cache: yes
+
+- name: Create package distribution directory
+  file:
+    path: "{{ dist_root }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+
+- name: Create the trojanized installer script
+  copy:
+    dest: "{{ dist_root }}/net-diag-installer.sh"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      # net-diag v1.4.2 — Network Diagnostics Utility Installer
+      # Internal distribution — do not redistribute
+      set -e
+      echo "[net-diag] Installing network diagnostics utility..."
+      install -d /usr/local/bin
+      install -d /usr/local/lib/.netd
+      install -d /var/lib/.netd
+      cat > /usr/local/bin/net-diag <<'WRAPPER'
+      #!/bin/bash
+      echo "=== Network Diagnostics v1.4.2 ==="
+      echo "Hostname : $(hostname)"
+      echo "IP       : $(hostname -I | awk '{print $1}')"
+      echo "Uptime   : $(uptime -p)"
+      echo "Routing  :"
+      ip route 2>/dev/null || route -n 2>/dev/null
+      WRAPPER
+      chmod 0755 /usr/local/bin/net-diag
+      echo "[net-diag] Installation complete. Run: net-diag"
+
+- name: Create package manifest (makes download look legitimate)
+  copy:
+    dest: "{{ dist_root }}/MANIFEST"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      Package: net-diag
+      Version: 1.4.2
+      Maintainer: infra-team@internal
+      Description: Network diagnostics utility for internal hosts
+      Files:
+        net-diag-installer.sh
+        net-diag-1.4.2.tar.gz (stub)
+
+- name: Create systemd service to serve packages via HTTP
+  copy:
+    dest: /etc/systemd/system/pkg-server.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Internal Package Distribution Server
+      After=network.target
+
+      [Service]
+      Type=simple
+      WorkingDirectory={{ dist_root }}
+      ExecStart=/usr/bin/python3 -m http.server 8080
+      Restart=always
+      RestartSec=3
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable and start package HTTP server
+  systemd:
+    name: pkg-server.service
+    enabled: yes
+    state: started
+    daemon_reload: yes

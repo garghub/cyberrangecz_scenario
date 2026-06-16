@@ -1,0 +1,143 @@
+{
+  "title": "Godfather Android Banking Trojan Investigation",
+  "description": "Investigate the compromise of the victim host by the Godfather Android banking Trojan, identify indicators of compromise (IOCs), and contain the threat.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Password cracking techniques"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "The victim host in your network has been compromised by the Godfather Android banking Trojan. Your task is to investigate the compromise, identify the indicators of compromise (IOCs), and contain the threat. The Godfather Trojan is designed to harvest login credentials for banking applications and other financial services, exfiltrate data, and establish reverse shell connections. This investigation will cover the entire attack chain, including initial access, persistence mechanisms, and data exfiltration. Specifically, you will need to investigate systemd timers and services for indicators of compromise."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "You have SSH access to the victim host with the username `cyrano` and password `cyrano`. The victim host is `victim` with the IP address `192.168.60.10`. You also have access to the C2 server with the IP address `192.168.60.20`.",
+      "local_content": "You have SSH access to the victim host with the username `cyrano` and password `cyrano`. The victim host is `victim` with the IP address `192.168.60.10`. You also have access to the C2 server with the IP address `192.168.60.20`."
+    },
+    {
+      "title": "Identify the suspicious scheduled task/timer used by the malware",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "network-diagnostics.timer",
+      "answer_variable_name": null,
+      "content": "The Godfather Trojan uses a scheduled task to maintain persistence on the victim host. Investigate the systemd timers and identify the suspicious timer used by the malware.",
+      "solution": "The suspicious timer used by the malware is `network-diagnostics.timer`. You can find it by running the command `systemctl list-timers` and looking for timers related to network diagnostics or health checks.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for timers related to network diagnostics or health checks.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "systemctl list-timers",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-timers",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the hidden malware directory",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 20,
+      "minimal_possible_solve_time": null,
+      "answer": "/var/lib/.netd",
+      "answer_variable_name": null,
+      "content": "The Godfather Trojan creates a hidden directory to store its components. Investigate the file system and identify the hidden directory used by the malware.",
+      "solution": "The hidden directory used by the malware is `/var/lib/.netd`. You can find it by running the command `ls -la /var/lib | grep '.netd'` and looking for directories with unusual names or paths.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for directories with unusual names or paths in `/var/lib`.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "ls -la /var/lib | grep '.netd'",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ls -la /var/lib | grep '.netd'",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the reverse shell mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 25,
+      "minimal_possible_solve_time": null,
+      "answer": "/usr/local/lib/.netd/revshell.sh",
+      "answer_variable_name": null,
+      "content": "The Godfather Trojan establishes a reverse shell connection to the C2 server. Investigate the systemd services and identify the script used to establish the reverse shell connection.",
+      "solution": "The script used to establish the reverse shell connection is `/usr/local/lib/.netd/revshell.sh`. You can find it by running the command `cat /usr/local/lib/.netd/revshell.sh | grep 'nc'` and looking for scripts in the hidden malware directory.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for the script in the hidden malware directory `/usr/local/lib/.netd`.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "state_identifier",
+          "prereq_state": [],
+          "cmd": "cat /usr/local/lib/.netd/revshell.sh | grep 'nc'",
+          "cmd_type": "bash-command",
+          "cmd_regex": "cat /usr/local/lib/.netd/revshell.sh | grep 'nc'",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}

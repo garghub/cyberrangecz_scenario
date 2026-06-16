@@ -1,0 +1,8 @@
+---
+username: cyrano
+password: cyrano
+hosts_entries:
+- {ip: "192.168.60.5", name: "dist-server"}
+- {ip: "192.168.60.10", name: "victim"}
+- {ip: "192.168.60.20", name: "c2-server"}
+dist_root: /var/www/packages

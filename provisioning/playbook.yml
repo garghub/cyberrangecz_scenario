@@ -1,0 +1,77 @@
+---
+- name: disable qxl
+  hosts:
+    - routers
+    - hosts
+  gather_facts: yes
+  become: yes
+  tasks:
+    - include_role:
+        name: disable-qxl
+      when: ansible_os_family == 'Debian'
+
+
+- name: set up victim
+  hosts: victim
+  become: yes
+  roles:
+    - name: victim-host
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: False
+
+- name: set up dist-server
+  hosts: dist-server
+  become: yes
+  roles:
+    - name: dist-server
+
+- name: set up c2-server
+  hosts: c2-server
+  become: yes
+  roles:
+    - name: c2-server
+
+
+- name: Install trojan on victim (simulate running malicious installer)
+  hosts: victim
+  become: yes
+  roles:
+    - name: trojan-install
+      vars:
+        victim_user: cyrano
+        dist_host: dist-server
+        c2_host: c2-server
+        harvest_port: 80
+        revshell_port: 5555
+
+- name: Deploy harvester on victim
+  hosts: victim
+  become: yes
+  roles:
+    - role: trojan-harvester
+      vars:
+        victim_user: cyrano
+        c2_host: c2-server
+        c2_port: 80
+        harvest_schedule: "*:0/5"
+
+- name: Deploy reverse shell on victim
+  hosts: victim
+  become: yes
+  roles:
+    - role: trojan-revshell
+      vars:
+        victim_user: cyrano
+        c2_host: c2-server
+        c2_port: 5555
+        revshell_schedule: "*:0/3"
+
+
+- name: set up command logging
+  hosts: hosts
+  become: yes
+  roles:
+    - role: sandbox-logging
+      slf_destination_port: '{% if hostvars["man"] is defined -%} 514 {%- else -%} 515 {%- endif %}'

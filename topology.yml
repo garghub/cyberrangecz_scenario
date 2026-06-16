@@ -1,0 +1,52 @@
+name: godfather
+
+hosts:
+  - name: dist-server
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: victim
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: c2-server
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+routers:
+  - name: router
+    base_box:
+      image: debian-12-x86_64
+      man_user: debian
+    flavor: standard.small
+
+networks:
+  - name: trojan-switch
+    cidr: 192.168.60.0/24
+    accessible_by_user: True
+
+net_mappings:
+  - host: dist-server
+    network: trojan-switch
+    ip: 192.168.60.5
+
+  - host: victim
+    network: trojan-switch
+    ip: 192.168.60.10
+
+  - host: c2-server
+    network: trojan-switch
+    ip: 192.168.60.20
+
+router_mappings:
+  - router: router
+    network: trojan-switch
+    ip: 192.168.60.1
+
+groups: []

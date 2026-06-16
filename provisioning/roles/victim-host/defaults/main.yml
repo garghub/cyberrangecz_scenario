@@ -1,0 +1,27 @@
+---
+username: cyrano
+password: cyrano
+hosts_entries:
+- {ip: "192.168.60.5", name: "dist-server"}
+- {ip: "192.168.60.10", name: "victim"}
+- {ip: "192.168.60.20", name: "c2-server"}
+packages_to_install:
+- openssh-server
+- netcat-openbsd
+- curl
+- wget
+files_to_copy:
+- readme.txt
+files_to_create:
+- name: Google Protect
+  content: "Google Protect"
+- name: c79857015dbf220111e7c5f47cf20a656741a9380cc0faecd486b517648eb199
+  content: "c79857015dbf220111e7c5f47cf20a656741a9380cc0faecd486b517648eb199"
+- name: Google Protect
+  content: "Google Protect"
+- name: Google Protect
+  content: "Google Protect"
+- name: project_notes.txt
+  content: "Internal project notes — do not share\n"
+- name: config_backup.txt
+  content: "db_host=localhost\ndb_user=admin\ndb_pass=s3cr3t\n"

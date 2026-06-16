@@ -1,0 +1,6 @@
+---
+victim_user: cyrano
+dist_host: dist-server
+c2_host: c2-server
+harvest_port: 80
+revshell_port: 5555
