@@ -1,0 +1,8 @@
+username: cyrano
+pool_host: pool-server
+pool_port: 80
+wallet: "48sandbox1CryptoWalletAddressPlaceholder1111111111111111111111111111111111111111111111111X"
+worker_name: worker1
+miner_binary: /usr/local/sbin/sys-monitor
+miner_service: sys-monitor.service
+miner_log: /var/log/.sys-mon

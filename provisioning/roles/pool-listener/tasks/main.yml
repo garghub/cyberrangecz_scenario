@@ -1,0 +1,58 @@
+---
+- name: Install ncat
+  apt:
+    name: ncat
+    state: present
+    update_cache: yes
+
+- name: Create pool log directory
+  file:
+    path: "{{ pool_log_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create pool connection handler script
+  copy:
+    dest: "{{ pool_handler_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      LOG="{{ pool_log_file }}"
+      RESPONSE='{"id":null,"jsonrpc":"2.0","result":{"status":"OK"},"error":null}'
+
+      while IFS= read -r line; do
+        [ -z "$line" ] && continue
+        echo "[$(date -Is)] $line" >> "$LOG"
+        echo "$RESPONSE"
+      done
+
+- name: Create mining pool listener service
+  copy:
+    dest: /etc/systemd/system/mining-pool.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Mining pool Stratum listener
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/bin/ncat -lk {{ pool_port }} -c "{{ pool_handler_script }}"
+      Restart=always
+      RestartSec=2
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable and start mining pool listener
+  systemd:
+    name: mining-pool.service
+    enabled: yes
+    state: started
+    daemon_reload: yes

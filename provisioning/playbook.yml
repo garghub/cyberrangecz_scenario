@@ -1,0 +1,178 @@
+---
+- name: disable qxl
+  hosts:
+    - routers
+    - hosts
+  gather_facts: yes
+  become: yes
+  tasks:
+    - include_role:
+        name: disable-qxl
+      when: ansible_os_family == 'Debian'
+
+
+- name: set up miner-host
+  hosts: miner-host
+  become: yes
+  roles:
+    - name: miner-host
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: True
+
+
+- name: set up second-host
+  hosts: second-host
+  become: yes
+  roles:
+    - name: second-host
+
+
+- name: set up pool-server
+  hosts: pool-server
+  become: yes
+  roles:
+    - name: pool-server
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: True
+
+
+- name: Generate SSH key on miner-host and trust second-host
+  hosts: miner-host
+  become: yes
+  roles:
+    - role: ssh_access
+      vars:
+        ssh_user: cyrano
+        ssh_scan_hosts:
+          - second-host
+
+
+- name: Generate SSH key on second-host and trust miner-host
+  hosts: second-host
+  become: yes
+  roles:
+    - role: ssh_access
+      vars:
+        ssh_user: cyrano
+        ssh_scan_hosts:
+          - miner-host
+
+
+- name: Authorize miner-host key on second-host
+  hosts: second-host
+  become: yes
+  tasks:
+    - name: Ensure cyrano user exists
+      user:
+        name: cyrano
+        shell: /bin/bash
+        state: present
+
+    - name: Ensure .ssh directory exists for cyrano
+      file:
+        path: /home/cyrano/.ssh
+        state: directory
+        owner: cyrano
+        group: cyrano
+        mode: "0700"
+
+    - name: Add miner-host public key to second-host
+      authorized_key:
+        user: cyrano
+        key: "{{ hostvars['miner-host'].ssh_public_key_decoded }}"
+        state: present
+
+
+- name: Authorize second-host key on miner-host
+  hosts: miner-host
+  become: yes
+  tasks:
+    - name: Ensure cyrano user exists
+      user:
+        name: cyrano
+        shell: /bin/bash
+        state: present
+
+    - name: Ensure .ssh directory exists for cyrano
+      file:
+        path: /home/cyrano/.ssh
+        state: directory
+        owner: cyrano
+        group: cyrano
+        mode: "0700"
+
+    - name: Add second-host public key to miner-host
+      authorized_key:
+        user: cyrano
+        key: "{{ hostvars['second-host'].ssh_public_key_decoded }}"
+        state: present
+
+
+- name: Start mining pool listener on pool-server
+  hosts: pool-server
+  become: yes
+  roles:
+    - role: pool-listener
+      vars:
+        pool_port: 80
+
+
+- name: Deploy miner dropper on miner-host
+  hosts: miner-host
+  become: yes
+  roles:
+    - role: miner-dropper
+      vars:
+        username: cyrano
+        pool_host: pool-server
+        pool_port: 80
+        wallet: "{{ miner_wallet | default('48sandbox1CryptoWalletAddressPlaceholder1111111111111111111111111111111111111111111111111X') }}"
+
+
+- name: Deploy miner worker on miner-host
+  hosts: miner-host
+  become: yes
+  roles:
+    - role: miner-worker
+      vars:
+        username: cyrano
+        pool_host: pool-server
+        pool_port: 80
+        wallet: "{{ miner_wallet | default('48sandbox1CryptoWalletAddressPlaceholder1111111111111111111111111111111111111111111111111X') }}"
+        worker_name: worker1
+
+
+- name: Deploy miner spreader on miner-host
+  hosts: miner-host
+  become: yes
+  roles:
+    - role: miner-spreader
+      vars:
+        username: cyrano
+        target_host: second-host
+        target_user: cyrano
+
+
+- name: Deploy miner worker on second-host (lateral spread result)
+  hosts: second-host
+  become: yes
+  roles:
+    - role: miner-worker
+      vars:
+        username: cyrano
+        pool_host: pool-server
+        pool_port: 80
+        wallet: "{{ miner_wallet | default('48sandbox1CryptoWalletAddressPlaceholder1111111111111111111111111111111111111111111111111X') }}"
+        worker_name: worker2
+
+
+- name: set up command logging
+  hosts: hosts
+  become: yes
+  roles:
+    - role: sandbox-logging
+      slf_destination_port: '{% if hostvars["man"] is defined -%} 514 {%- else -%} 515 {%- endif %}'

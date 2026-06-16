@@ -1,0 +1,145 @@
+{
+  "title": "Coinminer Incident Response",
+  "description": "Investigate and respond to a coinminer infection on Linux servers.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Identifying suspicious services",
+    "Locating malware droppers",
+    "Investigating persistence mechanisms"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "The organization has detected unusual CPU usage on several Linux servers. Initial investigation suggests a possible coinminer infection. Your task is to investigate, analyze, and respond to this incident."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the sandbox via the provided cloud link. Use the following credentials:\n\nHost: `miner-host`\nUsername: `cyrano`\nPassword: `cyrano`\n\nAccess method: SSH",
+      "local_content": "Local sandbox access is not required for this scenario."
+    },
+    {
+      "title": "Identify the suspicious service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "sys-monitor",
+      "answer_variable_name": null,
+      "content": "Investigate the `miner-host` to identify the suspicious service responsible for the high CPU usage.",
+      "solution": "Check running services and their resource usage. The suspicious service is named `sys-monitor`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Check running services and their resource usage.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "check_services",
+          "prereq_state": [],
+          "cmd": "ps aux | grep sys-monitor",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ps aux.*sys-monitor",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the malware dropper artifact",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/tmp/ofd",
+      "answer_variable_name": null,
+      "content": "Locate the file used by the attacker to drop the malware on the `miner-host`.",
+      "solution": "Check the `/tmp` directory for suspicious files. The dropper artifact is located at `/tmp/ofd`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Check the `/tmp` directory for suspicious files.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "check_tmp_directory",
+          "prereq_state": [],
+          "cmd": "ls -la /tmp",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ls -la /tmp",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the persistence mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "sys-monitor.service",
+      "answer_variable_name": null,
+      "content": "Investigate the persistence mechanism used by the malware on the `miner-host`.",
+      "solution": "Check the systemd services. The persistence mechanism is the `sys-monitor.service`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint",
+          "content": "Check the systemd services.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "check_systemd_services",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-units --type=service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 30,
+  "variant_sandboxes": false
+}

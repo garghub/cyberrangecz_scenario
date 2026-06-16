@@ -1,0 +1,4 @@
+pool_port: 80
+pool_log_dir: /var/log/mining-pool
+pool_log_file: /var/log/mining-pool/submissions.log
+pool_handler_script: /usr/local/bin/pool-handler.sh
