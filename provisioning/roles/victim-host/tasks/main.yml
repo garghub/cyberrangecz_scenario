@@ -1,0 +1,53 @@
+---
+- name: Add host aliases
+  lineinfile:
+    path: '/etc/hosts'
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Add victim user
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash("sha512") }}'
+    shell: '/bin/bash'
+    state: present
+
+- name: Install packages
+  apt:
+    name: "{{ packages_to_install }}"
+    state: present
+    update_cache: yes
+
+- name: Create hidden spyware runtime directory
+  file:
+    path: /var/lib/.monitor
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create hidden spyware binary directory
+  file:
+    path: /usr/local/lib/.monitor
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Copy decoy files to victim home
+  copy:
+    src: "{{ item }}"
+    dest: "/home/{{ username }}/{{ item }}"
+    owner: "{{ username }}"
+    mode: "0644"
+  loop: "{{ files_to_copy }}"
+
+- name: Create decoy files with sensitive-looking content
+  copy:
+    dest: "/home/{{ username }}/{{ item.name }}"
+    content: "{{ item.content }}"
+    owner: "{{ username }}"
+    mode: "0644"
+  loop: "{{ files_to_create }}"
+

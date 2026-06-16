@@ -1,0 +1,163 @@
+{
+  "title": "HackingTeam Android Implant Investigation",
+  "description": "Investigate a compromised victim host with HackingTeam Android implant spyware.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Identifying hidden spyware directories",
+    "Analyzing keylogging mechanisms",
+    "Investigating data exfiltration methods"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "The victim host in the network has been compromised by an Android implant spyware from the HackingTeam malware family. This spyware requests extensive permissions, including access to SMS, contacts, location, and more. It uses string encryption to hide its activities and communicates with C2 servers via HTTPS. The malware can exfiltrate data, execute commands, and maintain persistence on the device."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "You have SSH access to the victim host with the username `cyrano` and password `cyrano`. The victim host is part of a network that includes a spy-server and a colleague host. You can investigate the victim host and any reachable hosts from it.",
+      "local_content": "You have SSH access to the victim host with the username `cyrano` and password `cyrano`. The victim host is part of a network that includes a spy-server and a colleague host. You can investigate the victim host and any reachable hosts from it."
+    },
+    {
+      "title": "Identify the Suspicious Hidden Directory",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 45,
+      "minimal_possible_solve_time": null,
+      "answer": "/var/lib/.monitor",
+      "answer_variable_name": null,
+      "content": "The spyware creates hidden directories to store its components and collected data. Investigate the victim host to find the hidden directory used by the spyware.",
+      "solution": "The hidden directory used by the spyware is `/var/lib/.monitor`. This directory contains various files and scripts related to the spyware's activities.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First Hint",
+          "content": "Check the file system for directories with unusual names or permissions.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second Hint",
+          "content": "Look for directories that are not typically found in a standard Unix/Linux system.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "hidden_directory",
+          "prereq_state": [],
+          "cmd": "ls -la /var/lib/.monitor",
+          "cmd_type": "bash-command",
+          "cmd_regex": "ls -la /var/lib/.monitor",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the Keylogging Mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 45,
+      "minimal_possible_solve_time": null,
+      "answer": "/var/lib/.monitor/keylog.log",
+      "answer_variable_name": null,
+      "content": "The spyware logs keystrokes to capture sensitive information. Investigate the victim host to find the file used for keylogging.",
+      "solution": "The file used for keylogging is `/var/lib/.monitor/keylog.log`. This file contains logged commands or keystrokes captured by the spyware.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First Hint",
+          "content": "Look for files in the hidden directory that contain logged commands or keystrokes.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second Hint",
+          "content": "Check for files with names that suggest logging activity.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "keylogging_file",
+          "prereq_state": [],
+          "cmd": "cat /var/lib/.monitor/keylog.log",
+          "cmd_type": "bash-command",
+          "cmd_regex": "cat /var/lib/.monitor/keylog.log",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the Data Exfiltration Mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 50,
+      "minimal_possible_solve_time": null,
+      "answer": "/usr/local/lib/.monitor/exfil.sh",
+      "answer_variable_name": null,
+      "content": "The spyware exfiltrates collected data to a C2 server using string encryption to hide its activities. Investigate the victim host to find the script used for exfiltration.",
+      "solution": "The script used for exfiltration is `/usr/local/lib/.monitor/exfil.sh`. This script sends collected data to an external server using string encryption to hide its activities.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First Hint",
+          "content": "Check for scripts in the hidden directory that send data to an external server.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Second Hint",
+          "content": "Look for scripts with names that suggest data transfer or exfiltration.",
+          "hint_penalty": 1,
+          "order": 1
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "exfiltration_script",
+          "prereq_state": [],
+          "cmd": "cat /usr/local/lib/.monitor/exfil.sh",
+          "cmd_type": "bash-command",
+          "cmd_regex": "cat /usr/local/lib/.monitor/exfil.sh",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 145,
+  "variant_sandboxes": false
+}

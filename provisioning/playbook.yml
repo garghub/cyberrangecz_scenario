@@ -1,0 +1,72 @@
+---
+- name: disable qxl
+  hosts:
+    - routers
+    - hosts
+  gather_facts: yes
+  become: yes
+  tasks:
+    - include_role:
+        name: disable-qxl
+      when: ansible_os_family == 'Debian'
+
+
+- name: set up victim
+  hosts: victim
+  become: yes
+  roles:
+    - name: victim-host
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: False
+
+- name: set up spy-server
+  hosts: spy-server
+  become: yes
+  roles:
+    - name: spy-server
+
+- name: set up colleague
+  hosts: colleague
+  become: yes
+  roles:
+    - name: colleague-host
+
+
+- name: Install spyware on victim
+  hosts: victim
+  become: yes
+  roles:
+    - role: spyware-install
+      vars:
+        victim_user: cyrano
+        spy_host: spy-server
+        spy_port: 443
+
+- name: Deploy keylogger collector on victim
+  hosts: victim
+  become: yes
+  roles:
+    - role: spyware-collector
+      vars:
+        victim_user: cyrano
+        collect_schedule: "*:0/5"
+
+- name: Deploy exfil agent on victim
+  hosts: victim
+  become: yes
+  roles:
+    - role: spyware-exfil
+      vars:
+        spy_host: spy-server
+        spy_port: 443
+        exfil_schedule: "*:0/10"
+
+
+- name: set up command logging
+  hosts: hosts
+  become: yes
+  roles:
+    - role: sandbox-logging
+      slf_destination_port: '{% if hostvars["man"] is defined -%} 514 {%- else -%} 515 {%- endif %}'

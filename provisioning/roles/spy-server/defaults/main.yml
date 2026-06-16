@@ -1,0 +1,8 @@
+---
+username: cyrano
+password: cyrano
+hosts_entries:
+- {ip: "192.168.100.5", name: "spy-server"}
+- {ip: "192.168.100.10", name: "victim"}
+- {ip: "192.168.100.20", name: "colleague"}
+exfil_port: 443

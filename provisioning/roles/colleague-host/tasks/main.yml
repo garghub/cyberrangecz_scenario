@@ -1,0 +1,37 @@
+---
+- name: Add colleague user
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash("sha512") }}'
+    shell: '/bin/bash'
+    state: present
+
+- name: Add host aliases
+  lineinfile:
+    path: '/etc/hosts'
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Install SSH server
+  apt:
+    name: openssh-server
+    state: present
+    update_cache: yes
+
+- name: Ensure SSH service is running
+  service:
+    name: ssh
+    state: started
+    enabled: yes
+
+
+- name: Create a decoy project file on colleague
+  copy:
+    dest: "/home/{{ username }}/shared_project.txt"
+    owner: "{{ username }}"
+    mode: "0644"
+    content: |
+      Shared project notes — last synced with victim
+      Status: in progress
+      Next meeting: Friday

