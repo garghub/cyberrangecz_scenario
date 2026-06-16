@@ -1,0 +1,10 @@
+---
+# defaults file for worm-propagation
+
+lab_user: cyrano
+origin_ip: 192.168.90.5
+beacon_host: attacker
+beacon_port: 7777
+worm_dir: /opt/.worm
+worm_script: /opt/.worm/worm.sh
+spread_log: /opt/.worm/spread.log

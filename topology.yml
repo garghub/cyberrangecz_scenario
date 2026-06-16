@@ -1,0 +1,62 @@
+name: mirai
+
+hosts:
+  - name: patient-zero
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: host-a
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: host-b
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: attacker
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+routers:
+  - name: router
+    base_box:
+      image: debian-12-x86_64
+      man_user: debian
+    flavor: standard.small
+
+networks:
+  - name: worm-switch
+    cidr: 192.168.90.0/24
+    accessible_by_user: True
+
+net_mappings:
+  - host: patient-zero
+    network: worm-switch
+    ip: 192.168.90.5
+
+  - host: host-a
+    network: worm-switch
+    ip: 192.168.90.10
+
+  - host: host-b
+    network: worm-switch
+    ip: 192.168.90.20
+
+  - host: attacker
+    network: worm-switch
+    ip: 192.168.90.30
+
+router_mappings:
+  - router: router
+    network: worm-switch
+    ip: 192.168.90.1
+
+groups: []

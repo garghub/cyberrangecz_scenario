@@ -1,0 +1,109 @@
+---
+- name: disable qxl
+  hosts:
+    - routers
+    - hosts
+  gather_facts: yes
+  become: yes
+  tasks:
+    - include_role:
+        name: disable-qxl
+      when: ansible_os_family == 'Debian'
+
+
+- name: set up patient-zero
+  hosts: patient-zero
+  become: yes
+  roles:
+    - name: patient-zero-host
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: False
+
+- name: set up host-a
+  hosts: host-a
+  become: yes
+  roles:
+    - name: infected-host
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: False
+
+- name: set up host-b
+  hosts: host-b
+  become: yes
+  roles:
+    - name: infected-host
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: False
+
+- name: set up attacker
+  hosts: attacker
+  become: yes
+  roles:
+    - name: attacker-host
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: True
+
+
+- name: Plant worm on patient-zero (initial infection)
+  hosts: patient-zero
+  become: yes
+  roles:
+    - role: worm-initial
+      vars:
+        lab_user: cyrano
+        beacon_host: attacker
+        beacon_port: 7777
+        subnet_prefix: 192.168.90
+        host_a_ip: 192.168.90.10
+        host_b_ip: 192.168.90.20
+
+- name: Simulate worm propagation to host-a
+  hosts: host-a
+  become: yes
+  roles:
+    - role: worm-propagation
+      vars:
+        lab_user: cyrano
+        origin_ip: 192.168.90.5
+        beacon_host: attacker
+        beacon_port: 7777
+
+- name: Simulate worm propagation to host-b
+  hosts: host-b
+  become: yes
+  roles:
+    - role: worm-propagation
+      vars:
+        lab_user: cyrano
+        origin_ip: 192.168.90.5
+        beacon_host: attacker
+        beacon_port: 7777
+
+- name: Deploy beacon persistence on all infected hosts
+  hosts:
+    - patient-zero
+    - host-a
+    - host-b
+  become: yes
+  roles:
+    - role: worm-beacon
+      vars:
+        beacon_host: attacker
+        beacon_port: 7777
+        beacon_schedule: "*:0/7"
+
+
+- name: set up command logging
+  hosts: hosts
+  become: yes
+  roles:
+    - role: sandbox-logging
+      slf_destination_port: '{% if hostvars["man"] is defined -%} 514 {%- else -%} 515 {%- endif %}'

@@ -1,0 +1,12 @@
+---
+# defaults file for worm-initial
+
+lab_user: cyrano
+beacon_host: attacker
+beacon_port: 7777
+subnet_prefix: 192.168.90
+host_a_ip: 192.168.90.10
+host_b_ip: 192.168.90.20
+worm_dir: /opt/.worm
+worm_script: /opt/.worm/worm.sh
+spread_log: /opt/.worm/spread.log

@@ -1,0 +1,145 @@
+{
+  "title": "Okiru Worm Investigation",
+  "description": "Investigate and respond to an Okiru worm infection in your network.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Identifying suspicious scheduled tasks",
+    "Finding hidden malware directories",
+    "Analyzing beaconing mechanisms"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "The Okiru worm, a variant of the Mirai malware family, has been detected in your network. This worm targets IoT devices and uses exploits to propagate itself by scanning for vulnerable devices and compromising them. Your task is to investigate and respond to this incident."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "Access the sandbox via the provided cloud environment.",
+      "local_content": "Instructions for local sandbox usage."
+    },
+    {
+      "title": "Identify the Suspicious Scheduled Task/Timer",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/etc/systemd/system/sysnet-monitor.timer",
+      "answer_variable_name": null,
+      "content": "The Okiru worm creates a scheduled task/timer for persistence. Investigate the systemd timers on patient-zero to find the suspicious timer.",
+      "solution": "The suspicious timer is located in the /etc/systemd/system/ directory. The timer name is sysnet-monitor.timer.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First Hint",
+          "content": "Look for timers in the /etc/systemd/system/ directory.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "timer_check",
+          "prereq_state": [],
+          "cmd": "ls /etc/systemd/system/",
+          "cmd_type": "bash-command",
+          "cmd_regex": "sysnet-monitor.timer",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the Hidden Malware Directory",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/opt/.worm",
+      "answer_variable_name": null,
+      "content": "The Okiru worm creates a hidden directory to store its files. Search the filesystem on patient-zero for suspicious directories.",
+      "solution": "The hidden malware directory is located in /opt/.worm.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First Hint",
+          "content": "Check directories in /opt/ for any unusual names.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "directory_check",
+          "prereq_state": [],
+          "cmd": "ls /opt/",
+          "cmd_type": "bash-command",
+          "cmd_regex": "/opt/.worm",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the Beaconing Mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "/opt/.worm/beacon.sh",
+      "answer_variable_name": null,
+      "content": "The Okiru worm communicates with a command and control (C2) server. Investigate the scripts in the hidden malware directory on patient-zero to find the beaconing mechanism.",
+      "solution": "The beaconing mechanism is located in the hidden malware directory /opt/.worm/beacon.sh.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First Hint",
+          "content": "Look for scripts that make network connections.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "beacon_check",
+          "prereq_state": [],
+          "cmd": "ls /opt/.worm/",
+          "cmd_type": "bash-command",
+          "cmd_regex": "/opt/.worm/beacon.sh",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 30,
+  "variant_sandboxes": false
+}

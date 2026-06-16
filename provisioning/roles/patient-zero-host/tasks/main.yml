@@ -1,0 +1,49 @@
+---
+- name: Add host aliases
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Add lab user
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash("sha512") }}'
+    shell: /bin/bash
+    state: present
+
+- name: Install packages
+  apt:
+    name: "{{ packages_to_install }}"
+    state: present
+    update_cache: yes
+
+- name: Create worm runtime directory
+  file:
+    path: /opt/.worm
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create decoy work files
+  copy:
+    dest: "/home/{{ username }}/{{ item.name }}"
+    content: "{{ item.content }}"
+    owner: "{{ username }}"
+    mode: "0644"
+  loop:
+    - name: quarterly_report.txt
+      content: |
+        Q1 Financial Report — Internal Use Only
+        Revenue: $4.2M
+        Headcount: 47
+        Next review: board meeting Thursday
+    - name: ssh_notes.txt
+      content: |
+        Lab machine credentials (same on all lab hosts):
+        user: labuser
+        pass: labpass
+        SSH: ssh labuser@<host>
+

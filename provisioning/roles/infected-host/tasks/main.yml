@@ -1,0 +1,37 @@
+---
+- name: Add host aliases
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Add lab user
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash("sha512") }}'
+    shell: /bin/bash
+    state: present
+
+- name: Install packages
+  apt:
+    name: "{{ packages_to_install }}"
+    state: present
+    update_cache: yes
+
+- name: Create worm runtime directory
+  file:
+    path: /opt/.worm
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create decoy work file
+  copy:
+    dest: "/home/{{ username }}/work_notes.txt"
+    content: |
+      Work notes — {{ ansible_hostname }}
+      Contact: labuser@patient-zero for shared project files.
+    owner: "{{ username }}"
+    mode: "0644"

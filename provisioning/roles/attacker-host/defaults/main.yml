@@ -1,0 +1,9 @@
+---
+username: cyrano
+password: cyrano
+hosts_entries:
+- {ip: "192.168.90.5", name: "patient-zero"}
+- {ip: "192.168.90.10", name: "host-a"}
+- {ip: "192.168.90.20", name: "host-b"}
+- {ip: "192.168.90.30", name: "attacker"}
+beacon_port: 7777
