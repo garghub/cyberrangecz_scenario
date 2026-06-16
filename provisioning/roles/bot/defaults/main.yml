@@ -1,0 +1,18 @@
+---
+username: cyrano
+password: cyrano
+hosts_entries:
+- {ip: "192.168.70.5", name: "c2-server"}
+- {ip: "192.168.70.10", name: "bot1"}
+- {ip: "192.168.70.11", name: "bot2"}
+packages_to_install:
+- openssh-server
+- netcat-openbsd
+files_to_copy: []
+files_to_create:
+- name: RHOMBUS.x86_64
+  content: "RHOMBUS.x86_64"
+- name: ba42665872ea41e3d2edd8978bc38c24
+  content: "ba42665872ea41e3d2edd8978bc38c24"
+- name: RHOMBUS.sh4
+  content: "RHOMBUS.sh4"

@@ -1,0 +1,113 @@
+---
+- name: Add host aliases
+  lineinfile:
+    path: '/etc/hosts'
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+  loop: "{{ hosts_entries }}"
+
+- name: Add bot user
+  user:
+    name: '{{ username }}'
+    password: '{{ password | password_hash("sha512") }}'
+    shell: '/bin/bash'
+    state: present
+
+- name: Install packages
+  apt:
+    name: "{{ packages_to_install }}"
+    state: present
+    update_cache: yes
+
+- name: Create hidden bot cache directory
+  file:
+    path: /var/lib/.botcache
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create hidden binary staging directory
+  file:
+    path: /usr/local/lib/.botcache
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Copy decoy files to bot user home
+  copy:
+    src: "{{ item }}"
+    dest: "/home/{{ username }}/{{ item }}"
+    owner: "{{ username }}"
+    mode: "0644"
+  loop: "{{ files_to_copy }}"
+
+- name: Create Payloads
+  copy:
+      dest: "/home/{{ username }}/{{ item.name }}"
+      content: "{{ item.content }}"
+      owner: "{{ username }}"
+      mode: "0644"
+  loop: "{{ files_to_create }}"
+
+
+- name: Install persistence script disguised as system updater
+  copy:
+    dest: /usr/local/lib/.botcache/sys-updater.sh
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      # System update health monitor — do not remove
+      set -eu
+      LOG=/var/lib/.botcache/updater.log
+      echo "$(date -Is) [INFO] update check: $(hostname)" >> "$LOG"
+
+- name: Create persistence systemd service (disguised name)
+  copy:
+    dest: /etc/systemd/system/system-update-checker.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=System Update Health Monitor
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/lib/.botcache/sys-updater.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create persistence systemd timer
+  copy:
+    dest: /etc/systemd/system/system-update-checker.timer
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Periodic system update health check
+
+      [Timer]
+      OnBootSec=1min
+      OnUnitActiveSec=30min
+      Unit=system-update-checker.service
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: true
+
+- name: Enable persistence timer
+  systemd:
+    name: system-update-checker.timer
+    enabled: true
+    state: started

@@ -1,0 +1,165 @@
+---
+- name: disable qxl
+  hosts:
+    - routers
+    - hosts
+  gather_facts: yes
+  become: yes
+  tasks:
+    - include_role:
+        name: disable-qxl
+      when: ansible_os_family == 'Debian'
+
+
+- name: set up bot1
+  hosts: bot1
+  become: yes
+  roles:
+    - name: bot
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: False
+
+- name: set up bot2
+  hosts: bot2
+  become: yes
+  roles:
+    - name: bot
+    - name: user-access
+      user_access_username: cyrano
+      user_access_password: cyrano
+      user_access_sudo: False
+
+- name: set up c2-server
+  hosts: c2-server
+  become: yes
+  roles:
+    - name: c2-server
+
+
+- name: Generate SSH key on bot1 and trust bot2
+  hosts: bot1
+  become: yes
+  roles:
+    - role: ssh_access
+      vars:
+        ssh_user: cyrano
+        ssh_scan_hosts:
+          - bot2
+
+- name: Generate SSH key on bot2 and trust bot1
+  hosts: bot2
+  become: yes
+  roles:
+    - role: ssh_access
+      vars:
+        ssh_user: cyrano
+        ssh_scan_hosts:
+          - bot1
+
+- name: Authorize bot1 key on bot2
+  hosts: bot2
+  become: yes
+  tasks:
+    - name: Ensure cyrano exists
+      user:
+        name: cyrano
+        shell: /bin/bash
+        state: present
+
+    - name: Ensure .ssh directory exists
+      file:
+        path: /home/cyrano/.ssh
+        state: directory
+        owner: cyrano
+        group: cyrano
+        mode: "0700"
+
+    - name: Add bot1 public key to bot2
+      authorized_key:
+        user: cyrano
+        key: "{{ hostvars['bot1'].ssh_public_key_decoded }}"
+        state: present
+
+- name: Authorize bot2 key on bot1
+  hosts: bot1
+  become: yes
+  tasks:
+    - name: Ensure cyrano exists
+      user:
+        name: cyrano
+        shell: /bin/bash
+        state: present
+
+    - name: Ensure .ssh directory exists
+      file:
+        path: /home/cyrano/.ssh
+        state: directory
+        owner: cyrano
+        group: cyrano
+        mode: "0700"
+
+    - name: Add bot2 public key to bot1
+      authorized_key:
+        user: cyrano
+        key: "{{ hostvars['bot2'].ssh_public_key_decoded }}"
+        state: present
+
+
+- name: Start C2 command-and-control listener on c2-server
+  hosts: c2-server
+  become: yes
+  roles:
+    - role: c2-command-listener
+      vars:
+        listen_port: 2222
+        beacon_log: /var/log/botnet-c2/beacons.log
+        c2_response: "CMD:status_report"
+
+
+- name: Deploy beacon on bot1
+  hosts: bot1
+  become: yes
+  roles:
+    - role: bot-beacon
+      vars:
+        beacon_user: cyrano
+        c2_host: c2-server
+        c2_port: 2222
+        beacon_schedule: "*:0/1"
+        beacon_delay_seconds: 15
+
+- name: Deploy beacon on bot2
+  hosts: bot2
+  become: yes
+  roles:
+    - role: bot-beacon
+      vars:
+        beacon_user: cyrano
+        c2_host: c2-server
+        c2_port: 2222
+        beacon_schedule: "*:0/1"
+        beacon_delay_seconds: 30
+
+
+- name: Deploy simulated DDoS flood from bot1 and bot2
+  hosts:
+    - bot1
+    - bot2
+  become: yes
+  roles:
+    - role: bot-flood
+      vars:
+        flood_target_host: "192.168.80.100"
+        flood_target_port: 8888
+        flood_schedule: "*:0/5"
+        flood_count: 20
+
+
+- name: set up command logging
+  hosts: hosts
+  become: yes
+  roles:
+    - role: sandbox-logging
+      slf_destination_port: '{% if hostvars["man"] is defined -%} 514 {%- else -%} 515 {%- endif %}'

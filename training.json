@@ -1,0 +1,145 @@
+{
+  "title": "Rhombus Botnet Investigation",
+  "description": "Investigate and contain the Rhombus botnet (Linux/IRCTelnet) infection on compromised systems.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge"
+  ],
+  "outcomes": [
+    "Usage of nmap",
+    "Usage of metasploit",
+    "Password cracking techniques"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "content": "You are a cybersecurity analyst responding to reports of unusual network traffic from internal systems.\n\nThe Rhombus botnet (Linux/IRCTelnet) has been detected in your network, targeting VPS and IoT devices.\n\nYour task is to investigate the compromised systems, identify the command-and-control (C2) infrastructure, and contain the threat."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": null,
+      "passkey": "start",
+      "cloud_content": "SSH access to bot1 with user credentials provided.\n\nFrom bot1, you can SSH to bot2 using the established trust relationship.\n\nYou have sudo privileges on both bot1 and bot2.",
+      "local_content": "Local sandbox access is not required for this scenario."
+    },
+    {
+      "title": "Identify the suspicious beacon service",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "bot-beacon-RHOMBUS.service",
+      "answer_variable_name": null,
+      "content": "Investigate the systemd services running on bot1.\n\nIdentify the service responsible for beaconing to the C2 server.\n\nThe service name will be your flag.",
+      "solution": "1. List all systemd services: `systemctl list-units --type=service`\n2. Look for services with unusual names or descriptions related to system health or updates.\n3. The service name is `bot-beacon-RHOMBUS.service`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for services with unusual names or descriptions related to system health or updates.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "identify_beacon_service",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-units --type=service",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the persistence mechanism",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "system-update-checker.service",
+      "answer_variable_name": null,
+      "content": "Examine the systemd timers and services on bot1.\n\nIdentify the service responsible for maintaining persistence.\n\nThe service name will be your flag.",
+      "solution": "1. List all systemd timers: `systemctl list-timers`\n2. Look for timers with unusual names or descriptions related to system updates or health checks.\n3. The service name is `system-update-checker.service`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Look for services with unusual names or descriptions related to system updates or health checks.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "identify_persistence_service",
+          "prereq_state": [],
+          "cmd": "systemctl list-timers",
+          "cmd_type": "bash-command",
+          "cmd_regex": "systemctl list-timers",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Contain the C2 communication",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 10,
+      "minimal_possible_solve_time": null,
+      "answer": "2222",
+      "answer_variable_name": null,
+      "content": "Identify the C2 server IP address and port from the beacon service configuration.\n\nImplement a firewall rule to block outbound connections to the C2 server.\n\nThe port number used to block the connection will be your flag.",
+      "solution": "1. Check the beacon script or service configuration for the C2 server details.\n2. The C2 server IP address is `192.168.70.5` and the port is `2222`.\n3. Implement a firewall rule to block outbound connections to the C2 server: `iptables -A OUTPUT -d 192.168.70.5 -p tcp --destination-port 2222 -j DROP`.",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "First hint title",
+          "content": "Check the beacon script or service configuration for the C2 server details.",
+          "hint_penalty": 0,
+          "order": 0
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "block_c2_communication",
+          "prereq_state": [],
+          "cmd": "iptables -A OUTPUT -d 192.168.70.5 -p tcp --destination-port 2222 -j DROP",
+          "cmd_type": "bash-command",
+          "cmd_regex": "iptables -A OUTPUT -d 192.168.70.5 -p tcp --destination-port 2222 -j DROP",
+          "optional": false
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 60,
+  "variant_sandboxes": false
+}

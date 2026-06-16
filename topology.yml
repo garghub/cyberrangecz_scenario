@@ -1,0 +1,68 @@
+name: rhombus
+
+hosts:
+  - name: c2-server
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: bot1
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: bot2
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+  - name: victim
+    base_box:
+      image: ubuntu-noble-x86_64
+      man_user: ubuntu
+    flavor: standard.small
+
+routers:
+  - name: router
+    base_box:
+      image: debian-12-x86_64
+      man_user: debian
+    flavor: standard.small
+
+networks:
+  - name: botnet-switch
+    cidr: 192.168.70.0/24
+    accessible_by_user: True
+
+  - name: victim-switch
+    cidr: 192.168.80.0/24
+
+net_mappings:
+  - host: c2-server
+    network: botnet-switch
+    ip: 192.168.70.5
+
+  - host: bot1
+    network: botnet-switch
+    ip: 192.168.70.10
+
+  - host: bot2
+    network: botnet-switch
+    ip: 192.168.70.11
+
+  - host: victim
+    network: victim-switch
+    ip: 192.168.80.100
+
+router_mappings:
+  - router: router
+    network: botnet-switch
+    ip: 192.168.70.1
+  - router: router
+    network: victim-switch
+    ip: 192.168.80.1
+
+groups: []
