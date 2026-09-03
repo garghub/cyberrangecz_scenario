@@ -1,0 +1,185 @@
+{
+  "title": "Mirai Botnet Investigation",
+  "description": "This scenario simulates a Mirai botnet infection targeting Realtek & Huawei routers. The botnet uses a new TABLE encoder and aims devices with default telnet passwords to perform DDoS attacks. Your task is to investigate and respond to this incident.",
+  "prerequisites": [
+    "Basic knowledge of Unix/Linux",
+    "Basic networking knowledge",
+    "Basic knowledge of systemd services"
+  ],
+  "outcomes": [
+    "Understanding of Mirai botnet infection mechanisms",
+    "Identification of compromised services",
+    "Development of response strategies to mitigate threats"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Introduction",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 0,
+      "minimal_possible_solve_time": 0,
+      "content": "The scenario simulates a Mirai botnet infection targeting Realtek & Huawei routers. The botnet uses a new TABLE encoder and aims devices with default telnet passwords to perform DDoS attacks. Your task is to investigate and respond to this incident. The learning objective is to understand the Mirai botnet's infection mechanisms, identify compromised services, and develop response strategies to mitigate the threat. The command-and-control (C2) communication involves a beacon service that periodically checks in with the C2 server. Malicious files are used to maintain persistence and perform DDoS attacks. To proceed to the next level, enter the word 'start'."
+    },
+    {
+      "title": "Get Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 5,
+      "minimal_possible_solve_time": 2,
+      "passkey": "start",
+      "cloud_content": "Access the sandbox via the provided link. Use the following credentials to log in: Username: cyrano, Password: cyrano. To proceed to the next level, enter the word 'start'.",
+      "local_content": "Instructions for local sandbox usage."
+    },
+    {
+      "title": "Identify the suspicious beacon service on bot1",
+      "level_type": "TRAINING_LEVEL",
+      "order": 2,
+      "estimated_duration": 15,
+      "minimal_possible_solve_time": 5,
+      "answer": "bot-beacon-Hilix.sh.service",
+      "answer_variable_name": null,
+      "content": "Investigate the system services on bot1 to identify any suspicious beacon service that might be communicating with a command-and-control server. The flag is the name of the suspicious beacon service.",
+      "solution": "systemctl list-units --type=service",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "Conceptual Hint",
+          "content": "Beacon services typically communicate with command-and-control servers. Look for services with unusual names or descriptions.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Directional Hint",
+          "content": "Use systemctl to list all services and look for any that seem out of place.",
+          "hint_penalty": 1,
+          "order": 1
+        },
+        {
+          "title": "Near-Spoiler Hint",
+          "content": "The suspicious beacon service name starts with 'bot-beacon-' and ends with '.service'.",
+          "hint_penalty": 2,
+          "order": 2
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "check_services",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "bot-beacon-Hilix.sh.service",
+          "optional": false,
+          "comment": "List all systemd services to identify the suspicious beacon service."
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the suspicious flood service on bot1",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 20,
+      "minimal_possible_solve_time": 8,
+      "answer": "bot-flood-Hilix.sh.service",
+      "answer_variable_name": null,
+      "content": "Investigate the system services on bot1 to identify any suspicious flood service that might be performing DDoS attacks. The flag is the name of the suspicious flood service.",
+      "solution": "systemctl list-units --type=service",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "Conceptual Hint",
+          "content": "Flood services are often used to perform DDoS attacks. Look for services with unusual names or descriptions.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Directional Hint",
+          "content": "Use systemctl to list all services and look for any that seem out of place.",
+          "hint_penalty": 1,
+          "order": 1
+        },
+        {
+          "title": "Near-Spoiler Hint",
+          "content": "The suspicious flood service name starts with 'bot-flood-' and ends with '.service'.",
+          "hint_penalty": 2,
+          "order": 2
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "check_services",
+          "prereq_state": [],
+          "cmd": "systemctl list-units --type=service",
+          "cmd_type": "bash-command",
+          "cmd_regex": "bot-flood-Hilix.sh.service",
+          "optional": false,
+          "comment": "List all systemd services to identify the suspicious flood service."
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    },
+    {
+      "title": "Identify the persistence mechanism on bot1",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 25,
+      "minimal_possible_solve_time": 10,
+      "answer": "system-update-checker.timer",
+      "answer_variable_name": null,
+      "content": "Investigate the system services on bot1 to identify any persistence mechanisms that might be used to maintain the botnet's presence on the system. The flag is the name of the persistence mechanism.",
+      "solution": "systemctl list-timers",
+      "solution_penalized": true,
+      "hints": [
+        {
+          "title": "Conceptual Hint",
+          "content": "Persistence mechanisms often use timers to maintain their presence. Look for unusual timer names or descriptions.",
+          "hint_penalty": 0,
+          "order": 0
+        },
+        {
+          "title": "Directional Hint",
+          "content": "Use systemctl to list all timers and look for any that seem out of place.",
+          "hint_penalty": 1,
+          "order": 1
+        },
+        {
+          "title": "Near-Spoiler Hint",
+          "content": "The persistence mechanism name is 'system-update-checker.timer'.",
+          "hint_penalty": 2,
+          "order": 2
+        }
+      ],
+      "incorrect_answer_limit": 10,
+      "attachments": [],
+      "max_score": 10,
+      "variant_answers": false,
+      "reference_solution": [
+        {
+          "state_name": "check_services",
+          "prereq_state": [],
+          "cmd": "systemctl list-timers",
+          "cmd_type": "bash-command",
+          "cmd_regex": "system-update-checker.timer",
+          "optional": false,
+          "comment": "List all systemd timers to identify the persistence mechanism."
+        }
+      ],
+      "expected_commands": [],
+      "commands_required": false
+    }
+  ],
+  "estimated_duration": 75,
+  "variant_sandboxes": false
+}
